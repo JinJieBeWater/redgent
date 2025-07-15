@@ -1,5 +1,5 @@
 {
-  "name": "crogent",
+  "name": "redgent",
   "private": true,
   "scripts": {
     "build": "turbo run build",
