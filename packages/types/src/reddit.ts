@@ -116,12 +116,39 @@ export interface RedditPost {
   removed?: boolean
 }
 
-/**
- * 完整API响应类型（用于解析Reddit API返回）
- */
-export interface RedditAPIResponse {
-  /** t3表示帖子类型 */
+export interface RedditPostWrapper {
+  /** 帖子类型标识（通常为"t3"） */
   kind: 't3'
   /** 帖子数据 */
   data: RedditPost
+}
+
+/**
+ * Reddit帖子列表响应数据
+ */
+export interface RedditPostList {
+  after: string | null
+  before: string | null
+  dist: number
+  modhash: string
+  geo_filter: string | null
+  children: RedditPost[]
+}
+
+/**
+ * 完整API响应类型（用于解析Reddit API返回）
+ */
+export interface RedditListingResponse {
+  kind: 'Listing'
+  data: RedditPostList
+}
+
+/**
+ * Reddit访问令牌响应类型
+ */
+export interface RedditAccessTokenResponse {
+  access_token: string
+  token_type: string
+  expires_in: number
+  scope: string
 }
