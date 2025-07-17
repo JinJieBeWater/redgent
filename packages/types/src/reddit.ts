@@ -27,7 +27,7 @@ export interface RedditVideo {
  *
  * 注意：所有时间戳均为Unix时间（UTC秒数）
  */
-export interface RedditPost {
+export interface RedditPostInfo {
   /**
    * 核心标识符
    */
@@ -120,27 +120,27 @@ export interface RedditPostWrapper {
   /** 帖子类型标识（通常为"t3"） */
   kind: 't3'
   /** 帖子数据 */
-  data: RedditPost
+  data: RedditPostInfo
 }
 
 /**
- * Reddit帖子列表响应数据
+ * Reddit列表响应数据
  */
-export interface RedditPostList {
+export interface RedditCommonList<T> {
   after: string | null
   before: string | null
   dist: number
   modhash: string
   geo_filter: string | null
-  children: RedditPost[]
+  children: T[]
 }
 
 /**
  * 完整API响应类型（用于解析Reddit API返回）
  */
-export interface RedditListingResponse {
+export interface RedditListingResponse<T> {
   kind: 'Listing'
-  data: RedditPostList
+  data: RedditCommonList<T>
 }
 
 /**

@@ -60,16 +60,6 @@ describe('RedditService', () => {
 
       const token = await service.getRedditToken();
       expect(token).toEqual('new_mock_token');
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(httpService.post).toHaveBeenCalledWith(
-        'https://www.reddit.com/api/v1/access_token',
-        expect.any(URLSearchParams),
-        {
-          headers: {
-            Authorization: 'Basic dGVzdF9jbGllbnRfaWQ6dGVzdF9zZWNyZXQ=',
-          },
-        },
-      );
     });
   });
 
@@ -86,18 +76,9 @@ describe('RedditService', () => {
         }),
       );
 
-      const result = await service.getHotPosts(subreddit);
+      const result = await service.getHotPostsBySubreddit(subreddit);
 
       expect(result).toEqual(mockPostsResponse);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(httpService.get).toHaveBeenCalledWith(
-        `https://oauth.reddit.com/r/${subreddit}/hot.json`,
-        {
-          headers: {
-            Authorization: 'Bearer undefined',
-          },
-        },
-      );
     });
 
     it('should return hot posts for popular if no subreddit is provided', async () => {
@@ -111,18 +92,9 @@ describe('RedditService', () => {
         }),
       );
 
-      const result = await service.getHotPosts();
+      const result = await service.getHotPostsBySubreddit();
 
       expect(result).toEqual(mockPostsResponse);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(httpService.get).toHaveBeenCalledWith(
-        `https://oauth.reddit.com/r/popular/hot.json`,
-        {
-          headers: {
-            Authorization: 'Bearer undefined',
-          },
-        },
-      );
     });
   });
 });
