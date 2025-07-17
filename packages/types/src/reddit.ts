@@ -27,7 +27,7 @@ export interface RedditVideo {
  *
  * 注意：所有时间戳均为Unix时间（UTC秒数）
  */
-export interface RedditPost {
+export interface RedditPostInfo {
   /**
    * 核心标识符
    */
@@ -116,12 +116,49 @@ export interface RedditPost {
   removed?: boolean
 }
 
+export interface RedditPostWrapper {
+  /** 帖子类型标识（通常为"t3"） */
+  kind: 't3'
+  /** 帖子数据 */
+  data: RedditPostInfo
+}
+
+/**
+ * Reddit列表响应数据
+ */
+export interface RedditCommonList<T> {
+  after: string | null
+  before: string | null
+  dist: number
+  modhash: string
+  geo_filter: string | null
+  children: T[]
+}
+
 /**
  * 完整API响应类型（用于解析Reddit API返回）
  */
-export interface RedditAPIResponse {
-  /** t3表示帖子类型 */
-  kind: 't3'
-  /** 帖子数据 */
-  data: RedditPost
+export interface RedditListingResponse<T> {
+  kind: 'Listing'
+  data: RedditCommonList<T>
 }
+
+/**
+ * Reddit访问令牌响应类型
+ */
+export interface RedditAccessTokenResponse {
+  access_token: string
+  token_type: string
+  expires_in: number
+  scope: string
+}
+
+export const RedditSort = {
+  Best: 'best',
+  Hot: 'hot',
+  New: 'new',
+  Top: 'top',
+  Rising: 'rising',
+} as const
+
+export type RedditSort = (typeof RedditSort)[keyof typeof RedditSort]
