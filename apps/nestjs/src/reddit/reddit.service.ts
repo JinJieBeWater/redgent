@@ -8,8 +8,8 @@ import {
   RedditSort,
   RedditPostWrapper,
   RedditPostInfo,
-} from '@repo/types/reddit';
-import { SubredditWrapper } from '@repo/types/subreddit';
+} from '@redgent/types/reddit';
+import { SubredditWrapper } from '@redgent/types/subreddit';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

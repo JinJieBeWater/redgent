@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { RedditModule } from './reddit/reddit.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import * as Joi from 'joi';
       },
     }),
     RedditModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { RedditService } from '../src/reddit/reddit.service';
-import { RedditSort, RedditPostInfo } from '@repo/types/reddit';
+import { RedditSort, RedditPostInfo } from '@redgent/types/reddit';
 
 // Helper to create a mock post
 const createMockPost = (id: string, subreddit: string): RedditPostInfo => ({

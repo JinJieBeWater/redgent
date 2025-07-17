@@ -1,8 +1,9 @@
 {
-  "name": "@repo/types",
+  "name": "@redgent/types",
   "version": "0.0.0",
   "private": true,
   "exports": {
+    ".": "./src/index.ts",
     "./*": "./src/*.ts"
   },
   "scripts": {
@@ -10,8 +11,8 @@
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@redgent/eslint-config": "workspace:*",
+    "@redgent/typescript-config": "workspace:*",
     "eslint": "^9.31.0",
     "typescript": "5.8.2"
   }
