@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import {
   RedditAccessTokenResponse,
   RedditListingResponse,
+  RedditSort,
 } from '@repo/types/reddit';
 import { ConfigService } from '@nestjs/config';
 
@@ -52,8 +53,9 @@ export class RedditService implements OnModuleInit {
 
   async getHotPosts(
     subreddit: string = 'popular',
+    sort: RedditSort = RedditSort.Hot,
   ): Promise<RedditListingResponse> {
-    const url = `https://oauth.reddit.com/r/${subreddit}/hot.json`;
+    const url = `https://oauth.reddit.com/r/${subreddit}/${sort}.json`;
     const response = await firstValueFrom(
       this.httpService
         .get<RedditListingResponse>(url, {

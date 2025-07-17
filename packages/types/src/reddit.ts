@@ -152,3 +152,13 @@ export interface RedditAccessTokenResponse {
   expires_in: number
   scope: string
 }
+
+export const RedditSort = {
+  Best: 'best',
+  Hot: 'hot',
+  New: 'new',
+  Top: 'top',
+  Rising: 'rising',
+} as const
+
+export type RedditSort = (typeof RedditSort)[keyof typeof RedditSort]

@@ -9,6 +9,14 @@
 - **自动化报告生成**: 将分析结果整理成简洁的报告，方便用户快速回顾和查阅。
 - **灵活的任务管理**: 通过友好的界面轻松创建、暂停、编辑和删除你的 Reddit 监控任务。
 
+## 🛠️ 技术栈
+
+- **后端**: [Nest.js](https://nestjs.com/), TypeScript
+- **前端**: [React](https://react.dev/), TypeScript
+- **数据库**: PostgreSQL (Prisma)
+- **Monorepo 工具**: [Turborepo](https://turbo.build/repo), [pnpm](https://pnpm.io/)
+- **核心依赖**: Reddit API
+
 ## 🚀 快速开始
 
 ### 1. 安装依赖
@@ -27,9 +35,11 @@ pnpm install
 pnpm dev
 ```
 
-该命令会同时启动：
+该命令会通过 `turbo` 同时启动所有应用。服务启动后：
 
-- `apps/nestjs`: NestJS 后端服务
+- **Web 前端**: 访问 `http://localhost:3000`
+- **NestJS 后端**: 运行于 `http://localhost:3001`
+- **文档网站**: 访问 `http://localhost:3002`
 
 ## 📂 项目结构
 
@@ -114,6 +124,42 @@ sequenceDiagram
     DB-->>U: ✅ 任务已创建
 ```
 
+```typescript
+// 任务配置字段
+interface TaskConfig {
+  /** 任务唯一标识符 */
+  id: string
+  /** 任务名称 */
+  name: string
+  /** 任务所属用户的唯一标识符 */
+  ownerId: string
+  /** 定时任务的 cron 表达式 */
+  cron: string
+  /** 用户的任务提示词 */
+  prompt: string
+  /** 关键词列表，用于 Reddit 搜索 */
+  keywords: string[]
+  /** 相关的 Reddit 子版块列表 */
+  subreddits: string[]
+  /** 创建时间 */
+  createdAt: Date
+  /** 更新时间 */
+  updatedAt: Date
+  /** 任务状态（如：active, paused） */
+  status: 'active' | 'paused'
+  /** 最后执行时间 */
+  lastExecutedAt?: Date
+  /** 是否启用过滤机制，通过缓存（ttl=36）过滤之前已经抓取过的内容 */
+  enableFiltering: boolean
+  /** 上次执行失败的时间 */
+  lastFailureAt?: Date
+  /** 上次执行失败的错误信息 */
+  lastErrorMessage?: string
+  /** 自定义分析模型 */
+  llmModel?: string
+}
+```
+
 ## 🤖 任务执行逻辑
 
 任务创建后，调度器会根据其 `cron` 表达式定时触发执行。
@@ -121,21 +167,24 @@ sequenceDiagram
 执行流程如下：
 
 1.  调度器从数据库中读取到期的任务配置。
-2.  根据配置中的 `keywords` 和 `subreddits`，从 Reddit 抓取相关帖子。
-3.  将抓取到的内容交由 LLM 进行分析、总结。
+2.  根据配置触发分析工作流，工作流会根据 `keywords` 和 `subreddits` 从 Reddit 抓取相关帖子。
+3.  将抓取到的内容交由 LLM 进行分析、总结，生成报告。
 4.  最终的分析报告被存回数据库，等待用户查询。
 
 ```mermaid
 sequenceDiagram
     participant SCH as 定时任务 (Scheduler)
     participant DB as 数据库 (PostgreSQL)
+    participant WF as 分析工作流
     participant LLM as 大语言模型
     participant U as 用户 (User)
 
     loop 按 cron 表达式定时触发
-        SCH->>DB: 读取 TaskConfig
-        SCH->>LLM: 根据 keywords/subreddits 抓取 Reddit 内容并分析
-        LLM->>DB: 保存分析结果
+        SCH->>DB: 读取到期的 TaskConfig
+        SCH->>WF: 触发分析工作流
+        WF->>LLM: 根据配置抓取 Reddit 内容并请求分析
+        LLM-->>WF: 返回分析结果 (报告)
+        WF->>DB: 将分析报告存入数据库
     end
 
     U->>DB: 查询任务结果
@@ -144,18 +193,27 @@ sequenceDiagram
 
 ## 🤖 Reddit 抓取逻辑
 
+抓取逻辑根据 `TaskConfig` 的配置来执行：
+
+1.  **数据源**: 根据任务中指定的 `subreddits` 和 `keywords`，从 Reddit API 并行抓取相关的热门帖子，汇集成原始内容池。
+2.  **过滤与去重**: 如果 `TaskConfig` 中的 `enableFiltering` 选项为 `true`，系统会启用缓存机制。它会将当前抓取到的内容与历史缓存进行对比，过滤掉那些在近期（如过去36小时内）已经处理过的帖子，从而有效避免重复分析。
+3.  **生成结果集**: 最终，将排序后的帖子列表作为可分析的数据集，交由下游的分析模块进行处理。
+
+下面的序列图展示了这个过程：
+
 ```mermaid
 sequenceDiagram
-    participant C as 内容池
-    participant F as 三重过滤
-    participant D as 热度衰减
-    participant R as 结果集
+    participant TC as TaskConfig
+    participant Reddit as Reddit API
+    participant Cache as 历史缓存
+    participant P as 处理流程
 
-    C->>F: 原始内容
-    F->>F: 应用基础时间过滤
-    F->>F: 应用动态窗口过滤
-    F->>F: 应用热点豁免
-    F->>D: 通过过滤的内容
-    D->>D: 计算衰减后热度
-    D->>R: 按热度排序
+    P->>TC: 读取 keywords, subreddits, enableFiltering
+    P->>Reddit: 根据 keywords/subreddits 抓取内容
+    Reddit-->>P: 返回原始帖子列表
+    alt 如果 enableFiltering is true
+        P->>Cache: 对比帖子列表进行去重
+        Cache-->>P: 返回过滤后的列表
+    end
+    P-->>下游分析模块: 输出最终数据集
 ```
