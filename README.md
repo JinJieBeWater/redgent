@@ -77,7 +77,7 @@ sequenceDiagram
     PG-->>U: ✅ 任务已创建
 
     %% 2. 定时执行
-    loop 每天早上6点
+    loop 每天6点
         SCH->>PG: 读取 TaskConfig
         SCH->>WF: 抓取信息+分析
         WF->>PG: 保存分析结果
@@ -124,40 +124,37 @@ sequenceDiagram
     DB-->>U: ✅ 任务已创建
 ```
 
-```typescript
-// 任务配置字段
-interface TaskConfig {
-  /** 任务唯一标识符 */
-  id: string
-  /** 任务名称 */
-  name: string
-  /** 任务所属用户的唯一标识符 */
-  ownerId: string
-  /** 定时任务的 cron 表达式 */
-  cron: string
-  /** 用户的任务提示词 */
-  prompt: string
-  /** 关键词列表，用于 Reddit 搜索 */
-  keywords: string[]
-  /** 相关的 Reddit 子版块列表 */
-  subreddits: string[]
-  /** 创建时间 */
-  createdAt: Date
-  /** 更新时间 */
-  updatedAt: Date
-  /** 任务状态（如：active, paused） */
-  status: 'active' | 'paused'
-  /** 最后执行时间 */
-  lastExecutedAt?: Date
-  /** 是否启用过滤机制，通过缓存（ttl=36）过滤之前已经抓取过的内容 */
-  enableFiltering: boolean
-  /** 上次执行失败的时间 */
-  lastFailureAt?: Date
-  /** 上次执行失败的错误信息 */
-  lastErrorMessage?: string
-  /** 自定义分析模型 */
-  llmModel?: string
-}
+## 🤖 Reddit 抓取逻辑
+
+抓取逻辑根据 `TaskConfig` 的配置来执行：
+
+1.  **数据源**: 根据任务中指定的 `subreddits` 和 `keywords`，从 Reddit API 并行抓取相关的热门帖子，汇集成原始内容池。
+2.  **过滤与去重**: 如果 `TaskConfig` 中的 `enableFiltering` 选项为 `true`，系统会启用缓存机制。它会将当前抓取到的内容与历史缓存进行对比，过滤掉那些在近期（如过去36小时内）已经处理过的帖子，从而有效避免重复分析。
+3.  **生成结果集**: 最终，将排序后的帖子列表作为可分析的数据集，交由下游的分析模块进行处理。
+
+下面的序列图展示了这个过程：
+
+```mermaid
+sequenceDiagram
+    participant TC as TaskConfig
+    participant Reddit as Reddit API
+    participant Cache as 历史缓存
+    participant P as 处理流程
+    participant LLM as LLM
+
+
+    P->>TC: 读取 keywords, subreddits, enableFiltering
+    P->>Reddit: 根据 keywords/subreddits 抓取内容
+    Reddit-->>P: 返回原始帖子列表
+    alt 如果 enableFiltering is true
+        P->>Cache: 对比帖子列表进行去重
+        Cache-->>P: 返回过滤后的列表
+    end
+    P->>LLM: 列表太多，让 LLM 帮我精选
+    LLM-->>P: 返回精选后的列表
+    P->>Reddit: 根据列表抓取相关评论
+    Reddit-->>P: 返回相关评论
+    P-->>下游分析模块: 输出最终数据集
 ```
 
 ## 🤖 任务执行逻辑
@@ -177,43 +174,16 @@ sequenceDiagram
     participant DB as 数据库 (PostgreSQL)
     participant WF as 分析工作流
     participant LLM as 大语言模型
-    participant U as 用户 (User)
+    participant U as 用户
 
     loop 按 cron 表达式定时触发
         SCH->>DB: 读取到期的 TaskConfig
         SCH->>WF: 触发分析工作流
         WF->>LLM: 根据配置抓取 Reddit 内容并请求分析
-        LLM-->>WF: 返回分析结果 (报告)
+        LLM-->>WF: 返回分析报告
         WF->>DB: 将分析报告存入数据库
     end
 
     U->>DB: 查询任务结果
     DB-->>U: 返回分析报告
-```
-
-## 🤖 Reddit 抓取逻辑
-
-抓取逻辑根据 `TaskConfig` 的配置来执行：
-
-1.  **数据源**: 根据任务中指定的 `subreddits` 和 `keywords`，从 Reddit API 并行抓取相关的热门帖子，汇集成原始内容池。
-2.  **过滤与去重**: 如果 `TaskConfig` 中的 `enableFiltering` 选项为 `true`，系统会启用缓存机制。它会将当前抓取到的内容与历史缓存进行对比，过滤掉那些在近期（如过去36小时内）已经处理过的帖子，从而有效避免重复分析。
-3.  **生成结果集**: 最终，将排序后的帖子列表作为可分析的数据集，交由下游的分析模块进行处理。
-
-下面的序列图展示了这个过程：
-
-```mermaid
-sequenceDiagram
-    participant TC as TaskConfig
-    participant Reddit as Reddit API
-    participant Cache as 历史缓存
-    participant P as 处理流程
-
-    P->>TC: 读取 keywords, subreddits, enableFiltering
-    P->>Reddit: 根据 keywords/subreddits 抓取内容
-    Reddit-->>P: 返回原始帖子列表
-    alt 如果 enableFiltering is true
-        P->>Cache: 对比帖子列表进行去重
-        Cache-->>P: 返回过滤后的列表
-    end
-    P-->>下游分析模块: 输出最终数据集
 ```
