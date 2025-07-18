@@ -1,7 +1,26 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export const RedditTypeEnum = {
+  /** Comment */
+  t1: 't1',
+  /** Account */
+  t2: 't2',
+  /** Link */
+  t3: 't3',
+  /** Message */
+  t4: 't4',
+  /** Subreddit */
+  t5: 't5',
+  /** Award */
+  t6: 't6',
+} as const
+
+export type RedditType = (typeof RedditTypeEnum)[keyof typeof RedditTypeEnum]
+
 /**
  * Reddit视频媒体资源
+ * 由 AI 生成
  */
-export interface RedditVideo {
+export interface RedditVideoUntrusted {
   /** 视频比特率（千比特/秒） */
   bitrate_kbps?: number
   /** 视频回退URL（MP4格式，最可靠的资源） */
@@ -26,8 +45,9 @@ export interface RedditVideo {
  * Reddit帖子数据模型
  *
  * 注意：所有时间戳均为Unix时间（UTC秒数）
+ * 由 AI 生成
  */
-export interface RedditPostInfo {
+export interface RedditLinkInfoUntrusted {
   /**
    * 核心标识符
    */
@@ -102,7 +122,7 @@ export interface RedditPostInfo {
   }
   /** 媒体资源对象 */
   media?: {
-    reddit_video?: RedditVideo
+    reddit_video?: RedditVideoUntrusted
   }
 
   /**
@@ -116,11 +136,11 @@ export interface RedditPostInfo {
   removed?: boolean
 }
 
-export interface RedditPostWrapper {
-  /** 帖子类型标识（通常为"t3"） */
-  kind: 't3'
+export interface RedditLinkWrapper {
+  /** 帖子类型标识 */
+  kind: typeof RedditTypeEnum.t3
   /** 帖子数据 */
-  data: RedditPostInfo
+  data: RedditLinkInfoUntrusted
 }
 
 /**
@@ -129,7 +149,7 @@ export interface RedditPostWrapper {
 export interface RedditCommonList<T> {
   after: string | null
   before: string | null
-  dist: number
+  dist: number | null
   modhash: string
   geo_filter: string | null
   children: T[]
@@ -162,3 +182,89 @@ export const RedditSort = {
 } as const
 
 export type RedditSort = (typeof RedditSort)[keyof typeof RedditSort]
+
+/**
+ * 由 AI 生成 Reddit 帖子评论数据结构 不可信
+ */
+export interface RedditCommentInfoUntrusted {
+  subreddit_id: string
+  approved_at_utc: number | null
+  author_is_blocked: boolean
+  comment_type: string | null
+  awarders: any[]
+  mod_reason_by: string | null
+  banned_by: string | null
+  author_flair_type: string
+  total_awards_received: number
+  subreddit: string
+  author_flair_template_id: string | null
+  likes: boolean | null
+  replies: '' | RedditListingResponse<RedditCommentWrapper>
+  user_reports: any[]
+  saved: boolean
+  id: string
+  banned_at_utc: number | null
+  mod_reason_title: string | null
+  gilded: number
+  archived: boolean
+  collapsed_reason_code: string | null
+  no_follow: boolean
+  author: string
+  can_mod_post: boolean
+  created_utc: number
+  send_replies: boolean
+  parent_id: string
+  score: number
+  author_fullname: string
+  removal_reason: string | null
+  approved_by: string | null
+  mod_note: string | null
+  all_awardings: any[]
+  body: string
+  edited: boolean | number
+  top_awarded_type: string | null
+  author_flair_css_class: string | null
+  name: string
+  is_submitter: boolean
+  downs: number
+  author_flair_richtext: any[]
+  author_patreon_flair: boolean
+  body_html: string
+  gildings: Record<string, any>
+  collapsed_reason: string | null
+  distinguished: string | null
+  associated_award: string | null
+  stickied: boolean
+  author_premium: boolean
+  can_gild: boolean
+  link_id: string
+  unrepliable_reason: string | null
+  author_flair_text_color: string | null
+  score_hidden: boolean
+  permalink: string
+  subreddit_type: string
+  locked: boolean
+  report_reasons: string | null
+  created: number
+  author_flair_text: string | null
+  treatment_tags: any[]
+  collapsed: boolean
+  subreddit_name_prefixed: string
+  controversiality: number
+  depth: number
+  author_flair_background_color: string | null
+  collapsed_because_crowd_control: string | null
+  mod_reports: any[]
+  num_reports: number | null
+  ups: number
+}
+
+export interface RedditCommentWrapper {
+  kind: typeof RedditTypeEnum.t1
+  data: RedditCommentInfoUntrusted
+}
+
+export type RedditCommentResponse = [
+  RedditListingResponse<RedditLinkWrapper>,
+  RedditListingResponse<RedditCommentWrapper>,
+]

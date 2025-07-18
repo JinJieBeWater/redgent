@@ -38,6 +38,7 @@ export const nestJsConfig = [
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
       "@typescript-eslint/require-await": 'off',
+      "@typescript-eslint/unbound-method": 'off',
     },
   },
 ]

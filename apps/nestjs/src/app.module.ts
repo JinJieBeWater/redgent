@@ -1,13 +1,20 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { RedditModule } from './reddit/reddit.module';
-import { ConfigModule } from '@nestjs/config';
-import * as Joi from 'joi';
-import { TaskModule } from './task/task.module';
+import { Module } from '@nestjs/common'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { RedditModule } from './reddit/reddit.module'
+import { ConfigModule } from '@nestjs/config'
+import * as Joi from 'joi'
+import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
+import { CacheModule } from '@nestjs/cache-manager'
+import { PrismaModule } from './prisma/prisma.module'
+import { AnalysisReportModule } from './analysis-report/analysis-report.module'
 
 @Module({
   imports: [
+    CacheModule.register({
+      ttl: 5000,
+      isGlobal: true,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
@@ -25,7 +32,9 @@ import { TaskModule } from './task/task.module';
       },
     }),
     RedditModule,
-    TaskModule,
+    AnalysisTaskModule,
+    PrismaModule,
+    AnalysisReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
