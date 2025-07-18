@@ -10,10 +10,18 @@ import {
   RedditLinkWrapper,
   RedditLinkInfoUntrusted,
   RedditCommentResponse,
+  RedditCommentInfoUntrusted,
+  RedditCommentWrapper,
 } from '@redgent/types/reddit'
 import { SubredditWrapper } from '@redgent/types/subreddit'
 
 import { ConfigService } from '@nestjs/config'
+
+export interface CommentNode {
+  author: string
+  body: string
+  replies?: CommentNode[]
+}
 
 @Injectable()
 export class RedditService implements OnModuleInit {
@@ -161,12 +169,56 @@ export class RedditService implements OnModuleInit {
   }
 
   async getCommentsByLinkId(linkId: string) {
-    const url = `https://oauth.reddit.com/comments/${linkId}.json`
+    const url = `https://oauth.reddit.com/comments/${linkId}.json?sort=confidence&limit=5`
     const response = await firstValueFrom(
       this.httpService
         .get<RedditCommentResponse>(url)
         .pipe(map((res) => res.data)),
     )
     return response
+  }
+
+  async getCommentsByLinkIds(linkIds: string[]) {
+    const requests = linkIds.map((linkId) => this.getCommentsByLinkId(linkId))
+    const results = await Promise.allSettled(requests)
+    const currentData: {
+      content: RedditLinkInfoUntrusted
+      comment: CommentNode[]
+    }[] = []
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        currentData.push({
+          content: result.value[0].data.children[0].data,
+          comment: this.extractCommentNodes(
+            result.value[1].data.children.map((c) => c.data),
+          ),
+        })
+      }
+    }
+    return currentData
+  }
+
+  public extractCommentNodes(
+    comments: RedditCommentInfoUntrusted[],
+  ): CommentNode[] {
+    const nodes: CommentNode[] = []
+    for (const comment of comments) {
+      const node: CommentNode = {
+        author: comment.author,
+        body: comment.body,
+      }
+      if (
+        comment.replies !== '' &&
+        comment.replies &&
+        comment.replies.data.children.length > 0
+      ) {
+        const nestedComments = comment.replies.data.children.map(
+          (reply: RedditCommentWrapper) => reply.data,
+        )
+        node.replies = this.extractCommentNodes(nestedComments)
+      }
+      nodes.push(node)
+    }
+    return nodes
   }
 }

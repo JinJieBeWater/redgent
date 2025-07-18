@@ -138,7 +138,10 @@ export class AnalysisTaskExecutionService {
             })
 
             const filteredLinks =
-              await this.aisdkService.selectMostRelevantLinks(uniqueLinks)
+              await this.aisdkService.selectMostRelevantLinks(
+                taskConfig,
+                uniqueLinks,
+              )
 
             subscriber.next({
               status: TaskStatus.SELECT_COMPLETE,
@@ -162,6 +165,22 @@ export class AnalysisTaskExecutionService {
             return
           }
 
+          // 8. 开始获取完整内容
+          subscriber.next({
+            status: TaskStatus.FETCH_CONTENT_START,
+            message: '正在从 Reddit 获取完整内容...',
+          })
+
+          const completeLinkData =
+            await this.redditService.getCommentsByLinkIds(
+              uniqueLinks.map((p) => p.id),
+            )
+
+          subscriber.next({
+            status: TaskStatus.FETCH_CONTENT_COMPLETE,
+            message: '获取完整内容完成',
+          })
+
           // 8. 开始分析帖子
           subscriber.next({
             status: TaskStatus.ANALYZE_START,
@@ -171,7 +190,7 @@ export class AnalysisTaskExecutionService {
 
           const analysisResult = await this.aisdkService.analyze(
             taskConfig,
-            uniqueLinks,
+            completeLinkData,
           )
 
           subscriber.next({

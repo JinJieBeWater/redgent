@@ -60,6 +60,11 @@ export const TaskStatus = {
   /** 完成筛选流程 */
   SELECT_COMPLETE: 'SELECT_COMPLETE',
 
+  /** 开始获取完整内容 */
+  FETCH_CONTENT_START: 'FETCH_CONTENT_START',
+  /** 完成获取完整内容 */
+  FETCH_CONTENT_COMPLETE: 'FETCH_CONTENT_COMPLETE',
+
   /** 开始调用 AI 服务进行分析 */
   ANALYZE_START: 'ANALYZE_START',
   /** 完成 AI 分析 */
@@ -144,7 +149,16 @@ export interface SelectCompleteProgress extends BaseProgress {
   }
 }
 
-// 5. AI 分析阶段
+// 5. 获取完整内容阶段
+export interface FetchContentStartProgress extends BaseProgress {
+  status: typeof TaskStatus.FETCH_CONTENT_START
+}
+
+export interface FetchContentCompleteProgress extends BaseProgress {
+  status: typeof TaskStatus.FETCH_CONTENT_COMPLETE
+}
+
+// 6. AI 分析阶段
 export interface AnalyzeStartProgress extends BaseProgress {
   status: typeof TaskStatus.ANALYZE_START
   data: {
@@ -157,7 +171,7 @@ export interface AnalyzeCompleteProgress extends BaseProgress {
   status: typeof TaskStatus.ANALYZE_COMPLETE
 }
 
-// 6. 通用信息
+// 7. 通用信息
 export interface InfoProgress extends BaseProgress {
   status: typeof TaskStatus.INFO
 }
@@ -178,6 +192,8 @@ export type TaskProgress =
   | FilterCompleteProgress
   | SelectStartProgress
   | SelectCompleteProgress
+  | FetchContentStartProgress
+  | FetchContentCompleteProgress
   | AnalyzeStartProgress
   | AnalyzeCompleteProgress
   | InfoProgress

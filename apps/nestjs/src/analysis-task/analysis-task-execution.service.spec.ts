@@ -11,9 +11,11 @@ import {
   TaskStatus,
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
+import { AnalysisReport } from '@redgent/types/analysis-report'
 import { AnalysisReportService } from '../analysis-report/analysis-report.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { createMockContext } from '../prisma/context'
+import { CommentNode } from '../reddit/reddit.service'
 
 // Mock data for testing
 const mockTaskConfig: TaskConfig = {
@@ -36,6 +38,73 @@ const mockRedditLinks: RedditLinkInfoUntrusted[] = [
   { id: 'link-2', title: 'Test Post 2' } as RedditLinkInfoUntrusted,
 ]
 
+const mockAnalysisReport: AnalysisReport = {
+  title: '测试分析报告',
+  overallSummary: '这是一个测试分析报告的总结',
+  findings: [
+    {
+      point: '测试要点1',
+      elaboration: '这是要点1的详细阐述',
+      supportingPostIds: ['link-1'],
+    },
+  ],
+}
+
+const mockCompleteLinkData: {
+  content: RedditLinkInfoUntrusted
+  comment: CommentNode[]
+}[] = [
+  {
+    content: {
+      id: 'link-1',
+      title: 'Test Post 1',
+    } as RedditLinkInfoUntrusted,
+    comment: [
+      {
+        author: 'user1',
+        body: 'This is comment 1',
+        replies: [
+          {
+            author: 'user1_1',
+            body: 'Child comment 1.1',
+            replies: [
+              {
+                author: 'user1_1_1',
+                body: 'Grandchild comment 1.1.1',
+                replies: [],
+              },
+            ],
+          },
+          {
+            author: 'user1_2',
+            body: 'Child comment 1.2',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    content: {
+      id: 'link-2',
+      title: 'Test Post 2',
+    } as RedditLinkInfoUntrusted,
+    comment: [],
+  },
+  {
+    content: {
+      id: 'link-3',
+      title: 'Test Post 3',
+    } as RedditLinkInfoUntrusted,
+    comment: [
+      {
+        author: 'user3',
+        body: 'This is comment 3',
+        replies: [],
+      },
+    ],
+  },
+]
+
 describe('AnalysisTaskExecutionService', () => {
   let service: AnalysisTaskExecutionService
   let redditService: jest.Mocked<RedditService>
@@ -55,6 +124,9 @@ describe('AnalysisTaskExecutionService', () => {
           provide: RedditService,
           useValue: {
             getHotLinksByQueriesAndSubreddits: jest.fn(),
+            getCommentsByLinkIds: jest
+              .fn()
+              .mockResolvedValue(mockCompleteLinkData),
           },
         },
         {
@@ -89,9 +161,7 @@ describe('AnalysisTaskExecutionService', () => {
   describe('execute', () => {
     it('should execute a task successfully without filtering', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: false }
-      const analysisResult = {
-        analysisResult: '分析结果',
-      }
+      const analysisResult: AnalysisReport = mockAnalysisReport
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         mockRedditLinks,
@@ -107,6 +177,8 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.FETCH_COMPLETE,
+        TaskStatus.FETCH_CONTENT_START,
+        TaskStatus.FETCH_CONTENT_COMPLETE,
         TaskStatus.ANALYZE_START,
         TaskStatus.ANALYZE_COMPLETE,
         TaskStatus.TASK_COMPLETE,
@@ -116,7 +188,7 @@ describe('AnalysisTaskExecutionService', () => {
       ).toHaveBeenCalledWith(taskConfig.keywords, taskConfig.subreddits)
       expect(aisdkService.analyze).toHaveBeenCalledWith(
         taskConfig,
-        mockRedditLinks,
+        mockCompleteLinkData,
       )
       expect(cacheManager.mget).not.toHaveBeenCalled()
       const completeEvent = progressEvents.pop() as TaskCompleteProgress
@@ -125,9 +197,7 @@ describe('AnalysisTaskExecutionService', () => {
 
     it('should execute a task successfully with filtering for new links', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: true }
-      const analysisResult = {
-        analysisResult: 'mock analysis result',
-      }
+      const analysisResult: AnalysisReport = mockAnalysisReport
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         mockRedditLinks,
@@ -147,6 +217,8 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.FETCH_COMPLETE,
         TaskStatus.FILTER_START,
         TaskStatus.FILTER_COMPLETE,
+        TaskStatus.FETCH_CONTENT_START,
+        TaskStatus.FETCH_CONTENT_COMPLETE,
         TaskStatus.ANALYZE_START,
         TaskStatus.ANALYZE_COMPLETE,
         TaskStatus.TASK_COMPLETE,
@@ -158,7 +230,10 @@ describe('AnalysisTaskExecutionService', () => {
         'redgent:link:link-2',
       ])
       expect(cacheManager.mset).toHaveBeenCalled()
-      expect(aisdkService.analyze).toHaveBeenCalledWith(taskConfig, newLinks)
+      expect(aisdkService.analyze).toHaveBeenCalledWith(
+        taskConfig,
+        mockCompleteLinkData,
+      )
       const completeEvent = progressEvents.pop() as TaskCompleteProgress
       expect(completeEvent.status).toBe(TaskStatus.TASK_COMPLETE)
     })
@@ -253,9 +328,7 @@ describe('AnalysisTaskExecutionService', () => {
       )
       cacheManager.mget.mockResolvedValue(tooManyLinks.map(() => undefined))
       aisdkService.selectMostRelevantLinks.mockResolvedValue(filteredLinks)
-      aisdkService.analyze.mockResolvedValue({
-        analysisResult: 'Analysis complete',
-      })
+      aisdkService.analyze.mockResolvedValue(mockAnalysisReport)
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -270,17 +343,20 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.FILTER_COMPLETE,
         TaskStatus.SELECT_START,
         TaskStatus.SELECT_COMPLETE,
+        TaskStatus.FETCH_CONTENT_START,
+        TaskStatus.FETCH_CONTENT_COMPLETE,
         TaskStatus.ANALYZE_START,
         TaskStatus.ANALYZE_COMPLETE,
         TaskStatus.TASK_COMPLETE,
       ])
 
       expect(aisdkService.selectMostRelevantLinks).toHaveBeenCalledWith(
+        mockTaskConfig,
         tooManyLinks,
       )
       expect(aisdkService.analyze).toHaveBeenCalledWith(
         mockTaskConfig,
-        filteredLinks,
+        mockCompleteLinkData,
       )
     })
 
@@ -291,9 +367,7 @@ describe('AnalysisTaskExecutionService', () => {
         fewLinks,
       )
       cacheManager.mget.mockResolvedValue([undefined, undefined])
-      aisdkService.analyze.mockResolvedValue({
-        analysisResult: 'Analysis complete',
-      })
+      aisdkService.analyze.mockResolvedValue(mockAnalysisReport)
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -306,6 +380,8 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.FETCH_COMPLETE,
         TaskStatus.FILTER_START,
         TaskStatus.FILTER_COMPLETE,
+        TaskStatus.FETCH_CONTENT_START,
+        TaskStatus.FETCH_CONTENT_COMPLETE,
         TaskStatus.ANALYZE_START,
         TaskStatus.ANALYZE_COMPLETE,
         TaskStatus.TASK_COMPLETE,
@@ -314,8 +390,23 @@ describe('AnalysisTaskExecutionService', () => {
       expect(aisdkService.selectMostRelevantLinks).not.toHaveBeenCalled()
       expect(aisdkService.analyze).toHaveBeenCalledWith(
         mockTaskConfig,
-        fewLinks,
+        mockCompleteLinkData,
       )
+    })
+
+    it('should handle error during fetching complete content', async () => {
+      jest
+        .spyOn(redditService, 'getCommentsByLinkIds')
+        .mockRejectedValueOnce(new Error('Failed to fetch comments'))
+
+      const progressObservable = service.execute(mockTaskConfig)
+
+      await expect(
+        lastValueFrom(progressObservable.pipe(toArray())),
+      ).rejects.toMatchObject({
+        status: TaskStatus.TASK_ERROR,
+        message: `任务 "${mockTaskConfig.name}" 执行失败`,
+      })
     })
   })
 })
