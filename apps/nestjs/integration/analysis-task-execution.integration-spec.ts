@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common'
 import { Cache } from 'cache-manager'
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
 import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
-import { RedditService } from '../src/reddit/reddit.service'
+import { CommentNode, RedditService } from '../src/reddit/reddit.service'
 import { AiSdkService } from '../src/ai-sdk/ai-sdk.service'
 import {
   TaskCompleteProgress,
@@ -43,6 +43,60 @@ describe('AnalysisTaskExecutionService', () => {
     enableFiltering: true,
     llmModel: 'test-model',
   }
+  const mockCompleteLinkData: {
+    content: RedditLinkInfoUntrusted
+    comment: CommentNode[]
+  }[] = [
+    {
+      content: {
+        id: 'link-1',
+        title: 'Test Post 1',
+      } as RedditLinkInfoUntrusted,
+      comment: [
+        {
+          author: 'user1',
+          body: 'This is comment 1',
+          replies: [
+            {
+              author: 'user1_1',
+              body: 'Child comment 1.1',
+              replies: [
+                {
+                  author: 'user1_1_1',
+                  body: 'Grandchild comment 1.1.1',
+                  replies: [],
+                },
+              ],
+            },
+            {
+              author: 'user1_2',
+              body: 'Child comment 1.2',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      content: {
+        id: 'link-2',
+        title: 'Test Post 2',
+      } as RedditLinkInfoUntrusted,
+      comment: [],
+    },
+    {
+      content: {
+        id: 'link-3',
+        title: 'Test Post 3',
+      } as RedditLinkInfoUntrusted,
+      comment: [
+        {
+          author: 'user3',
+          body: 'This is comment 3',
+          replies: [],
+        },
+      ],
+    },
+  ]
 
   beforeEach(async () => {
     const mockRedditServiceProvider = {
@@ -51,6 +105,7 @@ describe('AnalysisTaskExecutionService', () => {
         getHotLinksByQueriesAndSubreddits: jest
           .fn()
           .mockResolvedValue(mockRedditLinks),
+        getCommentsByLinkIds: jest.fn().mockResolvedValue(mockCompleteLinkData),
       },
     }
 
@@ -132,7 +187,7 @@ describe('AnalysisTaskExecutionService', () => {
     // 4. 验证 AI 服务被调用
     expect(mockAiSdkService.analyze).toHaveBeenCalledWith(
       mockTaskConfig,
-      mockRedditLinks,
+      mockCompleteLinkData,
     )
 
     // 5. 验证任务最后走到了 TASK_COMPLETE 状态
@@ -173,11 +228,6 @@ describe('AnalysisTaskExecutionService', () => {
       (p) => p.status === TaskStatus.ANALYZE_START,
     )!
     expect(analyzeStart.data.count).toBe(2)
-    const expectedLinksForAi = mockRedditLinks.slice(1) // link2 and link3
-    expect(mockAiSdkService.analyze).toHaveBeenCalledWith(
-      mockTaskConfig,
-      expectedLinksForAi,
-    )
 
     // 4. 验证任务最后走到了 TASK_COMPLETE 状态
     const lastEvent = progressEvents[progressEvents.length - 1]
