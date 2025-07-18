@@ -1,44 +1,47 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common'
+import { HttpService } from '@nestjs/axios'
+import { firstValueFrom } from 'rxjs'
+import { map } from 'rxjs/operators'
+
 import {
   RedditAccessTokenResponse,
   RedditListingResponse,
   RedditSort,
-  RedditPostWrapper,
-  RedditPostInfo,
-} from '@redgent/types/reddit';
-import { SubredditWrapper } from '@redgent/types/subreddit';
-import { ConfigService } from '@nestjs/config';
+  RedditLinkWrapper,
+  RedditLinkInfoUntrusted,
+  RedditCommentResponse,
+} from '@redgent/types/reddit'
+import { SubredditWrapper } from '@redgent/types/subreddit'
+
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class RedditService implements OnModuleInit {
-  private accessToken: string;
-  private readonly redditClientId: string;
-  private readonly redditSecret: string;
-  private readonly logger = new Logger(RedditService.name);
+  private accessToken: string
+  private readonly redditClientId: string
+  private readonly redditSecret: string
+  private readonly logger = new Logger(RedditService.name)
 
   constructor(
     private configService: ConfigService,
     private readonly httpService: HttpService,
   ) {
-    this.redditClientId = this.configService.get<string>('REDDIT_CLIENT_ID')!;
-    this.redditSecret = this.configService.get<string>('REDDIT_SECRET')!;
+    this.redditClientId = this.configService.get<string>('REDDIT_CLIENT_ID')!
+    this.redditSecret = this.configService.get<string>('REDDIT_SECRET')!
   }
 
   async onModuleInit() {
-    this.accessToken = await this.getRedditToken();
+    this.accessToken = await this.getRedditToken()
     this.httpService.axiosRef.defaults.headers.common['Authorization'] =
-      `Bearer ${this.accessToken}`;
+      `Bearer ${this.accessToken}`
   }
 
   async getRedditToken() {
     const auth = Buffer.from(
       `${this.redditClientId}:${this.redditSecret}`,
-    ).toString('base64');
+    ).toString('base64')
 
-    const params = new URLSearchParams({ grant_type: 'client_credentials' });
+    const params = new URLSearchParams({ grant_type: 'client_credentials' })
 
     const response = await firstValueFrom(
       this.httpService
@@ -52,118 +55,118 @@ export class RedditService implements OnModuleInit {
           },
         )
         .pipe(map((res) => res.data)),
-    );
+    )
 
-    return response.access_token;
+    return response.access_token
   }
 
   async getSubredditsByQuery(query: string) {
-    const url = `https://oauth.reddit.com/subreddits/search.json?q=${encodeURIComponent(query)}`;
+    const url = `https://oauth.reddit.com/subreddits/search.json?q=${encodeURIComponent(query)}`
     const response = await firstValueFrom(
       this.httpService
         .get<RedditListingResponse<SubredditWrapper>>(url)
         .pipe(map((res) => res.data)),
-    );
-    return response.data;
+    )
+    return response.data
   }
 
-  async getHotPostsBySubreddit(
+  async getHotLinksBySubreddit(
     subreddit: string = 'popular',
     sort: RedditSort = RedditSort.Hot,
   ) {
-    const url = `https://oauth.reddit.com/r/${subreddit}/${sort}.json`;
+    const url = `https://oauth.reddit.com/r/${subreddit}/${sort}.json`
     const response = await firstValueFrom(
       this.httpService
-        .get<RedditListingResponse<RedditPostWrapper>>(url)
+        .get<RedditListingResponse<RedditLinkWrapper>>(url)
         .pipe(map((res) => res.data)),
-    );
-    return response.data;
+    )
+    return response.data
   }
 
-  async getHotPostsBySubreddits(
+  async getHotLinksBySubreddits(
     subreddits: string[],
     sort: RedditSort = RedditSort.Hot,
   ) {
     const requests = subreddits.map((subreddit) =>
-      this.getHotPostsBySubreddit(subreddit, sort),
-    );
+      this.getHotLinksBySubreddit(subreddit, sort),
+    )
 
-    const results = await Promise.allSettled(requests);
-    const postMap = new Map<string, RedditPostInfo>();
+    const results = await Promise.allSettled(requests)
+    const linkMap = new Map<string, RedditLinkInfoUntrusted>()
 
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        for (const post of result.value.children) {
-          postMap.set(post.data.id, post.data);
+        for (const link of result.value.children) {
+          linkMap.set(link.data.id, link.data)
         }
       } else {
         this.logger.error(
-          `Failed to fetch posts for a subreddit: ${result.reason}`,
-        );
+          `Failed to fetch links for a subreddit: ${result.reason}`,
+        )
       }
     }
 
-    return Array.from(postMap.values());
+    return Array.from(linkMap.values())
   }
 
-  async getHotPostsByQuery(query: string, sort: RedditSort = RedditSort.Hot) {
-    const url = `https://oauth.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=${sort}`;
+  async getHotLinksByQuery(query: string, sort: RedditSort = RedditSort.Hot) {
+    const url = `https://oauth.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=${sort}`
     const response = await firstValueFrom(
       this.httpService
-        .get<RedditListingResponse<RedditPostWrapper>>(url)
+        .get<RedditListingResponse<RedditLinkWrapper>>(url)
         .pipe(map((res) => res.data)),
-    );
-    return response.data;
+    )
+    return response.data
   }
 
-  async getHotPostsByQueries(
+  async getHotLinksByQueries(
     querys: string[],
     sort: RedditSort = RedditSort.Hot,
   ) {
-    const requests = querys.map((query) =>
-      this.getHotPostsByQuery(query, sort),
-    );
-    const results = await Promise.allSettled(requests);
-    const postMap = new Map<string, RedditPostInfo>();
+    const requests = querys.map((query) => this.getHotLinksByQuery(query, sort))
+    const results = await Promise.allSettled(requests)
+    const linkMap = new Map<string, RedditLinkInfoUntrusted>()
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        for (const post of result.value.children) {
-          postMap.set(post.data.id, post.data);
+        for (const link of result.value.children) {
+          linkMap.set(link.data.id, link.data)
         }
-      } else {
-        this.logger.error(
-          `Failed to fetch posts for a query: ${result.reason}`,
-        );
       }
     }
-    return Array.from(postMap.values());
+    return Array.from(linkMap.values())
   }
 
-  async getHotPostsByQueriesAndSubreddits(
+  async getHotLinksByQueriesAndSubreddits(
     querys: string[] = [],
     subreddits: string[] = [],
     sort: RedditSort = RedditSort.Hot,
   ) {
     const requests = [
-      ...querys.map((query) => this.getHotPostsByQuery(query, sort)),
+      ...querys.map((query) => this.getHotLinksByQuery(query, sort)),
       ...subreddits.map((subreddit) =>
-        this.getHotPostsBySubreddit(subreddit, sort),
+        this.getHotLinksBySubreddit(subreddit, sort),
       ),
-    ];
+    ]
 
-    const results = await Promise.allSettled(requests);
-    const postMap = new Map<string, RedditPostInfo>();
+    const results = await Promise.allSettled(requests)
+    const linkMap = new Map<string, RedditLinkInfoUntrusted>()
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        for (const post of result.value.children) {
-          postMap.set(post.data.id, post.data);
+        for (const link of result.value.children) {
+          linkMap.set(link.data.id, link.data)
         }
-      } else {
-        this.logger.error(
-          `Failed to fetch posts for a query or subreddit: ${result.reason}`,
-        );
       }
     }
-    return Array.from(postMap.values());
+    return Array.from(linkMap.values()).sort((a, b) => b.score - a.score)
+  }
+
+  async getCommentsByLinkId(linkId: string) {
+    const url = `https://oauth.reddit.com/comments/${linkId}.json`
+    const response = await firstValueFrom(
+      this.httpService
+        .get<RedditCommentResponse>(url)
+        .pipe(map((res) => res.data)),
+    )
+    return response
   }
 }

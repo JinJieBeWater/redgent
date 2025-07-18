@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String @id @default(cuid())
+  tasks AnalysisTask[]
+}
+
+model AnalysisTask {
+  id               String           @id @default(cuid())
+  name             String
+  ownerId          String
+  owner            User             @relation(fields: [ownerId], references: [id])
+  cron             String
+  prompt           String
+  keywords         String[]
+  subreddits       String[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  status           AnalysisTaskStatus
+  lastExecutedAt   DateTime?
+  enableFiltering  Boolean
+  lastFailureAt    DateTime?
+  lastErrorMessage String?
+  llmModel         String?
+  results          AnalysisReport[]
+}
+
+model AnalysisReport {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  content   Json
+  taskId    String
+  task      AnalysisTask     @relation(fields: [taskId], references: [id])
+}
+
+enum AnalysisTaskStatus {
+  active
+  paused
+  running
+}

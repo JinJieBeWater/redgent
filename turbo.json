@@ -32,6 +32,7 @@
   },
   "globalEnv": [
     "PORT",
-    "NODE_ENV"
+    "NODE_ENV",
+    "OPENROUTER_API_KEY"
   ]
 }
