@@ -31,29 +31,29 @@ export class AiSdkService {
   ): Promise<AnalysisReport> {
     // TODO: 实现分析逻辑
 
-    const linkInfoToAnalyze = completeLinkData.map((link) => {
-      const { content: linkContent, comment: linkComment } = link
+    // const linkInfoToAnalyze = completeLinkData.map((link) => {
+    //   const { content: linkContent, comment: linkComment } = link
 
-      return {
-        id: link.content.id,
-        title: linkContent.title,
-        selftext: linkContent.selftext,
-        permalink: linkContent.permalink,
-        created_utc: linkContent.created_utc,
-        linkComment: linkComment,
-      }
-    })
+    //   return {
+    //     id: link.content.id,
+    //     title: linkContent.title,
+    //     selftext: linkContent.selftext,
+    //     permalink: linkContent.permalink,
+    //     created_utc: linkContent.created_utc,
+    //     linkComment: linkComment,
+    //   }
+    // })
 
-    // 结合link与对应评论交给ai解析
-    const { text } = await generateText({
-      model: registry.languageModel('openrouter:moonshotai/kimi-k2:free'),
-      prompt: `分析以下Reddit数据，识别热门话题和趋势，提取趋势和关键观点，数据按照热度降序排列：
-      ${JSON.stringify(linkInfoToAnalyze, null, 2)}
-      `,
-    })
+    // // 结合link与对应评论交给ai解析
+    // const { text } = await generateText({
+    //   model: registry.languageModel('openrouter:moonshotai/kimi-k2:free'),
+    //   prompt: `分析以下Reddit数据，识别热门话题和趋势，提取趋势和关键观点，数据按照热度降序排列：
+    //   ${JSON.stringify(linkInfoToAnalyze, null, 2)}
+    //   `,
+    // })
 
     return {
-      text,
+      text: '分析结果',
     } as unknown as AnalysisReport
   }
 }
