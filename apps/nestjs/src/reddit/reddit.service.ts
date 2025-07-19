@@ -130,18 +130,23 @@ export class RedditService implements OnModuleInit {
     querys: string[],
     sort: RedditSort = RedditSort.Hot,
   ) {
+    if (querys.length === 0) return []
+
     const requests = querys.map((query) => this.getHotLinksByQuery(query, sort))
     const results = await Promise.allSettled(requests)
-    const allLinks: RedditLinkInfoUntrusted[] = []
-    
+
+    const uniqueLinksMap = new Map<string, RedditLinkInfoUntrusted>()
+
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        // 直接添加所有链接，不进行去重和排序
-        allLinks.push(...result.value.children.map(link => link.data))
-      }
+        for (const linkWrapper of result.value.children) {
+          const link = linkWrapper.data
+          uniqueLinksMap.set(link.id, link)
+        }
+      } 
     }
-    
-    return allLinks
+
+    return Array.from(uniqueLinksMap.values())
   }
 
   async getHotLinksByQueriesAndSubreddits(
@@ -158,14 +163,14 @@ export class RedditService implements OnModuleInit {
 
     const results = await Promise.allSettled(requests)
     const allLinks: RedditLinkInfoUntrusted[] = []
-    
+
     for (const result of results) {
       if (result.status === 'fulfilled') {
         // 直接添加所有链接，不进行去重和排序
         allLinks.push(...result.value.children.map(link => link.data))
       }
     }
-    
+
     return allLinks
   }
 

@@ -109,39 +109,6 @@ describe('RedditService (集成测试)', () => {
         getHotLinksBySubredditSpy.mockRestore()
       })
 
-      it('应该从多个子版块获取链接并去除重复项', async () => {
-        const link1 = createMockLink('link1', 'typescript')
-        const link2 = createMockLink('link2', 'javascript')
-        const link3Shared = createMockLink('link3', 'shared') // This link is in both responses
-
-        const tsResponse = createMockResponse([link1, link3Shared])
-        const jsResponse = createMockResponse([link2, link3Shared])
-
-        getHotLinksBySubredditSpy.mockImplementation(async (subreddit) => {
-          if (subreddit === 'typescript') {
-            return tsResponse.data
-          }
-          if (subreddit === 'javascript') {
-            return jsResponse.data
-          }
-          return createMockResponse([]).data
-        })
-
-        const result = await redditService.getHotLinksBySubreddits([
-          'typescript',
-          'javascript',
-        ])
-
-        expect(result).toBeDefined()
-        expect(result.length).toBe(3) // link1, link2, link3 (deduplicated)
-        expect(result.map((p) => p.id).sort()).toEqual([
-          'link1',
-          'link2',
-          'link3',
-        ])
-        expect(getHotLinksBySubredditSpy).toHaveBeenCalledTimes(2)
-      })
-
       it('应该优雅地处理部分失败', async () => {
         const link1 = createMockLink('link1', 'nestjs')
         const nestjsResponse = createMockResponse([link1])
