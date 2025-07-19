@@ -154,12 +154,12 @@ describe('AnalysisTaskExecutionService', () => {
     cacheManager = module.get(CACHE_MANAGER)
   })
 
-  it('should be defined', () => {
+  it('应该被正确定义', () => {
     expect(service).toBeDefined()
   })
 
   describe('execute', () => {
-    it('should execute a task successfully without filtering', async () => {
+    it('应该在不过滤的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: false }
       const analysisResult: AnalysisReport = mockAnalysisReport
 
@@ -195,7 +195,7 @@ describe('AnalysisTaskExecutionService', () => {
       expect(completeEvent.status).toBe(TaskStatus.TASK_COMPLETE)
     })
 
-    it('should execute a task successfully with filtering for new links', async () => {
+    it('应该在过滤新链接的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: true }
       const analysisResult: AnalysisReport = mockAnalysisReport
 
@@ -238,7 +238,7 @@ describe('AnalysisTaskExecutionService', () => {
       expect(completeEvent.status).toBe(TaskStatus.TASK_COMPLETE)
     })
 
-    it('should cancel the task if filtering is enabled and no new links are found', async () => {
+    it('应该在启用过滤且没有找到新链接时取消任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: true }
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
@@ -264,7 +264,7 @@ describe('AnalysisTaskExecutionService', () => {
       expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
     })
 
-    it('should cancel the task if no links are fetched from Reddit', async () => {
+    it('应该在从 Reddit 获取不到链接时取消任务', async () => {
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue([])
 
       const progressObservable = service.execute(mockTaskConfig)
@@ -282,7 +282,7 @@ describe('AnalysisTaskExecutionService', () => {
       expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
     })
 
-    it('should handle errors from RedditService', async () => {
+    it('应该正确处理 RedditService 的错误', async () => {
       const errorMessage = '测试预期的报错 Reddit API error'
       redditService.getHotLinksByQueriesAndSubreddits.mockRejectedValue(
         new Error(errorMessage),
@@ -298,7 +298,7 @@ describe('AnalysisTaskExecutionService', () => {
       })
     })
 
-    it('should handle errors from AiSdkService', async () => {
+    it('应该正确处理 AiSdkService 的错误', async () => {
       const errorMessage = 'AI analysis failed'
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         mockRedditLinks,
@@ -316,7 +316,7 @@ describe('AnalysisTaskExecutionService', () => {
       })
     })
 
-    it('should filter links with AI if they exceed MAX_LINKS_PER_TASK', async () => {
+    it('应该在链接数量超过 MAX_LINKS_PER_TASK 时使用 AI 过滤链接', async () => {
       const tooManyLinks = Array.from({ length: 15 }, (_, i) => ({
         id: `link-${i}`,
         title: `Post ${i}`,
@@ -360,7 +360,7 @@ describe('AnalysisTaskExecutionService', () => {
       )
     })
 
-    it('should not filter links with AI if they do not exceed MAX_LINKS_PER_TASK', async () => {
+    it('应该在链接数量未超过 MAX_LINKS_PER_TASK 时不使用 AI 过滤链接', async () => {
       const fewLinks = mockRedditLinks.slice(0, 2)
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
@@ -394,7 +394,7 @@ describe('AnalysisTaskExecutionService', () => {
       )
     })
 
-    it('should handle error during fetching complete content', async () => {
+    it('应该正确处理获取完整内容时的错误', async () => {
       jest
         .spyOn(redditService, 'getCommentsByLinkIds')
         .mockRejectedValueOnce(new Error('Failed to fetch comments'))

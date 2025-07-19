@@ -16,7 +16,7 @@ import { AnalysisReportService } from '../src/analysis-report/analysis-report.se
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
 
-describe('AnalysisTaskExecutionService', () => {
+describe('AnalysisTaskExecutionService (集成测试)', () => {
   let app: INestApplication
   let taskExecutionService: AnalysisTaskExecutionService
   let cacheManager: Cache
@@ -153,7 +153,7 @@ describe('AnalysisTaskExecutionService', () => {
     await app.close()
   })
 
-  it('should fetch links, filter none (all new), and cache them', async () => {
+  it('应该获取链接，不过滤（全部为新链接），并缓存它们', async () => {
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
 
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
@@ -197,7 +197,7 @@ describe('AnalysisTaskExecutionService', () => {
     expect(lastEvent.status).toBe(TaskStatus.TASK_COMPLETE)
   })
 
-  it('should fetch links, filter out cached links, and cache only new ones', async () => {
+  it('应该获取链接，过滤掉已缓存的链接，只缓存新链接', async () => {
     // 预先缓存 link1
     await cacheManager.set('redgent:link:link-1', 1)
 
@@ -234,7 +234,7 @@ describe('AnalysisTaskExecutionService', () => {
     expect(lastEvent.status).toBe(TaskStatus.TASK_COMPLETE)
   })
 
-  it('should stop execution if all fetched links are already in cache', async () => {
+  it('应该在所有获取的链接都已在缓存中时停止执行', async () => {
     // 预先缓存所有链接
     await cacheManager.mset([
       { key: 'redgent:link:link-1', value: 1 },

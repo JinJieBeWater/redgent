@@ -45,12 +45,12 @@ describe('RedditService', () => {
     configService = module.get<ConfigService>(ConfigService)
   })
 
-  it('should be defined', () => {
+  it('应该被正确定义', () => {
     expect(service).toBeDefined()
   })
 
   describe('getRedditToken', () => {
-    it('should return an access token', async () => {
+    it('应该返回访问令牌', async () => {
       const mockResponse: AxiosResponse = {
         data: {
           access_token: 'mock_token',
@@ -71,7 +71,7 @@ describe('RedditService', () => {
   })
 
   describe('extractCommentNodes', () => {
-    it('should extract comment bodies and authors from a flat list of comments', () => {
+    it('应该从扁平评论列表中提取评论内容和作者', () => {
       const comments: RedditCommentInfoUntrusted[] = [
         {
           author: 'user1',
@@ -93,7 +93,7 @@ describe('RedditService', () => {
       ])
     })
 
-    it('should extract comment bodies and authors with nested replies', () => {
+    it('应该提取带有嵌套回复的评论内容和作者', () => {
       const comments: RedditCommentInfoUntrusted[] = [
         {
           author: 'user1',

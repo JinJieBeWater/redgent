@@ -22,7 +22,7 @@ describe('AnalysisReportController', () => {
     controller = module.get<AnalysisReportController>(AnalysisReportController)
   })
 
-  it('should be defined', () => {
+  it('应该被正确定义', () => {
     expect(controller).toBeDefined()
   })
 })

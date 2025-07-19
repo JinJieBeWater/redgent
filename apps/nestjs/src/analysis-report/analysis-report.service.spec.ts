@@ -13,7 +13,7 @@ describe('AnalysisReportService', () => {
     service = module.get<AnalysisReportService>(AnalysisReportService)
   })
 
-  it('should be defined', () => {
+  it('应该被正确定义', () => {
     expect(service).toBeDefined()
   })
 })

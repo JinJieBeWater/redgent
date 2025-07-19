@@ -5,6 +5,7 @@ import { AnalysisTaskExecutionService } from './analysis-task-execution.service'
 import { RedditModule } from '../reddit/reddit.module'
 import { AiSdkModule } from '../ai-sdk/ai-sdk.module'
 import { AnalysisReportModule } from '../analysis-report/analysis-report.module'
+import { MonitoringModule } from '../monitoring/monitoring.module'
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { AnalysisReportModule } from '../analysis-report/analysis-report.module'
     RedditModule,
     AiSdkModule,
     AnalysisReportModule,
+    MonitoringModule,
   ],
   providers: [AnalysisTaskSchedulerService, AnalysisTaskExecutionService],
 })

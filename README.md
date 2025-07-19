@@ -113,7 +113,7 @@ sequenceDiagram
     participant Reddit as Reddit
     participant DB as 数据库 (PostgreSQL)
 
-    U->>Agent: 「帮我监控关于前端开发的 Reddit 帖子」
+    U->>Agent: 「帮我监控关于前端开发的 Reddit 帖子，每三个小时一次」
     Agent->>LLM: 基于「前端开发」生成关键词
     LLM-->>Agent: 返回 keywords
     Agent->>Reddit: 根据 keywords 搜索 subreddits

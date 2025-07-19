@@ -19,7 +19,7 @@ export interface TaskConfig {
   /** 更新时间 */
   updatedAt: Date
   /** 任务状态（如：active, paused） */
-  status: 'active' | 'paused'
+  status: 'active' | 'paused' | 'running'
   /** 最后执行时间 */
   lastExecutedAt?: Date
   /** 是否启用过滤机制，通过缓存（ttl=36）过滤之前已经抓取过的内容 */
@@ -77,6 +77,34 @@ export const TaskStatus = {
 export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
 
 // =================================================================
+// 数据大小监控相关类型定义
+// =================================================================
+
+/** 数据大小信息接口 */
+export interface DataSizeInfo {
+  /** 对象数量 */
+  count: number
+  /** 内存大小（字节） */
+  memorySize: number
+  /** 序列化大小（字节） */
+  serializedSize?: number
+  /** 格式化的大小字符串 */
+  formattedSize: string
+  /** 平均单个对象大小 */
+  averageItemSize: number
+}
+
+/** 数据大小统计接口 */
+export interface DataSizeStats extends DataSizeInfo {
+  /** 数据类型描述 */
+  dataType: string
+  /** 计算时间戳 */
+  timestamp: number
+  /** 是否为采样计算 */
+  isSampled: boolean
+}
+
+// =================================================================
 // 进度更新的类型定义
 // =================================================================
 
@@ -116,6 +144,8 @@ export interface FetchCompleteProgress extends BaseProgress {
   data: {
     /** 本次抓取到的链接总数 */
     count: number
+    /** 数据大小信息 */
+    dataSizeInfo?: DataSizeStats
   }
 }
 
@@ -131,6 +161,13 @@ export interface FilterCompleteProgress extends BaseProgress {
     originalCount: number
     /** 过滤后的新链接数 */
     uniqueCount: number
+    /** 数据大小对比信息 */
+    dataSizeInfo?: {
+      /** 过滤前的数据大小 */
+      beforeFilter: DataSizeStats
+      /** 过滤后的数据大小 */
+      afterFilter: DataSizeStats
+    }
   }
 }
 
@@ -146,6 +183,8 @@ export interface SelectCompleteProgress extends BaseProgress {
     originalCount: number
     /** 过滤后的新链接数 */
     uniqueCount: number
+    /** 筛选后的数据大小信息 */
+    dataSizeInfo?: DataSizeStats
   }
 }
 
@@ -156,6 +195,10 @@ export interface FetchContentStartProgress extends BaseProgress {
 
 export interface FetchContentCompleteProgress extends BaseProgress {
   status: typeof TaskStatus.FETCH_CONTENT_COMPLETE
+  data?: {
+    /** 完整内容数据大小信息 */
+    dataSizeInfo: DataSizeStats
+  }
 }
 
 // 6. AI 分析阶段
@@ -169,6 +212,10 @@ export interface AnalyzeStartProgress extends BaseProgress {
 
 export interface AnalyzeCompleteProgress extends BaseProgress {
   status: typeof TaskStatus.ANALYZE_COMPLETE
+  data?: {
+    /** 分析结果数据大小信息 */
+    dataSizeInfo: DataSizeStats
+  }
 }
 
 // 7. 通用信息

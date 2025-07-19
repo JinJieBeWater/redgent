@@ -100,13 +100,12 @@ export class RedditService implements OnModuleInit {
     )
 
     const results = await Promise.allSettled(requests)
-    const linkMap = new Map<string, RedditLinkInfoUntrusted>()
+    const allLinks: RedditLinkInfoUntrusted[] = []
 
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        for (const link of result.value.children) {
-          linkMap.set(link.data.id, link.data)
-        }
+        // 直接添加所有链接，不进行去重和排序
+        allLinks.push(...result.value.children.map(link => link.data))
       } else {
         this.logger.error(
           `Failed to fetch links for a subreddit: ${result.reason}`,
@@ -114,7 +113,7 @@ export class RedditService implements OnModuleInit {
       }
     }
 
-    return Array.from(linkMap.values())
+    return allLinks
   }
 
   async getHotLinksByQuery(query: string, sort: RedditSort = RedditSort.Hot) {
@@ -133,15 +132,16 @@ export class RedditService implements OnModuleInit {
   ) {
     const requests = querys.map((query) => this.getHotLinksByQuery(query, sort))
     const results = await Promise.allSettled(requests)
-    const linkMap = new Map<string, RedditLinkInfoUntrusted>()
+    const allLinks: RedditLinkInfoUntrusted[] = []
+    
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        for (const link of result.value.children) {
-          linkMap.set(link.data.id, link.data)
-        }
+        // 直接添加所有链接，不进行去重和排序
+        allLinks.push(...result.value.children.map(link => link.data))
       }
     }
-    return Array.from(linkMap.values())
+    
+    return allLinks
   }
 
   async getHotLinksByQueriesAndSubreddits(
@@ -157,15 +157,16 @@ export class RedditService implements OnModuleInit {
     ]
 
     const results = await Promise.allSettled(requests)
-    const linkMap = new Map<string, RedditLinkInfoUntrusted>()
+    const allLinks: RedditLinkInfoUntrusted[] = []
+    
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        for (const link of result.value.children) {
-          linkMap.set(link.data.id, link.data)
-        }
+        // 直接添加所有链接，不进行去重和排序
+        allLinks.push(...result.value.children.map(link => link.data))
       }
     }
-    return Array.from(linkMap.values()).sort((a, b) => b.score - a.score)
+    
+    return allLinks
   }
 
   async getCommentsByLinkId(linkId: string) {

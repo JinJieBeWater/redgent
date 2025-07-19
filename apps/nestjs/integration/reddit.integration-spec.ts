@@ -43,7 +43,7 @@ const createMockResponse = (links: RedditLinkInfoUntrusted[]) => ({
   },
 })
 
-describe('RedditService', () => {
+describe('RedditService (集成测试)', () => {
   let app: INestApplication
   let redditService: RedditService
   jest.setTimeout(30000)
@@ -62,7 +62,7 @@ describe('RedditService', () => {
   })
 
   describe('getSubredditsByQuery', () => {
-    it('should fetch subreddits by query from the real Reddit API', async () => {
+    it('应该通过查询从真实的 Reddit API 获取子版块', async () => {
       const query = 'programming'
       const result = await redditService.getSubredditsByQuery(query)
 
@@ -74,7 +74,7 @@ describe('RedditService', () => {
   })
 
   describe('getHotLinksBySubreddit', () => {
-    it('should fetch hot links by subreddit from a real subreddit API', async () => {
+    it('应该从真实的子版块 API 获取热门链接', async () => {
       const subreddit = 'typescript'
       const result = await redditService.getHotLinksBySubreddit(
         subreddit,
@@ -86,18 +86,18 @@ describe('RedditService', () => {
       expect(result.children.length).toBeGreaterThan(0)
 
       const firstLink = result.children[0]
-      expect(firstLink.kind).toBe('t3') // t3 kind represents a link link
+      expect(firstLink.kind).toBe('t3') // t3 类型表示链接
       expect(firstLink.data).toBeDefined()
       expect(firstLink.data.subreddit).toBe(subreddit)
     })
   })
 
   describe('getHotLinksBySubreddits', () => {
-    describe('Mocked', () => {
+    describe('模拟测试', () => {
       let getHotLinksBySubredditSpy: jest.SpyInstance
 
       beforeEach(() => {
-        // Mock the dependency to control its behavior
+        // 模拟依赖以控制其行为
         getHotLinksBySubredditSpy = jest.spyOn(
           redditService,
           'getHotLinksBySubreddit',
@@ -105,11 +105,11 @@ describe('RedditService', () => {
       })
 
       afterEach(() => {
-        // Restore the original implementation after each test
+        // 每个测试后恢复原始实现
         getHotLinksBySubredditSpy.mockRestore()
       })
 
-      it('should fetch links from multiple subreddits and remove duplicates', async () => {
+      it('应该从多个子版块获取链接并去除重复项', async () => {
         const link1 = createMockLink('link1', 'typescript')
         const link2 = createMockLink('link2', 'javascript')
         const link3Shared = createMockLink('link3', 'shared') // This link is in both responses
@@ -142,7 +142,7 @@ describe('RedditService', () => {
         expect(getHotLinksBySubredditSpy).toHaveBeenCalledTimes(2)
       })
 
-      it('should handle partial failures gracefully', async () => {
+      it('应该优雅地处理部分失败', async () => {
         const link1 = createMockLink('link1', 'nestjs')
         const nestjsResponse = createMockResponse([link1])
 
@@ -176,7 +176,7 @@ describe('RedditService', () => {
       })
     })
 
-    it('should fetch hot links for multiple subreddits and deduplicate results', async () => {
+    it('应该为多个子版块获取热门链接并去重结果', async () => {
       const result = await redditService.getHotLinksBySubreddits([
         'nestjs',
         'javascript',
@@ -192,7 +192,7 @@ describe('RedditService', () => {
   })
 
   describe('getHotLinksByQuery', () => {
-    it('should fetch hot links by search query from the real Reddit API', async () => {
+    it('应该通过搜索查询从真实的 Reddit API 获取热门链接', async () => {
       const query = 'nestjs'
       const result = await redditService.getHotLinksByQuery(query)
 
@@ -203,7 +203,7 @@ describe('RedditService', () => {
   })
 
   describe('getHotLinksByQueries', () => {
-    it('should fetch hot links for multiple queries and deduplicate results', async () => {
+    it('应该为多个查询获取热门链接并去重结果', async () => {
       const query1 = 'nestjs'
       const query2 = 'Nestjs_framework' // Same query to test deduplication
       const result = await redditService.getHotLinksByQueries([query1, query2])
@@ -218,7 +218,7 @@ describe('RedditService', () => {
   })
 
   describe('getHotLinksByQueriesAndSubreddits', () => {
-    it('should fetch hot links for multiple queries and subreddits and deduplicate results', async () => {
+    it('应该为多个查询和子版块获取热门链接并去重结果', async () => {
       const query1 = 'nestjs'
       const subreddit1 = 'javascript'
       const result = await redditService.getHotLinksByQueriesAndSubreddits(
@@ -236,7 +236,7 @@ describe('RedditService', () => {
   })
 
   describe('getCommentsByLinkId', () => {
-    it('should fetch comments by link id from the real Reddit API', async () => {
+    it('应该通过链接 ID 从真实的 Reddit API 获取评论', async () => {
       const linkId = '1lwstfd'
       const result = await redditService.getCommentsByLinkId(linkId)
 

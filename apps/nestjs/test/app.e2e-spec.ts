@@ -20,7 +20,7 @@ describe('AppController (e2e)', () => {
     await app.close()
   })
 
-  it('/ (GET)', () => {
+  it('/ (GET) 应该返回 Hello World!', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
