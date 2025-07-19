@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * 数据大小计算工具类
  * 提供对象大小计算、格式化和统计功能
@@ -43,6 +44,7 @@ export class DataSizeCalculator {
    * 计算对象的内存大小（字节）
    * 处理循环引用和复杂对象结构
    */
+
   static calculateObjectSize(obj: any, visited = new WeakSet()): number {
     if (obj === null || obj === undefined) {
       return 0

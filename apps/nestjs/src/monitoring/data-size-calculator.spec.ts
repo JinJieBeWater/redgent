@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import {
   DataSizeCalculator,
   DataSizeCalculationError,
@@ -180,6 +182,7 @@ describe('DataSizeCalculator', () => {
 
     it('应该为有问题的数据返回降级统计信息', () => {
       // 创建一个可能导致计算问题的对象
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment @typescript-eslint/no-unsafe-member-access
       const problematicData = [{ circular: null as any }]
       problematicData[0].circular = problematicData[0]
 

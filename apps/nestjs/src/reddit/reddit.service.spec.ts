@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { RedditService, CommentNode } from './reddit.service'
+import { RedditService } from './reddit.service'
 import { HttpService } from '@nestjs/axios'
 import { ConfigService } from '@nestjs/config'
 import { of } from 'rxjs'
-import { AxiosResponse } from 'axios'
+import { AxiosRequestHeaders, AxiosResponse } from 'axios'
 import {
+  RedditAccessTokenResponse,
   RedditCommentInfoUntrusted,
   RedditCommentWrapper,
   RedditListingResponse,
@@ -13,7 +14,6 @@ import {
 describe('RedditService', () => {
   let service: RedditService
   let httpService: HttpService
-  let configService: ConfigService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,7 +42,6 @@ describe('RedditService', () => {
 
     service = module.get<RedditService>(RedditService)
     httpService = module.get<HttpService>(HttpService)
-    configService = module.get<ConfigService>(ConfigService)
   })
 
   it('应该被正确定义', () => {
@@ -51,7 +50,7 @@ describe('RedditService', () => {
 
   describe('getRedditToken', () => {
     it('应该返回访问令牌', async () => {
-      const mockResponse: AxiosResponse = {
+      const mockResponse: AxiosResponse<RedditAccessTokenResponse> = {
         data: {
           access_token: 'mock_token',
           token_type: 'Bearer',
@@ -61,7 +60,7 @@ describe('RedditService', () => {
         status: 200,
         statusText: 'OK',
         headers: {},
-        config: { headers: {} as any },
+        config: { headers: {} as AxiosRequestHeaders },
       }
       jest.spyOn(httpService, 'post').mockReturnValue(of(mockResponse))
 
