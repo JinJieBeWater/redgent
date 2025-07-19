@@ -21,7 +21,6 @@ import { CommentNode } from '../reddit/reddit.service'
 const mockTaskConfig: TaskConfig = {
   id: 'task-1',
   name: 'Test Task',
-  ownerId: 'user-1',
   cron: '0 0 * * *',
   prompt: 'Analyze these posts',
   keywords: ['test'],
@@ -139,10 +138,10 @@ describe('AnalysisTaskExecutionService', () => {
         {
           provide: CACHE_MANAGER,
           useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-            mget: jest.fn(),
-            mset: jest.fn(),
+            get: jest.fn().mockResolvedValue(undefined),
+            set: jest.fn().mockResolvedValue(undefined),
+            mget: jest.fn().mockResolvedValue([]),
+            mset: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -298,7 +297,7 @@ describe('AnalysisTaskExecutionService', () => {
     })
 
     it('应该正确处理 AiSdkService 的错误', async () => {
-      const errorMessage = 'AI analysis failed'
+      const errorMessage = '测试预期的报错 AI analysis failed'
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         mockRedditLinks,
       )

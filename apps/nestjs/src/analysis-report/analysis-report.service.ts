@@ -13,19 +13,8 @@ export class AnalysisReportService {
    * @returns 创建后的分析结果
    */
   create(createAnalysisReportDto: CreateAnalysisReportDto) {
-    const { taskId, content } = createAnalysisReportDto
-
-    const data: Prisma.AnalysisReportCreateInput = {
-      content: content,
-      task: {
-        connect: {
-          id: taskId,
-        },
-      },
-    }
-
     return this.prisma.analysisReport.create({
-      data,
+      data: createAnalysisReportDto,
     })
   }
 

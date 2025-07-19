@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
-import { AnalysisTaskSchedulerService } from './analysis-task-scheduler.service'
+import { AnalysisTaskService } from './analysis-task.service'
 import { AnalysisTaskExecutionService } from './analysis-task-execution.service'
 import { RedditModule } from '../reddit/reddit.module'
 import { AiSdkModule } from '../ai-sdk/ai-sdk.module'
 import { AnalysisReportModule } from '../analysis-report/analysis-report.module'
 import { MonitoringModule } from '../monitoring/monitoring.module'
+import { PrismaModule } from '../prisma/prisma.module'
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { MonitoringModule } from '../monitoring/monitoring.module'
     AiSdkModule,
     AnalysisReportModule,
     MonitoringModule,
+    PrismaModule,
   ],
-  providers: [AnalysisTaskSchedulerService, AnalysisTaskExecutionService],
+  providers: [AnalysisTaskService, AnalysisTaskExecutionService],
 })
 export class AnalysisTaskModule {}

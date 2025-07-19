@@ -11,19 +11,22 @@ import {
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 import { AnalysisReportService } from '../analysis-report/analysis-report.service'
+import { AnalysisTaskStatus } from '@prisma/client'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class AnalysisTaskExecutionService {
-  private readonly logger = new Logger(AnalysisTaskExecutionService.name)
   private readonly CACHE_KEY_PREFIX = 'redgent'
   private readonly CACHE_KEY_PREFIX_POST = this.CACHE_KEY_PREFIX + ':link:'
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
+  private readonly logger = new Logger(AnalysisTaskExecutionService.name)
 
   constructor(
     private readonly redditService: RedditService,
     private readonly aisdkService: AiSdkService,
     private readonly analysisService: AnalysisReportService,
+    private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -37,6 +40,18 @@ export class AnalysisTaskExecutionService {
     return new Observable((subscriber: Subscriber<TaskProgress>) => {
       const run = async () => {
         try {
+          // 记录开始时间
+          const now = performance.now()
+          // 标记任务正在执行
+          await this.prismaService.analysisTask.update({
+            where: {
+              id: taskConfig.id,
+            },
+            data: {
+              status: AnalysisTaskStatus.running,
+            },
+          })
+
           // 1. 开始任务
           subscriber.next({
             status: TaskStatus.TASK_START,
@@ -83,7 +98,7 @@ export class AnalysisTaskExecutionService {
           if (enableFiltering) {
             subscriber.next({
               status: TaskStatus.FILTER_START,
-              message: '开始过滤重复帖子...',
+              message: '开始查询缓存，并进行过滤',
             })
 
             const originalLinkCount = links.length
@@ -107,12 +122,18 @@ export class AnalysisTaskExecutionService {
                 value: 1,
                 ttl: this.CACHE_TTL,
               }))
-              await this.cacheManager.mset(pairsToCache)
+              // 移除 await，让它在后台执行，不阻塞主流程
+              this.cacheManager.mset(pairsToCache).catch((err) => {
+                this.logger.warn(
+                  'Failed to cache new links in the background',
+                  err,
+                )
+              })
             }
 
             subscriber.next({
               status: TaskStatus.FILTER_COMPLETE,
-              message: `过滤完成，发现 ${uniqueLinks.length} 个新帖子`,
+              message: `缓存查询完成，发现 ${uniqueLinks.length} 个新帖子`,
               data: {
                 originalCount: originalLinkCount,
                 uniqueCount: uniqueLinks.length,
@@ -199,20 +220,53 @@ export class AnalysisTaskExecutionService {
           })
 
           // 9. 保存结果
-          await this.analysisService.create({
-            taskId,
-            content: analysisResult,
-          })
+
+          // 记录结束时间
+          const end = performance.now()
+          const executionDuration = end - now
+
+          // 使用 Promise.all 并行执行两个独立的数据库写入操作
+          const [_, taskInfo] = await Promise.all([
+            this.prismaService.analysisTask.update({
+              where: {
+                id: taskConfig.id,
+              },
+              data: {
+                lastExecutedAt: new Date(),
+                status: AnalysisTaskStatus.active,
+              },
+            }),
+            this.analysisService.create({
+              taskId,
+              content: analysisResult,
+              executionDuration,
+            }),
+          ])
 
           // 10. 完成任务
           subscriber.next({
             status: TaskStatus.TASK_COMPLETE,
             message: '任务成功执行完毕',
+            data: taskInfo,
           })
 
           subscriber.complete()
         } catch (error) {
           this.logger.error(error)
+          // 修改任务信息 添加上次失败时间 和 错误信息
+          await this.prismaService.analysisTask.update({
+            where: {
+              id: taskConfig.id,
+            },
+            data: {
+              lastFailureAt: new Date(),
+              lastErrorMessage: error.message,
+              status: AnalysisTaskStatus.active,
+            },
+          })
+
+          // TODO：后续完成任务调度功能后可以重启限定次数的任务
+
           // 发生错误时，发射一个 error 状态并结束流
           subscriber.error({
             status: TaskStatus.TASK_ERROR,
