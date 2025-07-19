@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# Build project to ensure everything compiles
+echo "📦 Building project..."
+pnpm build
+
+# Run all tests including integration and e2e
+echo "🧪 Running all tests..."
+pnpm test
+
+echo "🔗 Running integration tests..."
+pnpm test:integration
+
+echo "🌐 Running e2e tests..."
+pnpm test:e2e
+
+echo "✅ All pre-push checks passed!"

@@ -105,7 +105,7 @@ export class RedditService implements OnModuleInit {
     for (const result of results) {
       if (result.status === 'fulfilled') {
         // 直接添加所有链接，不进行去重和排序
-        allLinks.push(...result.value.children.map(link => link.data))
+        allLinks.push(...result.value.children.map((link) => link.data))
       } else {
         this.logger.error(
           `Failed to fetch links for a subreddit: ${result.reason}`,
@@ -143,7 +143,7 @@ export class RedditService implements OnModuleInit {
           const link = linkWrapper.data
           uniqueLinksMap.set(link.id, link)
         }
-      } 
+      }
     }
 
     return Array.from(uniqueLinksMap.values())
@@ -167,7 +167,7 @@ export class RedditService implements OnModuleInit {
     for (const result of results) {
       if (result.status === 'fulfilled') {
         // 直接添加所有链接，不进行去重和排序
-        allLinks.push(...result.value.children.map(link => link.data))
+        allLinks.push(...result.value.children.map((link) => link.data))
       }
     }
 

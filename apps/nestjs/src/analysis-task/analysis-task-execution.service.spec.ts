@@ -224,7 +224,6 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.TASK_COMPLETE,
       ])
 
-      const newLinks = [mockRedditLinks[1]]
       expect(cacheManager.mget).toHaveBeenCalledWith([
         'redgent:link:link-1',
         'redgent:link:link-2',

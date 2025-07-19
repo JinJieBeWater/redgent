@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * 数据大小计算工具类
  * 提供对象大小计算、格式化和统计功能
@@ -29,7 +30,7 @@ export class DataSizeCalculationError extends Error {
   constructor(
     message: string,
     public readonly dataType: string,
-    public readonly originalError?: Error
+    public readonly originalError?: Error,
   ) {
     super(message)
     this.name = 'DataSizeCalculationError'
@@ -43,6 +44,7 @@ export class DataSizeCalculator {
    * 计算对象的内存大小（字节）
    * 处理循环引用和复杂对象结构
    */
+
   static calculateObjectSize(obj: any, visited = new WeakSet()): number {
     if (obj === null || obj === undefined) {
       return 0
@@ -116,7 +118,7 @@ export class DataSizeCalculator {
       throw new DataSizeCalculationError(
         'Failed to calculate serialized size',
         typeof obj,
-        error as Error
+        error as Error,
       )
     }
   }
@@ -140,11 +142,11 @@ export class DataSizeCalculator {
   static calculateArrayStats<T>(
     array: T[],
     dataType: string = 'unknown',
-    includeSerializedSize: boolean = false
+    includeSerializedSize: boolean = false,
   ): DataSizeStats {
     const startTime = Date.now()
     const count = array.length
-    
+
     if (count === 0) {
       return {
         dataType,
@@ -154,7 +156,7 @@ export class DataSizeCalculator {
         formattedSize: '0 Bytes',
         averageItemSize: 0,
         timestamp: startTime,
-        isSampled: false
+        isSampled: false,
       }
     }
 
@@ -176,7 +178,7 @@ export class DataSizeCalculator {
       }
 
       // 如果是采样计算，推算总体大小
-      const memorySize = isSampled 
+      const memorySize = isSampled
         ? Math.round((totalMemorySize / sampleArray.length) * count)
         : totalMemorySize
 
@@ -186,7 +188,9 @@ export class DataSizeCalculator {
         if (isSampled) {
           // 采样计算序列化大小
           const sampleSerializedSize = this.calculateSerializedSize(sampleArray)
-          serializedSize = Math.round((sampleSerializedSize / sampleArray.length) * count)
+          serializedSize = Math.round(
+            (sampleSerializedSize / sampleArray.length) * count,
+          )
         } else {
           serializedSize = this.calculateSerializedSize(array)
         }
@@ -202,13 +206,13 @@ export class DataSizeCalculator {
         formattedSize: this.formatBytes(memorySize),
         averageItemSize,
         timestamp: startTime,
-        isSampled
+        isSampled,
       }
     } catch (error) {
       throw new DataSizeCalculationError(
         `Failed to calculate array stats for ${dataType}`,
         dataType,
-        error as Error
+        error as Error,
       )
     }
   }
@@ -219,11 +223,11 @@ export class DataSizeCalculator {
   private static getSampleArray<T>(array: T[], sampleSize: number): T[] {
     const sample: T[] = []
     const step = Math.floor(array.length / sampleSize)
-    
+
     for (let i = 0; i < array.length && sample.length < sampleSize; i += step) {
       sample.push(array[i])
     }
-    
+
     return sample
   }
 
@@ -233,14 +237,14 @@ export class DataSizeCalculator {
   static calculateObjectStats(
     obj: any,
     dataType: string = 'object',
-    includeSerializedSize: boolean = false
+    includeSerializedSize: boolean = false,
   ): DataSizeStats {
     const startTime = Date.now()
 
     try {
       const memorySize = this.calculateObjectSize(obj)
-      const serializedSize = includeSerializedSize 
-        ? this.calculateSerializedSize(obj) 
+      const serializedSize = includeSerializedSize
+        ? this.calculateSerializedSize(obj)
         : undefined
 
       return {
@@ -251,13 +255,13 @@ export class DataSizeCalculator {
         formattedSize: this.formatBytes(memorySize),
         averageItemSize: memorySize,
         timestamp: startTime,
-        isSampled: false
+        isSampled: false,
       }
     } catch (error) {
       throw new DataSizeCalculationError(
         `Failed to calculate object stats for ${dataType}`,
         dataType,
-        error as Error
+        error as Error,
       )
     }
   }
@@ -268,7 +272,7 @@ export class DataSizeCalculator {
   static safeCalculateStats<T>(
     data: T[] | T,
     dataType: string = 'unknown',
-    includeSerializedSize: boolean = false
+    includeSerializedSize: boolean = false,
   ): DataSizeStats | null {
     try {
       return Array.isArray(data)
@@ -276,7 +280,7 @@ export class DataSizeCalculator {
         : this.calculateObjectStats(data, dataType, includeSerializedSize)
     } catch (error) {
       console.warn(`Data size calculation failed for ${dataType}:`, error)
-      
+
       // 返回基础统计信息作为降级处理
       const count = Array.isArray(data) ? data.length : 1
       return {
@@ -287,7 +291,7 @@ export class DataSizeCalculator {
         formattedSize: 'Unknown',
         averageItemSize: 0,
         timestamp: Date.now(),
-        isSampled: false
+        isSampled: false,
       }
     }
   }

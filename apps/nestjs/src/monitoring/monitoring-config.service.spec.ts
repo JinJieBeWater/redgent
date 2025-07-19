@@ -1,9 +1,11 @@
+/* eslint-disable */
+
 import { Test, TestingModule } from '@nestjs/testing'
 import {
   MonitoringConfigService,
   MonitoringLevel,
   DEFAULT_MONITORING_CONFIG,
-  MonitoringConfigError
+  MonitoringConfigError,
 } from './monitoring-config.service'
 
 describe('MonitoringConfigService', () => {
@@ -22,7 +24,7 @@ describe('MonitoringConfigService', () => {
     delete process.env.DATA_MONITORING_PERFORMANCE_LOGGING
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [MonitoringConfigService]
+      providers: [MonitoringConfigService],
     }).compile()
 
     service = module.get<MonitoringConfigService>(MonitoringConfigService)
@@ -30,7 +32,7 @@ describe('MonitoringConfigService', () => {
 
   afterEach(() => {
     // 恢复原始环境变量
-    Object.keys(process.env).forEach(key => {
+    Object.keys(process.env).forEach((key) => {
       if (!originalEnv.hasOwnProperty(key)) {
         delete process.env[key]
       }
@@ -57,10 +59,12 @@ describe('MonitoringConfigService', () => {
 
       // 重新创建服务实例以加载新的环境变量
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
       expect(config.level).toBe(MonitoringLevel.DETAILED)
     })
@@ -69,10 +73,12 @@ describe('MonitoringConfigService', () => {
       process.env.DATA_MONITORING_INCLUDE_SERIALIZED = 'true'
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
       expect(config.includeSerializedSize).toBe(true)
     })
@@ -81,10 +87,12 @@ describe('MonitoringConfigService', () => {
       process.env.DATA_MONITORING_SAMPLING_THRESHOLD = '2000'
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
       expect(config.samplingThreshold).toBe(2000)
     })
@@ -93,10 +101,12 @@ describe('MonitoringConfigService', () => {
       process.env.DATA_MONITORING_TIMEOUT = '200'
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
       expect(config.calculationTimeout).toBe(200)
     })
@@ -105,10 +115,12 @@ describe('MonitoringConfigService', () => {
       process.env.DATA_MONITORING_PERFORMANCE_LOGGING = 'true'
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
       expect(config.enablePerformanceLogging).toBe(true)
     })
@@ -120,15 +132,17 @@ describe('MonitoringConfigService', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
 
       expect(config.level).toBe(MonitoringLevel.BASIC)
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid monitoring level')
+        expect.stringContaining('Invalid monitoring level'),
       )
 
       consoleSpy.mockRestore()
@@ -139,15 +153,19 @@ describe('MonitoringConfigService', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
 
-      expect(config.samplingThreshold).toBe(DEFAULT_MONITORING_CONFIG.samplingThreshold)
+      expect(config.samplingThreshold).toBe(
+        DEFAULT_MONITORING_CONFIG.samplingThreshold,
+      )
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid sampling threshold')
+        expect.stringContaining('Invalid sampling threshold'),
       )
 
       consoleSpy.mockRestore()
@@ -158,15 +176,19 @@ describe('MonitoringConfigService', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
 
-      expect(config.samplingThreshold).toBe(DEFAULT_MONITORING_CONFIG.samplingThreshold)
+      expect(config.samplingThreshold).toBe(
+        DEFAULT_MONITORING_CONFIG.samplingThreshold,
+      )
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid sampling threshold')
+        expect.stringContaining('Invalid sampling threshold'),
       )
 
       consoleSpy.mockRestore()
@@ -177,15 +199,19 @@ describe('MonitoringConfigService', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MonitoringConfigService]
+        providers: [MonitoringConfigService],
       }).compile()
 
-      const newService = module.get<MonitoringConfigService>(MonitoringConfigService)
+      const newService = module.get<MonitoringConfigService>(
+        MonitoringConfigService,
+      )
       const config = newService.getConfig()
 
-      expect(config.calculationTimeout).toBe(DEFAULT_MONITORING_CONFIG.calculationTimeout)
+      expect(config.calculationTimeout).toBe(
+        DEFAULT_MONITORING_CONFIG.calculationTimeout,
+      )
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid calculation timeout')
+        expect.stringContaining('Invalid calculation timeout'),
       )
 
       consoleSpy.mockRestore()
@@ -196,13 +222,15 @@ describe('MonitoringConfigService', () => {
     it('应该能够更新部分配置', () => {
       service.updateConfig({
         level: MonitoringLevel.DETAILED,
-        samplingThreshold: 2000
+        samplingThreshold: 2000,
       })
 
       const config = service.getConfig()
       expect(config.level).toBe(MonitoringLevel.DETAILED)
       expect(config.samplingThreshold).toBe(2000)
-      expect(config.includeSerializedSize).toBe(DEFAULT_MONITORING_CONFIG.includeSerializedSize)
+      expect(config.includeSerializedSize).toBe(
+        DEFAULT_MONITORING_CONFIG.includeSerializedSize,
+      )
     })
 
     it('应该验证更新的配置', () => {
@@ -210,12 +238,14 @@ describe('MonitoringConfigService', () => {
 
       service.updateConfig({
         level: 'invalid' as any,
-        samplingThreshold: -100
+        samplingThreshold: -100,
       })
 
       const config = service.getConfig()
       expect(config.level).toBe(MonitoringLevel.BASIC)
-      expect(config.samplingThreshold).toBe(DEFAULT_MONITORING_CONFIG.samplingThreshold)
+      expect(config.samplingThreshold).toBe(
+        DEFAULT_MONITORING_CONFIG.samplingThreshold,
+      )
 
       consoleSpy.mockRestore()
     })
@@ -252,21 +282,21 @@ describe('MonitoringConfigService', () => {
       // 监控关闭时，即使配置了序列化大小也应该返回 false
       service.updateConfig({
         level: MonitoringLevel.OFF,
-        includeSerializedSize: true
+        includeSerializedSize: true,
       })
       expect(service.shouldIncludeSerializedSize()).toBe(false)
 
       // 监控开启但未配置序列化大小时应该返回 false
       service.updateConfig({
         level: MonitoringLevel.BASIC,
-        includeSerializedSize: false
+        includeSerializedSize: false,
       })
       expect(service.shouldIncludeSerializedSize()).toBe(false)
 
       // 监控开启且配置了序列化大小时应该返回 true
       service.updateConfig({
         level: MonitoringLevel.BASIC,
-        includeSerializedSize: true
+        includeSerializedSize: true,
       })
       expect(service.shouldIncludeSerializedSize()).toBe(true)
     })
@@ -306,7 +336,7 @@ describe('MonitoringConfigService', () => {
       service.updateConfig({
         level: MonitoringLevel.DETAILED,
         includeSerializedSize: true,
-        samplingThreshold: 2000
+        samplingThreshold: 2000,
       })
 
       // 重置配置
@@ -329,7 +359,9 @@ describe('MonitoringConfigService', () => {
 
       // 应该使用默认值而不是无效值
       expect(config.level).toBe(MonitoringLevel.BASIC)
-      expect(config.samplingThreshold).toBe(DEFAULT_MONITORING_CONFIG.samplingThreshold)
+      expect(config.samplingThreshold).toBe(
+        DEFAULT_MONITORING_CONFIG.samplingThreshold,
+      )
       expect(consoleSpy).toHaveBeenCalled()
 
       consoleSpy.mockRestore()

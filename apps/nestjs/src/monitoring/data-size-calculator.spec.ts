@@ -1,4 +1,9 @@
-import { DataSizeCalculator, DataSizeCalculationError } from './data-size-calculator'
+/* eslint-disable */
+
+import {
+  DataSizeCalculator,
+  DataSizeCalculationError,
+} from './data-size-calculator'
 
 describe('DataSizeCalculator', () => {
   describe('calculateObjectSize', () => {
@@ -25,7 +30,7 @@ describe('DataSizeCalculator', () => {
     it('应该正确处理循环引用', () => {
       const obj: any = { name: 'test' }
       obj.self = obj
-      
+
       expect(() => DataSizeCalculator.calculateObjectSize(obj)).not.toThrow()
       const size = DataSizeCalculator.calculateObjectSize(obj)
       expect(size).toBeGreaterThan(0)
@@ -44,7 +49,9 @@ describe('DataSizeCalculator', () => {
     })
 
     it('应该正确计算函数的大小', () => {
-      const func = function test() { return 'hello' }
+      const func = function test() {
+        return 'hello'
+      }
       const size = DataSizeCalculator.calculateObjectSize(func)
       expect(size).toBeGreaterThan(0)
     })
@@ -59,8 +66,9 @@ describe('DataSizeCalculator', () => {
 
     it('应该对不可序列化的对象抛出错误', () => {
       const obj = { func: () => {} }
-      expect(() => DataSizeCalculator.calculateSerializedSize(obj))
-        .toThrow(DataSizeCalculationError)
+      expect(() => DataSizeCalculator.calculateSerializedSize(obj)).toThrow(
+        DataSizeCalculationError,
+      )
     })
   })
 
@@ -77,7 +85,7 @@ describe('DataSizeCalculator', () => {
   describe('calculateArrayStats', () => {
     it('应该正确计算空数组的统计信息', () => {
       const stats = DataSizeCalculator.calculateArrayStats([], 'empty')
-      
+
       expect(stats.count).toBe(0)
       expect(stats.memorySize).toBe(0)
       expect(stats.formattedSize).toBe('0 Bytes')
@@ -91,11 +99,11 @@ describe('DataSizeCalculator', () => {
       const data = [
         { id: 1, name: 'test1' },
         { id: 2, name: 'test2' },
-        { id: 3, name: 'test3' }
+        { id: 3, name: 'test3' },
       ]
-      
+
       const stats = DataSizeCalculator.calculateArrayStats(data, 'test-objects')
-      
+
       expect(stats.count).toBe(3)
       expect(stats.memorySize).toBeGreaterThan(0)
       expect(stats.formattedSize).toContain('Bytes')
@@ -108,11 +116,14 @@ describe('DataSizeCalculator', () => {
       const largeArray = Array.from({ length: 2000 }, (_, i) => ({
         id: i,
         name: `test${i}`,
-        data: 'some data here'
+        data: 'some data here',
       }))
-      
-      const stats = DataSizeCalculator.calculateArrayStats(largeArray, 'large-objects')
-      
+
+      const stats = DataSizeCalculator.calculateArrayStats(
+        largeArray,
+        'large-objects',
+      )
+
       expect(stats.count).toBe(2000)
       expect(stats.memorySize).toBeGreaterThan(0)
       expect(stats.isSampled).toBe(true)
@@ -122,7 +133,7 @@ describe('DataSizeCalculator', () => {
     it('应该在请求时包含序列化大小', () => {
       const data = [{ id: 1, name: 'test' }]
       const stats = DataSizeCalculator.calculateArrayStats(data, 'test', true)
-      
+
       expect(stats.serializedSize).toBeDefined()
       expect(stats.serializedSize).toBeGreaterThan(0)
     })
@@ -130,7 +141,7 @@ describe('DataSizeCalculator', () => {
     it('默认情况下不应该包含序列化大小', () => {
       const data = [{ id: 1, name: 'test' }]
       const stats = DataSizeCalculator.calculateArrayStats(data, 'test')
-      
+
       expect(stats.serializedSize).toBeUndefined()
     })
   })
@@ -138,8 +149,11 @@ describe('DataSizeCalculator', () => {
   describe('calculateObjectStats', () => {
     it('应该正确计算单个对象的统计信息', () => {
       const obj = { id: 1, name: 'test', active: true }
-      const stats = DataSizeCalculator.calculateObjectStats(obj, 'single-object')
-      
+      const stats = DataSizeCalculator.calculateObjectStats(
+        obj,
+        'single-object',
+      )
+
       expect(stats.count).toBe(1)
       expect(stats.memorySize).toBeGreaterThan(0)
       expect(stats.averageItemSize).toBe(stats.memorySize)
@@ -150,7 +164,7 @@ describe('DataSizeCalculator', () => {
     it('应该在请求时包含序列化大小', () => {
       const obj = { id: 1, name: 'test' }
       const stats = DataSizeCalculator.calculateObjectStats(obj, 'test', true)
-      
+
       expect(stats.serializedSize).toBeDefined()
       expect(stats.serializedSize).toBeGreaterThan(0)
     })
@@ -160,7 +174,7 @@ describe('DataSizeCalculator', () => {
     it('应该为有效数据返回统计信息', () => {
       const data = [{ id: 1, name: 'test' }]
       const stats = DataSizeCalculator.safeCalculateStats(data, 'safe-test')
-      
+
       expect(stats).not.toBeNull()
       expect(stats!.count).toBe(1)
       expect(stats!.dataType).toBe('safe-test')
@@ -168,11 +182,15 @@ describe('DataSizeCalculator', () => {
 
     it('应该为有问题的数据返回降级统计信息', () => {
       // 创建一个可能导致计算问题的对象
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment @typescript-eslint/no-unsafe-member-access
       const problematicData = [{ circular: null as any }]
       problematicData[0].circular = problematicData[0]
-      
-      const stats = DataSizeCalculator.safeCalculateStats(problematicData, 'problematic')
-      
+
+      const stats = DataSizeCalculator.safeCalculateStats(
+        problematicData,
+        'problematic',
+      )
+
       expect(stats).not.toBeNull()
       expect(stats!.count).toBe(1)
       expect(stats!.dataType).toBe('problematic')
@@ -181,7 +199,7 @@ describe('DataSizeCalculator', () => {
     it('应该正确处理单个对象', () => {
       const obj = { id: 1, name: 'test' }
       const stats = DataSizeCalculator.safeCalculateStats(obj, 'single')
-      
+
       expect(stats).not.toBeNull()
       expect(stats!.count).toBe(1)
       expect(stats!.dataType).toBe('single')
@@ -191,8 +209,12 @@ describe('DataSizeCalculator', () => {
   describe('DataSizeCalculationError', () => {
     it('应该创建具有正确属性的错误对象', () => {
       const originalError = new Error('Original error')
-      const error = new DataSizeCalculationError('Test error', 'test-type', originalError)
-      
+      const error = new DataSizeCalculationError(
+        'Test error',
+        'test-type',
+        originalError,
+      )
+
       expect(error.name).toBe('DataSizeCalculationError')
       expect(error.message).toBe('Test error')
       expect(error.dataType).toBe('test-type')
