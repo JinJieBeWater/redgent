@@ -28,6 +28,28 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ]
+    },
+    "test:integration": {
+      "dependsOn": [
+        "^test:integration"
+      ]
+    },
+    "test:e2e": {
+      "dependsOn": [
+        "^test:e2e"
+      ]
+    },
+    "format": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".prettierrc*",
+        "prettier.config.*"
+      ]
     }
   },
   "globalEnv": [

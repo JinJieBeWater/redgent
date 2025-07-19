@@ -7,6 +7,6 @@ import { MonitoringConfigService } from './monitoring-config.service'
  */
 @Module({
   providers: [MonitoringConfigService],
-  exports: [MonitoringConfigService]
+  exports: [MonitoringConfigService],
 })
 export class MonitoringModule {}

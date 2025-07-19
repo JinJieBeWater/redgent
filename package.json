@@ -6,10 +6,15 @@
     "dev": "turbo run dev",
     "dev:server": "turbo run dev --filter=nestjs",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format": "turbo run format",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "turbo run test:e2e",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "turbo": "^2.5.4",
     "typescript": "5.8.3"

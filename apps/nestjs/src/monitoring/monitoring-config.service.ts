@@ -9,7 +9,7 @@ export enum MonitoringLevel {
   /** 基础监控 - 只记录关键阶段的数据大小 */
   BASIC = 'basic',
   /** 详细监控 - 记录所有阶段的数据大小和变化 */
-  DETAILED = 'detailed'
+  DETAILED = 'detailed',
 }
 
 /**
@@ -32,7 +32,10 @@ export interface MonitoringConfig {
  * 配置验证错误类
  */
 export class MonitoringConfigError extends Error {
-  constructor(message: string, public readonly invalidValue?: any) {
+  constructor(
+    message: string,
+    public readonly invalidValue?: any,
+  ) {
     super(message)
     this.name = 'MonitoringConfigError'
   }
@@ -46,7 +49,7 @@ export const DEFAULT_MONITORING_CONFIG: MonitoringConfig = {
   includeSerializedSize: false,
   samplingThreshold: 1000,
   calculationTimeout: 100,
-  enablePerformanceLogging: false
+  enablePerformanceLogging: false,
 }
 
 /**
@@ -128,7 +131,10 @@ export class MonitoringConfigService {
       const mergedConfig = { ...DEFAULT_MONITORING_CONFIG, ...envConfig }
       return this.validateConfig(mergedConfig)
     } catch (error) {
-      console.warn('Failed to load monitoring configuration, using defaults:', error)
+      console.warn(
+        'Failed to load monitoring configuration, using defaults:',
+        error,
+      )
       return { ...DEFAULT_MONITORING_CONFIG }
     }
   }
@@ -142,7 +148,9 @@ export class MonitoringConfigService {
     // 监控级别
     const levelEnv = process.env.DATA_MONITORING_LEVEL?.toLowerCase()
     if (levelEnv) {
-      if (Object.values(MonitoringLevel).includes(levelEnv as MonitoringLevel)) {
+      if (
+        Object.values(MonitoringLevel).includes(levelEnv as MonitoringLevel)
+      ) {
         config.level = levelEnv as MonitoringLevel
       } else {
         console.warn(`Invalid monitoring level: ${levelEnv}, using default`)
@@ -152,7 +160,8 @@ export class MonitoringConfigService {
     // 是否包含序列化大小
     const includeSerializedEnv = process.env.DATA_MONITORING_INCLUDE_SERIALIZED
     if (includeSerializedEnv !== undefined) {
-      config.includeSerializedSize = includeSerializedEnv.toLowerCase() === 'true'
+      config.includeSerializedSize =
+        includeSerializedEnv.toLowerCase() === 'true'
     }
 
     // 采样阈值
@@ -162,7 +171,9 @@ export class MonitoringConfigService {
       if (!isNaN(threshold) && threshold > 0) {
         config.samplingThreshold = threshold
       } else {
-        console.warn(`Invalid sampling threshold: ${samplingThresholdEnv}, using default`)
+        console.warn(
+          `Invalid sampling threshold: ${samplingThresholdEnv}, using default`,
+        )
       }
     }
 
@@ -173,14 +184,18 @@ export class MonitoringConfigService {
       if (!isNaN(timeout) && timeout > 0) {
         config.calculationTimeout = timeout
       } else {
-        console.warn(`Invalid calculation timeout: ${timeoutEnv}, using default`)
+        console.warn(
+          `Invalid calculation timeout: ${timeoutEnv}, using default`,
+        )
       }
     }
 
     // 性能日志
-    const performanceLoggingEnv = process.env.DATA_MONITORING_PERFORMANCE_LOGGING
+    const performanceLoggingEnv =
+      process.env.DATA_MONITORING_PERFORMANCE_LOGGING
     if (performanceLoggingEnv !== undefined) {
-      config.enablePerformanceLogging = performanceLoggingEnv.toLowerCase() === 'true'
+      config.enablePerformanceLogging =
+        performanceLoggingEnv.toLowerCase() === 'true'
     }
 
     return config
@@ -194,31 +209,47 @@ export class MonitoringConfigService {
 
     // 验证监控级别
     if (!Object.values(MonitoringLevel).includes(config.level)) {
-      console.warn(`Invalid monitoring level: ${config.level}, falling back to basic`)
+      console.warn(
+        `Invalid monitoring level: ${config.level}, falling back to basic`,
+      )
       validatedConfig.level = MonitoringLevel.BASIC
     }
 
     // 验证采样阈值
-    if (!Number.isInteger(config.samplingThreshold) || config.samplingThreshold <= 0) {
-      console.warn(`Invalid sampling threshold: ${config.samplingThreshold}, using default`)
-      validatedConfig.samplingThreshold = DEFAULT_MONITORING_CONFIG.samplingThreshold
+    if (
+      !Number.isInteger(config.samplingThreshold) ||
+      config.samplingThreshold <= 0
+    ) {
+      console.warn(
+        `Invalid sampling threshold: ${config.samplingThreshold}, using default`,
+      )
+      validatedConfig.samplingThreshold =
+        DEFAULT_MONITORING_CONFIG.samplingThreshold
     }
 
     // 验证计算超时时间
-    if (!Number.isInteger(config.calculationTimeout) || config.calculationTimeout <= 0) {
-      console.warn(`Invalid calculation timeout: ${config.calculationTimeout}, using default`)
-      validatedConfig.calculationTimeout = DEFAULT_MONITORING_CONFIG.calculationTimeout
+    if (
+      !Number.isInteger(config.calculationTimeout) ||
+      config.calculationTimeout <= 0
+    ) {
+      console.warn(
+        `Invalid calculation timeout: ${config.calculationTimeout}, using default`,
+      )
+      validatedConfig.calculationTimeout =
+        DEFAULT_MONITORING_CONFIG.calculationTimeout
     }
 
     // 验证布尔值
     if (typeof config.includeSerializedSize !== 'boolean') {
       console.warn(`Invalid includeSerializedSize value, using default`)
-      validatedConfig.includeSerializedSize = DEFAULT_MONITORING_CONFIG.includeSerializedSize
+      validatedConfig.includeSerializedSize =
+        DEFAULT_MONITORING_CONFIG.includeSerializedSize
     }
 
     if (typeof config.enablePerformanceLogging !== 'boolean') {
       console.warn(`Invalid enablePerformanceLogging value, using default`)
-      validatedConfig.enablePerformanceLogging = DEFAULT_MONITORING_CONFIG.enablePerformanceLogging
+      validatedConfig.enablePerformanceLogging =
+        DEFAULT_MONITORING_CONFIG.enablePerformanceLogging
     }
 
     return validatedConfig
