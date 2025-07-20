@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
 
-import { AnalysisReport } from '@redgent/types/analysis-report'
+import { AnalysisReportContent } from '@redgent/types/analysis-report'
 import {
   TaskCompleteProgress,
   TaskConfig,
@@ -11,7 +11,6 @@ import {
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
-import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { AnalysisReportService } from '../analysis-report/analysis-report.service'
 import { createMockContext } from '../prisma/context'
 import { PrismaService } from '../prisma/prisma.service'
@@ -38,7 +37,7 @@ const mockRedditLinks: RedditLinkInfoUntrusted[] = [
   { id: 'link-2', title: 'Test Post 2' } as RedditLinkInfoUntrusted,
 ]
 
-const mockAnalysisReport: AnalysisReport = {
+const mockAnalysisReport: AnalysisReportContent = {
   title: '测试分析报告',
   overallSummary: '这是一个测试分析报告的总结',
   findings: [
@@ -108,7 +107,6 @@ const mockCompleteLinkData: {
 describe('AnalysisTaskExecutionService', () => {
   let service: AnalysisTaskExecutionService
   let redditService: jest.Mocked<RedditService>
-  let aisdkService: jest.Mocked<AiSdkService>
   let cacheManager: jest.Mocked<Cache>
 
   beforeEach(async () => {
@@ -130,13 +128,6 @@ describe('AnalysisTaskExecutionService', () => {
           },
         },
         {
-          provide: AiSdkService,
-          useValue: {
-            analyze: jest.fn(),
-            selectMostRelevantLinks: jest.fn(),
-          },
-        },
-        {
           provide: CACHE_MANAGER,
           useValue: {
             get: jest.fn().mockResolvedValue(undefined),
@@ -150,7 +141,6 @@ describe('AnalysisTaskExecutionService', () => {
 
     service = module.get(AnalysisTaskExecutionService)
     redditService = module.get(RedditService)
-    aisdkService = module.get(AiSdkService)
     cacheManager = module.get(CACHE_MANAGER)
   })
 
@@ -161,12 +151,12 @@ describe('AnalysisTaskExecutionService', () => {
   describe('execute', () => {
     it('应该在不过滤的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: false }
-      const analysisResult: AnalysisReport = mockAnalysisReport
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         mockRedditLinks,
       )
-      aisdkService.analyze.mockResolvedValue(analysisResult)
+
+      jest.spyOn(service, 'analyze').mockResolvedValue(mockAnalysisReport)
 
       const progressObservable = service.execute(taskConfig)
       const progressEvents = await lastValueFrom(
@@ -186,7 +176,7 @@ describe('AnalysisTaskExecutionService', () => {
       expect(
         redditService.getHotLinksByQueriesAndSubreddits,
       ).toHaveBeenCalledWith(taskConfig.keywords, taskConfig.subreddits)
-      expect(aisdkService.analyze).toHaveBeenCalledWith(
+      expect(service.analyze).toHaveBeenCalledWith(
         taskConfig,
         mockCompleteLinkData,
       )
@@ -197,14 +187,14 @@ describe('AnalysisTaskExecutionService', () => {
 
     it('应该在过滤新链接的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: true }
-      const analysisResult: AnalysisReport = mockAnalysisReport
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         mockRedditLinks,
       )
       // Mock mget to return one cached link and one new one
       cacheManager.mget.mockResolvedValue([1, undefined])
-      aisdkService.analyze.mockResolvedValue(analysisResult)
+
+      jest.spyOn(service, 'analyze').mockResolvedValue(mockAnalysisReport)
 
       const progressObservable = service.execute(taskConfig)
       const progressEvents = await lastValueFrom(
@@ -229,7 +219,7 @@ describe('AnalysisTaskExecutionService', () => {
         'redgent:link:link-2',
       ])
       expect(cacheManager.mset).toHaveBeenCalled()
-      expect(aisdkService.analyze).toHaveBeenCalledWith(
+      expect(service.analyze).toHaveBeenCalledWith(
         taskConfig,
         mockCompleteLinkData,
       )
@@ -246,6 +236,8 @@ describe('AnalysisTaskExecutionService', () => {
       // Mock mget to return all links as cached
       cacheManager.mget.mockResolvedValue(mockRedditLinks.map(() => 1))
 
+      jest.spyOn(service, 'analyze').mockResolvedValue(mockAnalysisReport)
+
       const progressObservable = service.execute(taskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
@@ -259,12 +251,14 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.FILTER_COMPLETE,
         TaskStatus.TASK_CANCEL,
       ])
-      expect(aisdkService.analyze).not.toHaveBeenCalled()
+      expect(service.analyze).not.toHaveBeenCalled()
       expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
     })
 
     it('应该在从 Reddit 获取不到链接时取消任务', async () => {
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue([])
+
+      jest.spyOn(service, 'analyze').mockResolvedValue(mockAnalysisReport)
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -277,7 +271,7 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.FETCH_COMPLETE,
         TaskStatus.TASK_CANCEL,
       ])
-      expect(aisdkService.analyze).not.toHaveBeenCalled()
+      expect(service.analyze).not.toHaveBeenCalled()
       expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
     })
 
@@ -303,7 +297,7 @@ describe('AnalysisTaskExecutionService', () => {
         mockRedditLinks,
       )
       cacheManager.mget.mockResolvedValue([undefined, undefined]) // All links are new
-      aisdkService.analyze.mockRejectedValue(new Error(errorMessage))
+      jest.spyOn(service, 'analyze').mockRejectedValue(new Error(errorMessage))
 
       const progressObservable = service.execute(mockTaskConfig)
 
@@ -326,8 +320,10 @@ describe('AnalysisTaskExecutionService', () => {
         tooManyLinks,
       )
       cacheManager.mget.mockResolvedValue(tooManyLinks.map(() => undefined))
-      aisdkService.selectMostRelevantLinks.mockResolvedValue(filteredLinks)
-      aisdkService.analyze.mockResolvedValue(mockAnalysisReport)
+      jest.spyOn(service, 'analyze').mockResolvedValue(mockAnalysisReport)
+      jest
+        .spyOn(service, 'selectMostRelevantLinks')
+        .mockResolvedValue(filteredLinks)
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -349,11 +345,11 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.TASK_COMPLETE,
       ])
 
-      expect(aisdkService.selectMostRelevantLinks).toHaveBeenCalledWith(
+      expect(service.selectMostRelevantLinks).toHaveBeenCalledWith(
         mockTaskConfig,
         tooManyLinks,
       )
-      expect(aisdkService.analyze).toHaveBeenCalledWith(
+      expect(service.analyze).toHaveBeenCalledWith(
         mockTaskConfig,
         mockCompleteLinkData,
       )
@@ -366,7 +362,8 @@ describe('AnalysisTaskExecutionService', () => {
         fewLinks,
       )
       cacheManager.mget.mockResolvedValue([undefined, undefined])
-      aisdkService.analyze.mockResolvedValue(mockAnalysisReport)
+      jest.spyOn(service, 'analyze').mockResolvedValue(mockAnalysisReport)
+      jest.spyOn(service, 'selectMostRelevantLinks').mockResolvedValue([])
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -386,8 +383,8 @@ describe('AnalysisTaskExecutionService', () => {
         TaskStatus.TASK_COMPLETE,
       ])
 
-      expect(aisdkService.selectMostRelevantLinks).not.toHaveBeenCalled()
-      expect(aisdkService.analyze).toHaveBeenCalledWith(
+      expect(service.selectMostRelevantLinks).not.toHaveBeenCalled()
+      expect(service.analyze).toHaveBeenCalledWith(
         mockTaskConfig,
         mockCompleteLinkData,
       )

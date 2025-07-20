@@ -4,6 +4,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { AnalysisTaskStatus } from '@prisma/client'
 import { Observable, Subscriber } from 'rxjs'
 
+import { AnalysisReportContent } from '@redgent/types/analysis-report'
 import {
   TaskConfig,
   TaskProgress,
@@ -11,10 +12,9 @@ import {
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
-import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { AnalysisReportService } from '../analysis-report/analysis-report.service'
 import { PrismaService } from '../prisma/prisma.service'
-import { RedditService } from '../reddit/reddit.service'
+import { CommentNode, RedditService } from '../reddit/reddit.service'
 
 @Injectable()
 export class AnalysisTaskExecutionService {
@@ -26,7 +26,6 @@ export class AnalysisTaskExecutionService {
 
   constructor(
     private readonly redditService: RedditService,
-    private readonly aisdkService: AiSdkService,
     private readonly analysisService: AnalysisReportService,
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -160,11 +159,10 @@ export class AnalysisTaskExecutionService {
               message: `帖子过多，开始筛选流程...`,
             })
 
-            const filteredLinks =
-              await this.aisdkService.selectMostRelevantLinks(
-                taskConfig,
-                uniqueLinks,
-              )
+            const filteredLinks = await this.selectMostRelevantLinks(
+              taskConfig,
+              uniqueLinks,
+            )
 
             subscriber.next({
               status: TaskStatus.SELECT_COMPLETE,
@@ -211,7 +209,7 @@ export class AnalysisTaskExecutionService {
             data: { count: uniqueLinks.length },
           })
 
-          const analysisResult = await this.aisdkService.analyze(
+          const analysisResult = await this.analyze(
             taskConfig,
             completeLinkData,
           )
@@ -279,5 +277,50 @@ export class AnalysisTaskExecutionService {
 
       void run()
     })
+  }
+
+  /** 从过多link中筛选出最有价值最相关的link */
+  async selectMostRelevantLinks(
+    taskConfig: TaskConfig,
+    links: RedditLinkInfoUntrusted[],
+  ) {
+    // TODO: 实现筛选逻辑
+    return links
+  }
+
+  /** 分析任务 */
+  async analyze(
+    taskConfig: TaskConfig,
+    completeLinkData: {
+      content: RedditLinkInfoUntrusted
+      comment: CommentNode[]
+    }[],
+  ): Promise<AnalysisReportContent> {
+    // TODO: 实现分析逻辑
+
+    // const linkInfoToAnalyze = completeLinkData.map((link) => {
+    //   const { content: linkContent, comment: linkComment } = link
+
+    //   return {
+    //     id: link.content.id,
+    //     title: linkContent.title,
+    //     selftext: linkContent.selftext,
+    //     permalink: linkContent.permalink,
+    //     created_utc: linkContent.created_utc,
+    //     linkComment: linkComment,
+    //   }
+    // })
+
+    // // 结合link与对应评论交给ai解析
+    // const { text } = await generateText({
+    //   model: registry.languageModel('openrouter:moonshotai/kimi-k2:free'),
+    //   prompt: `分析以下Reddit数据，识别热门话题和趋势，提取趋势和关键观点，数据按照热度降序排列：
+    //   ${JSON.stringify(linkInfoToAnalyze, null, 2)}
+    //   `,
+    // })
+
+    return {
+      text: '分析结果',
+    } as unknown as AnalysisReportContent
   }
 }
