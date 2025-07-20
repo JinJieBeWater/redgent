@@ -32,7 +32,6 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
   const mockTaskConfig: TaskConfig = {
     id: 'task-1',
     name: 'Test Task',
-    ownerId: 'user-1',
     cron: '0 0 * * *',
     prompt: 'test prompt',
     keywords: ['test'],

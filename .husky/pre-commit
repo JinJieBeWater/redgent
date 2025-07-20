@@ -3,6 +3,10 @@
 
 echo "🔍 Running pre-commit checks..."
 
+# Check types
+echo "🔎 Checking types..."
+pnpm check-types
+
 # Format code
 echo "✨ Checking code formatting..."
 pnpm format-check

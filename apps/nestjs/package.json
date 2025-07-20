@@ -22,7 +22,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config ./integration/jest-integration.json",
     "repl": "npm run start -- --entryFile repl",
-    "mastra": "mastra dev"
+    "mastra": "mastra dev",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@mastra/core": "0.0.0-ai-v5-20250718021026",
