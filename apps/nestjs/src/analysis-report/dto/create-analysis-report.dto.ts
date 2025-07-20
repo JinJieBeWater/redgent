@@ -1,14 +1,15 @@
-import { IsNotEmpty, IsString, IsObject, IsNumber } from 'class-validator'
+import { IsNotEmpty, IsNumber, IsObject, IsString } from 'class-validator'
+
 import type { AnalysisReport } from '@redgent/types/analysis-report'
 
 export class CreateAnalysisReportDto {
   @IsString()
   @IsNotEmpty()
-  taskId: string
+  taskId!: string
 
   @IsObject()
   @IsNotEmpty()
-  content: AnalysisReport
+  content!: AnalysisReport
 
   @IsNumber()
   executionDuration?: number

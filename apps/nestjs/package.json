@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format-check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -20,9 +21,15 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config ./integration/jest-integration.json",
-    "repl": "npm run start -- --entryFile repl"
+    "repl": "npm run start -- --entryFile repl",
+    "mastra": "mastra dev",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mastra/core": "0.0.0-ai-v5-20250718021026",
+    "@mastra/loggers": "^0.10.3",
+    "@mastra/memory": "0.0.0-ai-v5-20250718021026",
+    "@mastra/pg": "^0.12.3",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -33,7 +40,7 @@
     "@nestjs/schedule": "^6.0.0",
     "@openrouter/ai-sdk-provider": "1.0.0-beta.1",
     "@prisma/client": "^6.12.0",
-    "ai": "^4.3.19",
+    "ai": "5.0.0-beta.24",
     "axios": "^1.10.0",
     "cache-manager": "^7.0.1",
     "class-transformer": "^0.5.1",
@@ -41,6 +48,7 @@
     "cron": "^4.3.2",
     "https-proxy-agent": "^7.0.6",
     "joi": "^17.13.3",
+    "mastra": "0.0.0-ai-v5-20250718021026",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.0.5"
@@ -54,11 +62,12 @@
     "@redgent/eslint-config": "workspace:*",
     "@redgent/types": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
+    "@redgent/prettier-config": "workspace:*",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.15.29",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -74,7 +83,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
@@ -93,5 +102,6 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "prettier": "@redgent/prettier-config"
 }

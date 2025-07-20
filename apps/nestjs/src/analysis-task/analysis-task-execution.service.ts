@@ -1,18 +1,20 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { RedditService } from '../reddit/reddit.service'
-import { AiSdkService } from '../ai-sdk/ai-sdk.service'
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import type { Cache } from 'cache-manager'
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import { AnalysisTaskStatus } from '@prisma/client'
 import { Observable, Subscriber } from 'rxjs'
+
 import {
   TaskConfig,
   TaskProgress,
   TaskStatus,
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
+
+import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { AnalysisReportService } from '../analysis-report/analysis-report.service'
-import { AnalysisTaskStatus } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { RedditService } from '../reddit/reddit.service'
 
 @Injectable()
 export class AnalysisTaskExecutionService {
@@ -260,7 +262,7 @@ export class AnalysisTaskExecutionService {
             },
             data: {
               lastFailureAt: new Date(),
-              lastErrorMessage: error.message,
+              lastErrorMessage: (error as Error).message,
               status: AnalysisTaskStatus.active,
             },
           })

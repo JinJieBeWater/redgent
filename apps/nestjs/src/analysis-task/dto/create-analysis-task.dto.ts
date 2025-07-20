@@ -1,36 +1,36 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsArray,
-  ArrayNotEmpty,
-  IsBoolean,
-  IsOptional,
-  IsEnum,
-} from 'class-validator'
 import { AnalysisTaskStatus } from '@prisma/client'
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator'
 
 export class CreateAnalysisTaskDto {
   @IsString()
   @IsNotEmpty()
-  name: string
+  name!: string
 
   @IsString()
   @IsNotEmpty()
-  cron: string
+  cron!: string
 
   @IsString()
   @IsNotEmpty()
-  prompt: string
+  prompt!: string
 
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  keywords: string[]
+  keywords!: string[]
 
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  subreddits: string[]
+  subreddits: string[] | undefined
 
   @IsBoolean()
   @IsOptional()

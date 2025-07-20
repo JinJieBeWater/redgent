@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
-import { TaskConfig } from '@redgent/types/analysis-task'
-import { registry } from './registry'
 import { generateText } from 'ai'
-import { CommentNode } from '../reddit/reddit.service'
+
 import { AnalysisReport } from '@redgent/types/analysis-report'
+import { TaskConfig } from '@redgent/types/analysis-task'
+import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
+
+import { CommentNode } from '../reddit/reddit.service'
+import { registry } from './registry'
 
 @Injectable()
 export class AiSdkService {

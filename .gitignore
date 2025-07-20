@@ -36,3 +36,9 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Mastra
+apps/nestjs/.mastra/
+
+# Kiro
+.kiro

@@ -1,21 +1,20 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { firstValueFrom } from 'rxjs'
 import { map } from 'rxjs/operators'
 
 import {
   RedditAccessTokenResponse,
+  RedditCommentInfoUntrusted,
+  RedditCommentResponse,
+  RedditCommentWrapper,
+  RedditLinkInfoUntrusted,
+  RedditLinkWrapper,
   RedditListingResponse,
   RedditSort,
-  RedditLinkWrapper,
-  RedditLinkInfoUntrusted,
-  RedditCommentResponse,
-  RedditCommentInfoUntrusted,
-  RedditCommentWrapper,
 } from '@redgent/types/reddit'
 import { SubredditWrapper } from '@redgent/types/subreddit'
-
-import { ConfigService } from '@nestjs/config'
 
 export interface CommentNode {
   author: string
@@ -25,7 +24,7 @@ export interface CommentNode {
 
 @Injectable()
 export class RedditService implements OnModuleInit {
-  private accessToken: string
+  private accessToken!: string
   private readonly redditClientId: string
   private readonly redditSecret: string
   private readonly logger = new Logger(RedditService.name)

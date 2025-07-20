@@ -1,5 +1,4 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
-
 import { createProviderRegistry } from 'ai'
 
 export const registry = createProviderRegistry({

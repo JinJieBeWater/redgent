@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateAnalysisTaskDto } from './dto/create-analysis-task.dto'
 import { UpdateAnalysisTaskDto } from './dto/update-analysis-task.dto'

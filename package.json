@@ -7,7 +7,8 @@
     "dev:server": "turbo run dev --filter=nestjs",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "check-types": "turbo run check-types",
+    "format-check": "turbo run format-check",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
     "test:e2e": "turbo run test:e2e",
@@ -15,12 +16,14 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
+    "@redgent/prettier-config": "workspace:*",
     "prettier": "^3.6.2",
     "turbo": "^2.5.4",
-    "typescript": "5.8.3"
+    "typescript": "^5.8.3"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
-  }
+  },
+  "prettier": "@redgent/prettier-config"
 }

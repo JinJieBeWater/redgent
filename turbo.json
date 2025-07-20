@@ -1,6 +1,15 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
+  "$schema": "https://turborepo.com/schema.v2.json",
   "ui": "tui",
+  "globalEnv": [
+    "NODE_ENV",
+    "PORT",
+    "OPENROUTER_API_KEY"
+  ],
+  "globalDependencies": [
+    ".env*",
+    ".env.*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [
@@ -12,49 +21,77 @@
       ],
       "outputs": [
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "dist/**"
       ]
     },
     "lint": {
       "dependsOn": [
         "^lint"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".eslintrc.*",
+        "eslint.config.*"
       ]
     },
-    "check-types": {
+    "typecheck": {
       "dependsOn": [
-        "^check-types"
-      ]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "test": {
-      "dependsOn": [
-        "^test"
-      ]
-    },
-    "test:integration": {
-      "dependsOn": [
-        "^test:integration"
-      ]
-    },
-    "test:e2e": {
-      "dependsOn": [
-        "^test:e2e"
+        "^typecheck"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig*.json"
       ]
     },
     "format": {
       "inputs": [
         "$TURBO_DEFAULT$",
-        ".prettierrc*",
+        ".prettierrc.*",
         "prettier.config.*"
       ]
+    },
+    "format-check": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".prettierrc.*",
+        "prettier.config.*"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.*",
+        "vitest.config.*"
+      ]
+    },
+    "test:integration": {
+      "dependsOn": [
+        "^test:integration"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.*",
+        "vitest.config.*"
+      ]
+    },
+    "test:e2e": {
+      "dependsOn": [
+        "^test:e2e"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "playwright.config.*",
+        "cypress.config.*"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "outputs": []
     }
-  },
-  "globalEnv": [
-    "PORT",
-    "NODE_ENV",
-    "OPENROUTER_API_KEY"
-  ]
+  }
 }

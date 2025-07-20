@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing'
+
+import { createMockContext } from '../prisma/context'
+import { PrismaService } from '../prisma/prisma.service'
 import { AnalysisReportController } from './analysis-report.controller'
 import { AnalysisReportService } from './analysis-report.service'
-import { PrismaService } from '../prisma/prisma.service'
-import { createMockContext } from '../prisma/context'
 
 describe('AnalysisReportController', () => {
   let controller: AnalysisReportController
