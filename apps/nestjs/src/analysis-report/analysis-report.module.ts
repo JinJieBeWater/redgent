@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common'
-import { AnalysisReportService } from './analysis-report.service'
-import { AnalysisReportController } from './analysis-report.controller'
+
 import { PrismaModule } from '../prisma/prisma.module'
+import { AnalysisReportController } from './analysis-report.controller'
+import { AnalysisReportService } from './analysis-report.service'
 
 @Module({
   imports: [PrismaModule],

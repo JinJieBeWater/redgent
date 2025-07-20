@@ -1,21 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { AnalysisTaskExecutionService } from './analysis-task-execution.service'
-import { RedditService } from '../reddit/reddit.service'
-import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
+
+import { AnalysisReport } from '@redgent/types/analysis-report'
 import {
   TaskCompleteProgress,
   TaskConfig,
   TaskStatus,
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
-import { AnalysisReport } from '@redgent/types/analysis-report'
+
+import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { AnalysisReportService } from '../analysis-report/analysis-report.service'
-import { PrismaService } from '../prisma/prisma.service'
 import { createMockContext } from '../prisma/context'
-import { CommentNode } from '../reddit/reddit.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { CommentNode, RedditService } from '../reddit/reddit.service'
+import { AnalysisTaskExecutionService } from './analysis-task-execution.service'
 
 // Mock data for testing
 const mockTaskConfig: TaskConfig = {

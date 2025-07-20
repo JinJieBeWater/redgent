@@ -1,7 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { MastraService } from './mastra.service'
 import { ConfigModule } from '@nestjs/config'
+import { Test, TestingModule } from '@nestjs/testing'
 import Joi from 'joi'
+
+import { MastraService } from './mastra.service'
 
 describe('MastraService', () => {
   let service: MastraService

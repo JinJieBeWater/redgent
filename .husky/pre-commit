@@ -1,11 +1,8 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "🔍 Running pre-commit checks..."
 
 # Check types
 echo "🔎 Checking types..."
-pnpm check-types
+pnpm typecheck
 
 # Format code
 echo "✨ Checking code formatting..."
@@ -17,7 +14,7 @@ pnpm lint
 
 # Type check
 echo "📝 Type checking..."
-pnpm check-types
+pnpm typecheck
 
 # Run tests
 echo "🧪 Running unit tests..."

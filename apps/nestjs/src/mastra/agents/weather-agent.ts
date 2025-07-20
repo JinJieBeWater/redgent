@@ -1,6 +1,7 @@
 import { Agent } from '@mastra/core/agent'
-import { weatherTool } from '../tools/weather-tool'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+
+import { weatherTool } from '../tools/weather-tool'
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,

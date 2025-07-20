@@ -23,7 +23,7 @@
     "test:integration": "jest --config ./integration/jest-integration.json",
     "repl": "npm run start -- --entryFile repl",
     "mastra": "mastra dev",
-    "check-types": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@mastra/core": "0.0.0-ai-v5-20250718021026",
@@ -62,11 +62,12 @@
     "@redgent/eslint-config": "workspace:*",
     "@redgent/types": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
+    "@redgent/prettier-config": "workspace:*",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.15.29",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -82,7 +83,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
@@ -101,5 +102,6 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "prettier": "@redgent/prettier-config"
 }

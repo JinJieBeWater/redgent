@@ -1,12 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
-import { App } from 'supertest/types'
-import { AppModule } from './../src/app.module'
-import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
-import { lastValueFrom, tap, toArray } from 'rxjs'
-import { TaskConfig, TaskStatus } from '@redgent/types/analysis-task'
+import { Test, TestingModule } from '@nestjs/testing'
 import { PrismaClient } from '@prisma/client'
+import { lastValueFrom, tap, toArray } from 'rxjs'
+import { App } from 'supertest/types'
+
+import { TaskConfig, TaskStatus } from '@redgent/types/analysis-task'
+
+import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
 import { PrismaService } from '../src/prisma/prisma.service'
+import { AppModule } from './../src/app.module'
 
 describe('analysis-task (e2e)', () => {
   let app: INestApplication<App>

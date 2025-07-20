@@ -1,5 +1,5 @@
-import { PostgresStore } from '@mastra/pg'
 import { Memory } from '@mastra/memory'
+import { PostgresStore } from '@mastra/pg'
 
 export const storage = new PostgresStore({
   connectionString: process.env.DATABASE_URL!,

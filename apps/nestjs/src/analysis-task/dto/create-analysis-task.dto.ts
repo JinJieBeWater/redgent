@@ -1,13 +1,13 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsArray,
-  ArrayNotEmpty,
-  IsBoolean,
-  IsOptional,
-  IsEnum,
-} from 'class-validator'
 import { AnalysisTaskStatus } from '@prisma/client'
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator'
 
 export class CreateAnalysisTaskDto {
   @IsString()

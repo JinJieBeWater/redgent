@@ -1,14 +1,15 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
-import { RedditModule } from './reddit/reddit.module'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
-import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
-import { CacheModule } from '@nestjs/cache-manager'
-import { PrismaModule } from './prisma/prisma.module'
+
 import { AnalysisReportModule } from './analysis-report/analysis-report.module'
+import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
 import { MastraModule } from './mastra/mastra.module'
+import { PrismaModule } from './prisma/prisma.module'
+import { RedditModule } from './reddit/reddit.module'
 
 @Module({
   imports: [

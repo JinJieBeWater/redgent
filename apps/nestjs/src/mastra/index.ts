@@ -1,8 +1,9 @@
 import { Mastra } from '@mastra/core'
+import { Agent } from '@mastra/core/agent'
+
+import { weatherAgentConfig } from './agents/weather-agent'
 import { config } from './config'
 import { memory, storage } from './storage'
-import { weatherAgentConfig } from './agents/weather-agent'
-import { Agent } from '@mastra/core/agent'
 
 export const mastra: Mastra = new Mastra({
   ...config,

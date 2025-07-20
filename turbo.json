@@ -35,9 +35,9 @@
         "eslint.config.*"
       ]
     },
-    "check-types": {
+    "typecheck": {
       "dependsOn": [
-        "^check-types"
+        "^typecheck"
       ],
       "inputs": [
         "$TURBO_DEFAULT$",

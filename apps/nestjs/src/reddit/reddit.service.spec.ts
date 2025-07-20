@@ -1,15 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { RedditService } from './reddit.service'
 import { HttpService } from '@nestjs/axios'
 import { ConfigService } from '@nestjs/config'
-import { of } from 'rxjs'
+import { Test, TestingModule } from '@nestjs/testing'
 import { AxiosRequestHeaders, AxiosResponse } from 'axios'
+import { of } from 'rxjs'
+
 import {
   RedditAccessTokenResponse,
   RedditCommentInfoUntrusted,
   RedditCommentWrapper,
   RedditListingResponse,
 } from '@redgent/types/reddit'
+
+import { RedditService } from './reddit.service'
 
 describe('RedditService', () => {
   let service: RedditService

@@ -1,4 +1,5 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common'
+
 import { AnalysisReportService } from './analysis-report.service'
 
 @Controller('analysis')
