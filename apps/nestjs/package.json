@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format-check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -20,13 +21,14 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config ./integration/jest-integration.json",
-    "repl": "npm run start -- --entryFile repl"
+    "repl": "npm run start -- --entryFile repl",
+    "mastra": "mastra dev"
   },
   "dependencies": {
     "@mastra/core": "0.0.0-ai-v5-20250718021026",
-    "@mastra/libsql": "^0.11.0",
     "@mastra/loggers": "^0.10.3",
     "@mastra/memory": "0.0.0-ai-v5-20250718021026",
+    "@mastra/pg": "^0.12.3",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",

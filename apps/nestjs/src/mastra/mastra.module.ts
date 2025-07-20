@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { MastraService } from './mastra.service';
+import { MastraService } from './mastra.service'
 
 @Module({
-  providers: [MastraService]
+  providers: [MastraService],
 })
 export class MastraModule {}

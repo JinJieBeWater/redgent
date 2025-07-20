@@ -1,6 +1,4 @@
 import { Agent } from '@mastra/core/agent'
-import { Memory } from '@mastra/memory'
-import { LibSQLStore } from '@mastra/libsql'
 import { weatherTool } from '../tools/weather-tool'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
@@ -8,7 +6,7 @@ const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 })
 
-export const weatherAgent = new Agent({
+export const weatherAgentConfig: ConstructorParameters<typeof Agent>[0] = {
   name: 'Weather Agent',
   instructions: `
       You are a helpful weather assistant that provides accurate weather information and can help planning activities based on the weather.
@@ -26,9 +24,4 @@ export const weatherAgent = new Agent({
 `,
   model: openrouter('x-ai/grok-2-1212'),
   tools: { weatherTool },
-  memory: new Memory({
-    storage: new LibSQLStore({
-      url: 'file:../mastra.db', // path is relative to the .mastra/output directory
-    }),
-  }),
-})
+}

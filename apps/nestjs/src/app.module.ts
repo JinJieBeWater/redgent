@@ -8,7 +8,7 @@ import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
 import { CacheModule } from '@nestjs/cache-manager'
 import { PrismaModule } from './prisma/prisma.module'
 import { AnalysisReportModule } from './analysis-report/analysis-report.module'
-import { MastraModule } from './mastra/mastra.module';
+import { MastraModule } from './mastra/mastra.module'
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { MastraModule } from './mastra/mastra.module';
           .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(3002),
-        PROXY: Joi.string().default('7890'),
+        PROXY: Joi.number().default(7890),
         REDDIT_CLIENT_ID: Joi.string().required(),
         REDDIT_SECRET: Joi.string().required(),
       }),

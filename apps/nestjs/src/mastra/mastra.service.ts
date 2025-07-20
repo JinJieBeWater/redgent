@@ -1,24 +1,34 @@
 import { Mastra } from '@mastra/core'
-import { LibSQLStore } from '@mastra/libsql'
-import { PinoLogger } from '@mastra/loggers'
-import { Injectable } from '@nestjs/common'
-import { weatherAgent } from './agents/weather-agent'
-import { weatherWorkflow } from './workflows/weather-workflow'
+import { Injectable, OnModuleInit } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { PostgresStore } from '@mastra/pg'
+import { config } from './config'
+import { weatherAgentConfig } from './agents/weather-agent'
+import { Memory } from '@mastra/memory'
+import { Agent } from '@mastra/core/agent'
 
 @Injectable()
 export class MastraService extends Mastra {
-  constructor() {
-    super({
-      workflows: { weatherWorkflow },
-      agents: { weatherAgent },
-      storage: new LibSQLStore({
-        // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db
-        url: ':memory:',
-      }),
-      logger: new PinoLogger({
-        name: 'Mastra',
-        level: 'info',
-      }),
+  private readonly postgresStore: PostgresStore
+  constructor(private readonly configService: ConfigService) {
+    const storage = new PostgresStore({
+      connectionString: configService.get<string>('DATABASE_URL')!,
     })
+    const memory = new Memory({
+      storage,
+    })
+
+    super({
+      ...config,
+      agents: {
+        weatherAgent: new Agent({
+          ...weatherAgentConfig,
+          memory: memory,
+        }),
+      },
+      storage,
+    })
+
+    this.postgresStore = storage
   }
 }

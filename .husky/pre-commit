@@ -4,8 +4,8 @@
 echo "🔍 Running pre-commit checks..."
 
 # Format code
-echo "✨ Formatting code..."
-pnpm format
+echo "✨ Checking code formatting..."
+pnpm format-check
 
 # Lint code
 echo "🔧 Linting code..."
