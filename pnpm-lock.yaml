@@ -319,31 +319,6 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  packages/validators:
-    dependencies:
-      zod:
-        specifier: ^4.0.5
-        version: 4.0.5
-    devDependencies:
-      '@redgent/eslint-config':
-        specifier: workspace:*
-        version: link:../../tooling/eslint-config
-      '@redgent/prettier-config':
-        specifier: workspace:*
-        version: link:../../tooling/prettier-config
-      '@redgent/typescript-config':
-        specifier: workspace:*
-        version: link:../../tooling/typescript-config
-      eslint:
-        specifier: ^9.31.0
-        version: 9.31.0(jiti@2.4.2)
-      prettier:
-        specifier: ^3.4.2
-        version: 3.6.2
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-
   tooling/eslint-config:
     devDependencies:
       '@eslint/js':
