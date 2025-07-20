@@ -12,25 +12,25 @@ import { AnalysisTaskStatus } from '@prisma/client'
 export class CreateAnalysisTaskDto {
   @IsString()
   @IsNotEmpty()
-  name: string
+  name!: string
 
   @IsString()
   @IsNotEmpty()
-  cron: string
+  cron!: string
 
   @IsString()
   @IsNotEmpty()
-  prompt: string
+  prompt!: string
 
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  keywords: string[]
+  keywords!: string[]
 
   @IsArray()
   @ArrayNotEmpty()
   @IsString({ each: true })
-  subreddits: string[]
+  subreddits: string[] | undefined
 
   @IsBoolean()
   @IsOptional()

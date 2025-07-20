@@ -8,6 +8,7 @@ import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
 import { CacheModule } from '@nestjs/cache-manager'
 import { PrismaModule } from './prisma/prisma.module'
 import { AnalysisReportModule } from './analysis-report/analysis-report.module'
+import { MastraModule } from './mastra/mastra.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AnalysisReportModule } from './analysis-report/analysis-report.module'
     AnalysisTaskModule,
     PrismaModule,
     AnalysisReportModule,
+    MastraModule,
   ],
   controllers: [AppController],
   providers: [AppService],

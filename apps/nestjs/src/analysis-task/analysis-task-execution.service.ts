@@ -260,7 +260,7 @@ export class AnalysisTaskExecutionService {
             },
             data: {
               lastFailureAt: new Date(),
-              lastErrorMessage: error.message,
+              lastErrorMessage: (error as Error).message,
               status: AnalysisTaskStatus.active,
             },
           })

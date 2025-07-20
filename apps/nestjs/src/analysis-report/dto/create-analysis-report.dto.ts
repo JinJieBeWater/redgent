@@ -4,11 +4,11 @@ import type { AnalysisReport } from '@redgent/types/analysis-report'
 export class CreateAnalysisReportDto {
   @IsString()
   @IsNotEmpty()
-  taskId: string
+  taskId!: string
 
   @IsObject()
   @IsNotEmpty()
-  content: AnalysisReport
+  content!: AnalysisReport
 
   @IsNumber()
   executionDuration?: number

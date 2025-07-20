@@ -23,6 +23,10 @@
     "repl": "npm run start -- --entryFile repl"
   },
   "dependencies": {
+    "@mastra/core": "0.0.0-ai-v5-20250718021026",
+    "@mastra/libsql": "^0.11.0",
+    "@mastra/loggers": "^0.10.3",
+    "@mastra/memory": "0.0.0-ai-v5-20250718021026",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -33,7 +37,7 @@
     "@nestjs/schedule": "^6.0.0",
     "@openrouter/ai-sdk-provider": "1.0.0-beta.1",
     "@prisma/client": "^6.12.0",
-    "ai": "^4.3.19",
+    "ai": "5.0.0-beta.24",
     "axios": "^1.10.0",
     "cache-manager": "^7.0.1",
     "class-transformer": "^0.5.1",
@@ -41,6 +45,7 @@
     "cron": "^4.3.2",
     "https-proxy-agent": "^7.0.6",
     "joi": "^17.13.3",
+    "mastra": "0.0.0-ai-v5-20250718021026",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.0.5"

@@ -25,7 +25,7 @@ export interface CommentNode {
 
 @Injectable()
 export class RedditService implements OnModuleInit {
-  private accessToken: string
+  private accessToken!: string
   private readonly redditClientId: string
   private readonly redditSecret: string
   private readonly logger = new Logger(RedditService.name)
