@@ -142,6 +142,8 @@ export class RedditService implements OnModuleInit {
           const link = linkWrapper.data
           uniqueLinksMap.set(link.id, link)
         }
+      } else {
+        this.logger.error(`Failed to fetch links for a query: ${result.reason}`)
       }
     }
 

@@ -22,8 +22,7 @@ import { CommentNode, RedditService } from '../reddit/reddit.service'
 
 @Injectable()
 export class AnalysisTaskExecutionService {
-  private readonly CACHE_KEY_PREFIX = 'redgent'
-  private readonly CACHE_KEY_PREFIX_POST = this.CACHE_KEY_PREFIX + ':link:'
+  private readonly CACHE_KEY_PREFIX_POST = 'redgent:link:'
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
   private readonly logger = new Logger(AnalysisTaskExecutionService.name)
@@ -117,7 +116,7 @@ export class AnalysisTaskExecutionService {
     )
 
     // 过滤ups为0的帖子 和 评论数为0的帖子 和 为媒体帖子
-    let filteredLinks = links.filter(
+    const filteredLinks = links.filter(
       (link) => link.ups > 0 || link.num_comments > 0 || !link.is_video,
     )
 
@@ -150,11 +149,12 @@ export class AnalysisTaskExecutionService {
       message: '开始查询缓存，并进行过滤',
     })
 
-    const cacheKeys = links.map((p) => `${this.CACHE_KEY_PREFIX_POST}${p.id}`)
+    const cacheKeys = links.map((l) => `${this.CACHE_KEY_PREFIX_POST}${l.id}`)
     const cachedValues = await this.cacheManager.mget(cacheKeys)
     const newLinks = links.filter(
       (_, index) => cachedValues[index] === undefined,
     )
+    this.logger.log('cacheKeys: ' + cacheKeys)
 
     if (newLinks.length > 0) {
       const pairsToCache = newLinks.map((p) => ({
