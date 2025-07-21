@@ -12,13 +12,15 @@ import {
   TaskProgress,
   TaskStatus,
 } from '@redgent/types/analysis-task'
-import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
+import { CommentNode, RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
-import { selectMostRelevantLinksPrompt } from '../ai-sdk/prompts'
+import {
+  analyzeRedditContentPrompt,
+  selectMostRelevantLinksPrompt,
+} from '../ai-sdk/prompts'
 import { myProvider } from '../ai-sdk/provider'
 import { PrismaService } from '../prisma/prisma.service'
-import { CommentNode, RedditService } from '../reddit/reddit.service'
-import { ReportService } from '../report/report.service'
+import { RedditService } from '../reddit/reddit.service'
 
 @Injectable()
 export class TaskExecutionService {
@@ -29,7 +31,6 @@ export class TaskExecutionService {
 
   constructor(
     private readonly redditService: RedditService,
-    private readonly analysisService: ReportService,
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -295,10 +296,13 @@ export class TaskExecutionService {
           status: TaskStatusModel.active,
         },
       }),
-      this.analysisService.create({
-        taskId: taskConfig.id,
-        content: analysisResult,
-        executionDuration,
+
+      this.prismaService.report.create({
+        data: {
+          taskId: taskConfig.id,
+          content: analysisResult,
+          executionDuration,
+        },
       }),
     ])
 
@@ -369,9 +373,37 @@ export class TaskExecutionService {
       comment: CommentNode[]
     }[],
   ): Promise<ReportContent> {
-    // TODO: 实现分析逻辑
-    return {
-      text: '分析结果',
-    } as unknown as ReportContent
+    try {
+      const { object: analysisResult } = await generateObject({
+        model: myProvider.languageModel('analysis-model'),
+        schema: z.object({
+          title: z.string().describe('报告的整体标题'),
+          overallSummary: z.string().describe('对所有分析内容的总体情况'),
+          findings: z
+            .array(
+              z.object({
+                point: z.string().describe('发现的要点总结，类似小标题'),
+                elaboration: z.string().describe('对该要点的详细阐述和分析'),
+                supportingPostIds: z
+                  .array(z.string())
+                  .describe('支持该发现的源帖子的 ID 列表'),
+              }),
+            )
+            .describe('具体的、分点的分析发现列表'),
+        }),
+        prompt: analyzeRedditContentPrompt(taskConfig.prompt, completeLinkData),
+      })
+
+      return analysisResult as ReportContent
+    } catch (error) {
+      if (APICallError.isInstance(error) && error.responseBody) {
+        const err = JSON.parse(error.responseBody)
+        this.logger.error(err)
+        throw new Error(err)
+      } else {
+        this.logger.error(error)
+        throw new Error('无法进行 AI 分析，请稍后重试')
+      }
+    }
   }
 }

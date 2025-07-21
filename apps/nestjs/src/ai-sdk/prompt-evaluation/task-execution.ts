@@ -3,6 +3,7 @@ import { lastValueFrom, tap } from 'rxjs'
 
 import { TaskConfig } from '@redgent/types/analysis-task'
 
+import { createMockTaskConfig } from '../../../test/data-factory'
 import { AppModule } from '../../app.module'
 import { PrismaService } from '../../prisma/prisma.service'
 import { TaskExecutionService } from '../../task-execution/task-execution.service'
@@ -13,7 +14,7 @@ import { TaskExecutionService } from '../../task-execution/task-execution.servic
  * 然后将 AI 的真实输出打印到控制台，以便进行人工评估。
  *
  * 使用方法：
- *  npx ts-node src\ai-sdk\prompt-evaluation\task-execution.ts
+ *  pnpm dlx ts-node src\ai-sdk\prompt-evaluation\task-execution.ts
  */
 async function evaluateTaskExecutionPrompt() {
   // 创建一个独立的 NestJS 应用上下文
@@ -25,29 +26,22 @@ async function evaluateTaskExecutionPrompt() {
   console.log('🚀 服务已加载，开始准备测试数据...')
 
   // 准备用于测试的模拟数据
-  const mockTaskConfig: TaskConfig = {
-    id: 'task-1',
-    name: 'React 生态',
-    cron: '0 0 * * *',
-    prompt: '每天早上6点抓取reactjs生态圈的最新动态',
-    keywords: ['react', 'reactjs'],
-    subreddits: ['react', 'reactjs'],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-    enableFiltering: true,
-  }
+  const mockTaskConfig: TaskConfig = createMockTaskConfig()
 
-  // 确保测试任务不存在
-  await prismaService.task.delete({
+  let taskConfig = await prismaService.task.findUnique({
     where: {
       id: mockTaskConfig.id,
     },
   })
-  // 插入任务
-  const taskConfig = await prismaService.task.create({
-    data: mockTaskConfig,
-  })
+  if (taskConfig) {
+    console.log('🚨 测试任务已存在，请先删除后重试')
+    return
+  } else {
+    // 插入任务
+    taskConfig = await prismaService.task.create({
+      data: mockTaskConfig,
+    })
+  }
 
   try {
     await lastValueFrom(

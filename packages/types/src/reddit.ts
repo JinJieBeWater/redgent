@@ -261,6 +261,16 @@ export interface RedditCommentInfoUntrusted {
   ups: number
 }
 
+/**
+ * 评论节点
+ */
+export interface CommentNode {
+  author: string
+  body: string
+  replies: CommentNode[] | ''
+  ups: number
+}
+
 export interface RedditCommentWrapper {
   kind: typeof RedditTypeEnum.t1
   data: RedditCommentInfoUntrusted

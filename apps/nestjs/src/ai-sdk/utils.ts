@@ -111,8 +111,8 @@ export function addCustomResponseHandler<T>(
  * 用于测试清理，确保测试间的隔离性
  */
 export function clearCustomHandlers(): void {
-  // 保留前2个默认处理器，移除后续添加的
-  responseHandlers.splice(2)
+  // 保留前3个默认处理器，移除后续添加的
+  responseHandlers.splice(3)
 }
 
 // ============================================================================
@@ -177,6 +177,22 @@ registerResponseHandler({
 registerResponseHandler({
   matcher: (prompt) =>
     compareMessages(prompt.at(-1)!, TEST_PROMPTS.ANALYZE_CONTENT),
+  response: () => JSON.stringify(MOCK_RESPONSES.analysisResult),
+})
+
+// 注册分析内容的响应处理器（用于 generateObject）
+registerResponseHandler({
+  matcher: (prompt) => {
+    const lastMessage = prompt.at(-1)
+    if (!lastMessage || !Array.isArray(lastMessage.content)) return false
+
+    const textContent =
+      lastMessage.content.find((c) => c.type === 'text')?.text || ''
+    return (
+      textContent.includes('你是一个专业的内容分析师') &&
+      textContent.includes('请分析以下 Reddit 帖子')
+    )
+  },
   response: () => JSON.stringify(MOCK_RESPONSES.analysisResult),
 })
 

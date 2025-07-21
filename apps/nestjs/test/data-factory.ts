@@ -5,12 +5,13 @@
 
 import type { TaskConfig } from '@redgent/types/analysis-task'
 import type {
+  CommentNode,
+  RedditCommentInfoUntrusted,
+  RedditCommentWrapper,
   RedditLinkInfoUntrusted,
   RedditLinkWrapper,
   RedditListingResponse,
 } from '@redgent/types/reddit'
-
-import type { CommentNode } from '../src/reddit/reddit.service'
 
 // ============================================================================
 // Reddit 数据工厂
@@ -111,6 +112,142 @@ export function createMockResponse(
 // ============================================================================
 
 /**
+ * 创建模拟的 Reddit 评论数据（RedditCommentInfoUntrusted）
+ * @param author 作者名
+ * @param body 评论内容
+ * @param overrides 可选的覆盖属性
+ * @returns Reddit评论对象
+ */
+export function createMockRedditComment(
+  author: string,
+  body: string,
+  overrides?: Partial<RedditCommentInfoUntrusted>,
+): RedditCommentInfoUntrusted {
+  return {
+    subreddit_id: 't5_test',
+    approved_at_utc: null,
+    author_is_blocked: false,
+    comment_type: null,
+    awarders: [],
+    mod_reason_by: null,
+    banned_by: null,
+    author_flair_type: 'text',
+    total_awards_received: 0,
+    subreddit: 'test',
+    author_flair_template_id: null,
+    likes: null,
+    replies: '',
+    user_reports: [],
+    saved: false,
+    id: `comment_${Date.now()}_${Math.random()}`,
+    banned_at_utc: null,
+    mod_reason_title: null,
+    gilded: 0,
+    archived: false,
+    collapsed_reason_code: null,
+    no_follow: true,
+    author,
+    can_mod_post: false,
+    created_utc: Date.now() / 1000,
+    send_replies: true,
+    parent_id: 't3_test',
+    score: 1,
+    author_fullname: `t2_${author}`,
+    approved_by: null,
+    mod_note: null,
+    all_awardings: [],
+    body,
+    edited: false,
+    top_awarded_type: null,
+    author_flair_css_class: null,
+    name: `t1_comment_${Date.now()}`,
+    is_submitter: false,
+    downs: 0,
+    author_flair_richtext: [],
+    author_patreon_flair: false,
+    body_html: `&lt;div class="md"&gt;&lt;p&gt;${body}&lt;/p&gt;&lt;/div&gt;`,
+    removal_reason: null,
+    collapsed: false,
+    link_id: 't3_test',
+    stickied: false,
+    author_premium: false,
+    can_gild: false,
+    gildings: {},
+    unrepliable_reason: null,
+    author_flair_text_color: null,
+    score_hidden: false,
+    permalink: `/r/test/comments/test/_/comment_${Date.now()}/`,
+    subreddit_type: 'public',
+    locked: false,
+    report_reasons: null,
+    created: Date.now() / 1000,
+    author_flair_text: null,
+    treatment_tags: [],
+    collapsed_because_crowd_control: null,
+    subreddit_name_prefixed: 'r/test',
+    controversiality: 0,
+    depth: 0,
+    author_flair_background_color: null,
+    collapsed_reason: null,
+    associated_award: null,
+    ups: 1,
+    distinguished: null,
+    mod_reports: [],
+    num_reports: null,
+    ...overrides,
+  }
+}
+
+/**
+ * 创建带有嵌套回复的评论数据
+ * @param author 主评论作者
+ * @param body 主评论内容
+ * @param nestedComments 嵌套的子评论数组
+ * @returns 带有回复的评论对象
+ */
+export function createMockRedditCommentWithReplies(
+  author: string,
+  body: string,
+  nestedComments: RedditCommentInfoUntrusted[] = [],
+): RedditCommentInfoUntrusted {
+  const comment = createMockRedditComment(author, body)
+
+  if (nestedComments.length > 0) {
+    comment.replies = {
+      kind: 'Listing',
+      data: {
+        after: null,
+        before: null,
+        dist: nestedComments.length,
+        modhash: 'mock_modhash',
+        geo_filter: null,
+        children: nestedComments.map((nested) => ({
+          kind: 't1',
+          data: nested,
+        })) as RedditCommentWrapper[],
+      },
+    }
+  }
+
+  return comment
+}
+
+/**
+ * 批量创建简单评论数组
+ * @param count 评论数量
+ * @param prefix 作者名前缀，默认为 'user'
+ * @returns 评论数组
+ */
+export function createMockRedditComments(
+  count: number,
+  prefix: string = 'user',
+): RedditCommentInfoUntrusted[] {
+  return Array.from({ length: count }, (_, i) =>
+    createMockRedditComment(`${prefix}${i + 1}`, `This is comment ${i + 1}`),
+  )
+}
+
+/**
  * 创建模拟的评论节点
  * @param author 作者名
  * @param body 评论内容
@@ -126,6 +263,7 @@ export function createMockComment(
     author,
     body,
     replies,
+    ups: 0,
   }
 }
 
@@ -162,16 +300,15 @@ export function createMockTaskConfig(
 ): TaskConfig {
   return {
     id: 'task-1',
-    name: 'Test Task',
+    name: 'React 生态',
     cron: '0 0 * * *',
-    prompt: 'Test prompt for redgent',
-    keywords: ['test'],
-    subreddits: ['test'],
+    prompt: '每天早上6点抓取reactjs生态圈的最新动态',
+    keywords: ['react', 'reactjs'],
+    subreddits: ['react', 'reactjs'],
     createdAt: new Date(),
     updatedAt: new Date(),
     status: 'active',
     enableFiltering: true,
-    llmModel: 'test-model',
     ...overrides,
   }
 }
@@ -203,4 +340,18 @@ export const TEST_DATA_PRESETS = {
 
   /** 禁用过滤的任务配置 */
   taskWithoutFiltering: createMockTaskConfig({ enableFiltering: false }),
+
+  /** 简单的 Reddit 评论数据 */
+  simpleRedditComments: createMockRedditComments(2),
+
+  /** 复杂的嵌套 Reddit 评论数据 */
+  nestedRedditComments: [
+    createMockRedditCommentWithReplies('user1', 'Parent comment 1', [
+      createMockRedditComment('user1_1', 'Child comment 1.1'),
+      createMockRedditCommentWithReplies('user1_2', 'Child comment 1.2', [
+        createMockRedditComment('user1_2_1', 'Grandchild comment 1.2.1'),
+      ]),
+    ]),
+    createMockRedditComment('user2', 'Parent comment 2'),
+  ],
 } as const

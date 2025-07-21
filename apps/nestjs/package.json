@@ -23,7 +23,8 @@
     "test:integration": "jest --config ./integration/jest-integration.json",
     "repl": "npm run start -- --entryFile repl",
     "mastra": "mastra dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "task-execution": "ts-node src/ai-sdk/prompt-evaluation/task-execution.ts"
   },
   "dependencies": {
     "@ai-sdk/provider": "^2.0.0-beta.1",
