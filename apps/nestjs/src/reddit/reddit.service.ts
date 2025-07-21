@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs'
 import { map } from 'rxjs/operators'
 
 import {
+  CommentNode,
   RedditAccessTokenResponse,
   RedditCommentInfoUntrusted,
   RedditCommentResponse,
@@ -15,12 +16,6 @@ import {
   RedditSort,
 } from '@redgent/types/reddit'
 import { SubredditWrapper } from '@redgent/types/subreddit'
-
-export interface CommentNode {
-  author: string
-  body: string
-  replies?: CommentNode[]
-}
 
 @Injectable()
 export class RedditService implements OnModuleInit {
@@ -213,6 +208,8 @@ export class RedditService implements OnModuleInit {
       const node: CommentNode = {
         author: comment.author,
         body: comment.body,
+        ups: comment.ups,
+        replies: '',
       }
       if (
         comment.replies !== '' &&

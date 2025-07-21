@@ -1,57 +1,11 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
-import {
-  RedditLinkInfoUntrusted,
-  RedditLinkWrapper,
-  RedditListingResponse,
-  RedditSort,
-} from '@redgent/types/reddit'
+import { RedditSort } from '@redgent/types/reddit'
 
 import { AppModule } from '../src/app.module'
 import { RedditService } from '../src/reddit/reddit.service'
-
-// Helper to create a mock link
-const createMockLink = (
-  id: string,
-  subreddit: string,
-): RedditLinkInfoUntrusted => ({
-  id,
-  title: `Title for ${id}`,
-  author: 'test-author',
-  author_fullname: 't2_test-author',
-  created_utc: Date.now() / 1000,
-  subreddit,
-  subreddit_name_prefixed: `r/${subreddit}`,
-  subreddit_subscribers: 1000,
-  url: `https://www.reddit.com/r/${subreddit}/comments/${id}/`,
-  is_video: false,
-  over_18: false,
-  permalink: `/r/${subreddit}/comments/${id}/`,
-  score: 100,
-  num_comments: 50,
-  upvote_ratio: 0.9,
-  num_crossposts: 1,
-  thumbnail: 'self',
-  archived: false,
-  locked: false,
-  ups: 100,
-})
-
-// Helper to create a mock API response
-const createMockResponse = (
-  links: RedditLinkInfoUntrusted[],
-): RedditListingResponse<RedditLinkWrapper> => ({
-  kind: 'Listing',
-  data: {
-    after: 't3_xyz',
-    before: null,
-    dist: links.length,
-    modhash: 'mock_modhash',
-    geo_filter: null,
-    children: links.map((link) => ({ kind: 't3', data: link })),
-  },
-})
+import { createMockLink, createMockResponse } from '../test/data-factory'
 
 describe(RedditService.name, () => {
   let app: INestApplication

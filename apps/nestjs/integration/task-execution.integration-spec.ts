@@ -8,16 +8,19 @@ import { ReportContent } from '@redgent/types/analysis-report'
 import {
   TaskCancelProgress,
   TaskCompleteProgress,
-  TaskConfig,
   TaskStatus,
 } from '@redgent/types/analysis-task'
-import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
-import { CommentNode, RedditService } from '../src/reddit/reddit.service'
+import { RedditService } from '../src/reddit/reddit.service'
 import { ReportService } from '../src/report/report.service'
 import { TaskExecutionService } from '../src/task-execution/task-execution.service'
+import {
+  createMockLinks,
+  createMockTaskConfig,
+  TEST_DATA_PRESETS,
+} from '../test/data-factory'
 
 const mockReport: ReportContent = {
   title: '测试分析报告',
@@ -31,94 +34,10 @@ const mockReport: ReportContent = {
   ],
 }
 
-const mockRedditLinks: RedditLinkInfoUntrusted[] = [
-  {
-    id: 'link-1',
-    title: 'Test Post 1',
-    ups: 10,
-    num_comments: 5,
-  } as RedditLinkInfoUntrusted,
-  {
-    id: 'link-2',
-    title: 'Test Post 2',
-    ups: 10,
-    num_comments: 5,
-  } as RedditLinkInfoUntrusted,
-  {
-    id: 'link-3',
-    title: 'Test Post 3',
-    ups: 10,
-    num_comments: 5,
-  } as RedditLinkInfoUntrusted,
-]
-
-const mockTaskConfig: TaskConfig = {
-  id: 'task-1',
-  name: 'Test Task',
-  cron: '0 0 * * *',
-  prompt: 'test prompt',
-  keywords: ['test'],
-  subreddits: ['test'],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  status: 'active',
-  enableFiltering: true,
-  llmModel: 'test-model',
-}
-const mockCompleteLinkData: {
-  content: RedditLinkInfoUntrusted
-  comment: CommentNode[]
-}[] = [
-  {
-    content: {
-      id: 'link-1',
-      title: 'Test Post 1',
-    } as RedditLinkInfoUntrusted,
-    comment: [
-      {
-        author: 'user1',
-        body: 'This is comment 1',
-        replies: [
-          {
-            author: 'user1_1',
-            body: 'Child comment 1.1',
-            replies: [
-              {
-                author: 'user1_1_1',
-                body: 'Grandchild comment 1.1.1',
-                replies: [],
-              },
-            ],
-          },
-          {
-            author: 'user1_2',
-            body: 'Child comment 1.2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    content: {
-      id: 'link-2',
-      title: 'Test Post 2',
-    } as RedditLinkInfoUntrusted,
-    comment: [],
-  },
-  {
-    content: {
-      id: 'link-3',
-      title: 'Test Post 3',
-    } as RedditLinkInfoUntrusted,
-    comment: [
-      {
-        author: 'user3',
-        body: 'This is comment 3',
-        replies: [],
-      },
-    ],
-  },
-]
+// 使用 data-factory 创建测试数据
+const mockRedditLinks = createMockLinks(3, 'test')
+const mockTaskConfig = createMockTaskConfig()
+const mockCompleteLinkData = TEST_DATA_PRESETS.completeLinkData
 
 describe(TaskExecutionService.name, () => {
   let app: INestApplication

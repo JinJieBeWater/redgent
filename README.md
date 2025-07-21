@@ -38,8 +38,7 @@ pnpm dev
 该命令会通过 `turbo` 同时启动所有应用。服务启动后：
 
 - **Web 前端**: 访问 `http://localhost:3000`
-- **NestJS 后端**: 运行于 `http://localhost:3001`
-- **文档网站**: 访问 `http://localhost:3002`
+- **NestJS 后端**: 运行于 `http://localhost:3002`
 
 ## 📂 项目结构
 

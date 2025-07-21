@@ -83,7 +83,7 @@ export interface RedditLinkInfoUntrusted {
   /** 帖子永久链接路径（需拼接域名） */
   permalink: string
   /** 帖子正文文本（文本帖子才有值） */
-  selftext?: string
+  selftext: string
 
   /**
    * 互动指标
@@ -258,6 +258,16 @@ export interface RedditCommentInfoUntrusted {
   collapsed_because_crowd_control: string | null
   mod_reports: any[]
   num_reports: number | null
+  ups: number
+}
+
+/**
+ * 评论节点
+ */
+export interface CommentNode {
+  author: string
+  body: string
+  replies: CommentNode[] | ''
   ups: number
 }
 

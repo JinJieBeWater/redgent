@@ -1,95 +1,33 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
+import { ModelMessage } from 'ai'
 import { Cache } from 'cache-manager'
-import { lastValueFrom, tap, toArray } from 'rxjs'
+import { lastValueFrom, toArray } from 'rxjs'
+
+import { TaskCompleteProgress, TaskStatus } from '@redgent/types/analysis-task'
 
 import {
-  TaskCompleteProgress,
-  TaskConfig,
-  TaskStatus,
-} from '@redgent/types/analysis-task'
-import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
-
+  createMockTaskConfig,
+  createTooManyLinks,
+  TEST_DATA_PRESETS,
+} from '../../test/data-factory'
+import { selectMostRelevantLinksPrompt } from '../ai-sdk/prompts'
+import {
+  addCustomResponseHandler,
+  clearCustomHandlers,
+  compareMessages,
+  MOCK_RESPONSES,
+} from '../ai-sdk/utils'
 import { createMockContext } from '../prisma/context'
 import { PrismaService } from '../prisma/prisma.service'
-import { CommentNode, RedditService } from '../reddit/reddit.service'
+import { RedditService } from '../reddit/reddit.service'
 import { ReportService } from '../report/report.service'
 import { TaskExecutionService } from './task-execution.service'
 
-// Mock data for testing
-const mockTaskConfig: TaskConfig = {
-  id: 'task-1',
-  name: 'Test Task',
-  cron: '0 0 * * *',
-  prompt: 'Test prompt for redgent',
-  keywords: ['test'],
-  subreddits: ['test'],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  status: 'active',
-  enableFiltering: true,
-  llmModel: 'test-model',
-}
-
-const mockRedditLinks: RedditLinkInfoUntrusted[] = [
-  { id: 'link-1', title: 'Test Post 1' } as RedditLinkInfoUntrusted,
-  { id: 'link-2', title: 'Test Post 2' } as RedditLinkInfoUntrusted,
-]
-
-const mockCompleteLinkData: {
-  content: RedditLinkInfoUntrusted
-  comment: CommentNode[]
-}[] = [
-  {
-    content: {
-      id: 'link-1',
-      title: 'Test Post 1',
-    } as RedditLinkInfoUntrusted,
-    comment: [
-      {
-        author: 'user1',
-        body: 'This is comment 1',
-        replies: [
-          {
-            author: 'user1_1',
-            body: 'Child comment 1.1',
-            replies: [
-              {
-                author: 'user1_1_1',
-                body: 'Grandchild comment 1.1.1',
-                replies: [],
-              },
-            ],
-          },
-          {
-            author: 'user1_2',
-            body: 'Child comment 1.2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    content: {
-      id: 'link-2',
-      title: 'Test Post 2',
-    } as RedditLinkInfoUntrusted,
-    comment: [],
-  },
-  {
-    content: {
-      id: 'link-3',
-      title: 'Test Post 3',
-    } as RedditLinkInfoUntrusted,
-    comment: [
-      {
-        author: 'user3',
-        body: 'This is comment 3',
-        replies: [],
-      },
-    ],
-  },
-]
+// 使用数据工厂创建测试数据
+const mockTaskConfig = createMockTaskConfig()
+const mockRedditLinks = TEST_DATA_PRESETS.fewLinks
+const mockCompleteLinkData = TEST_DATA_PRESETS.completeLinkData
 
 describe(TaskExecutionService.name, () => {
   let service: TaskExecutionService
@@ -97,6 +35,9 @@ describe(TaskExecutionService.name, () => {
   let cacheManager: jest.Mocked<Cache>
 
   beforeEach(async () => {
+    // 清理之前的自定义处理器
+    clearCustomHandlers()
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TaskExecutionService,
@@ -131,6 +72,11 @@ describe(TaskExecutionService.name, () => {
     service = module.get(TaskExecutionService)
     redditService = module.get(RedditService)
     cacheManager = module.get(CACHE_MANAGER)
+  })
+
+  afterEach(() => {
+    // 测试后清理自定义处理器
+    clearCustomHandlers()
   })
 
   it('应该被正确定义', () => {
@@ -270,18 +216,40 @@ describe(TaskExecutionService.name, () => {
     })
 
     it('应该在链接数量超过 MAX_LINKS_PER_TASK 时使用 AI 过滤链接', async () => {
-      const tooManyLinks = Array.from({ length: 15 }, (_, i) => ({
-        id: `link-${i}`,
-        title: `link ${i}`,
-        selftext: `Content of link ${i}`,
-      })) as RedditLinkInfoUntrusted[]
+      const tooManyLinks = createTooManyLinks(15)
+      const inputLinkData = tooManyLinks.map((link) => ({
+        id: link.id,
+        title: link.title,
+        selftext: link.selftext,
+      }))
+
+      // 创建期望的测试 prompt
+      const expectedPrompt: ModelMessage = {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: selectMostRelevantLinksPrompt(
+              mockTaskConfig.prompt,
+              inputLinkData,
+              10,
+            ),
+          },
+        ],
+      }
+
+      // 注册基于精确消息匹配的响应处理器
+      addCustomResponseHandler(
+        (prompt) => compareMessages(prompt.at(-1)!, expectedPrompt),
+        () => JSON.stringify(MOCK_RESPONSES.linkSelection),
+      )
 
       jest.spyOn(service, 'selectMostRelevantLinks')
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         tooManyLinks,
       )
-      cacheManager.mget.mockResolvedValue(tooManyLinks.map(() => undefined))
+      cacheManager.mget.mockResolvedValue(inputLinkData.map(() => undefined))
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -305,7 +273,7 @@ describe(TaskExecutionService.name, () => {
 
       expect(service.selectMostRelevantLinks).toHaveBeenCalledWith(
         mockTaskConfig,
-        tooManyLinks,
+        inputLinkData,
       )
     })
 

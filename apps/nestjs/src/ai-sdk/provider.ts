@@ -1,31 +1,19 @@
-import type {
-  EmbeddingModel,
-  ImageModel,
-  Provider,
-  SpeechModel,
-  TranscriptionModel,
-} from 'ai'
 import { createOpenRouter, LanguageModelV2 } from '@openrouter/ai-sdk-provider'
 import { customProvider } from 'ai'
 
-import { chatModel, structureModel } from './models.test'
+import { analysisModel, chatModel, structureModel } from './models.test'
 
 const openRouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 })
 
-export const myProvider: Provider & {
-  languageModel(modelId: 'chat-model' | 'structure-model'): LanguageModelV2
-  textEmbeddingModel(modelId: string): EmbeddingModel<string>
-  imageModel(modelId: string): ImageModel
-  transcriptionModel(modelId: string): TranscriptionModel
-  speechModel(modelId: string): SpeechModel
-} =
+export const myProvider =
   process.env.NODE_ENV === 'test'
     ? customProvider({
         languageModels: {
           'chat-model': chatModel,
           'structure-model': structureModel,
+          'analysis-model': analysisModel,
         },
       })
     : customProvider({
@@ -34,5 +22,6 @@ export const myProvider: Provider & {
           'structure-model': openRouter(
             'google/gemini-2.5-flash-lite-preview-06-17',
           ),
+          'analysis-model': openRouter('google/gemini-2.0-flash-001'),
         },
       })
