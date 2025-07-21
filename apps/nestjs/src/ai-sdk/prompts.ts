@@ -4,7 +4,7 @@
 
 export const selectMostRelevantLinksPrompt = (
   prompt: string,
-  links: { id: string; title: string; selftext: string | undefined }[],
+  links: { id: string; title: string; selftext: string }[],
   MAX_LINKS_PER_TASK: number = 10,
 ) => `
       你是一个专业的内容筛选助手，任务是从给定的帖子列表中找出与用户想要关注的内容最相关的帖子。

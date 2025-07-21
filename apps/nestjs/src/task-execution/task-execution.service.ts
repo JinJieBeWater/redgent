@@ -25,7 +25,7 @@ export class TaskExecutionService {
   private readonly CACHE_KEY_PREFIX_POST = 'redgent:link:'
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
-  private readonly logger = new Logger(TaskExecutionService.name)
+  readonly logger = new Logger(TaskExecutionService.name)
 
   constructor(
     private readonly redditService: RedditService,
@@ -115,9 +115,9 @@ export class TaskExecutionService {
       taskConfig.subreddits,
     )
 
-    // 过滤ups为0的帖子 和 评论数为0的帖子 和 为媒体帖子
+    // 过滤ups为0的帖子 和 评论数为0的帖子
     const filteredLinks = links.filter(
-      (link) => link.ups > 0 || link.num_comments > 0 || !link.is_video,
+      (link) => link.ups > 0 || link.num_comments > 0,
     )
 
     // // 帖子数量大于30时，按照ups排序，取前30个
@@ -332,7 +332,7 @@ export class TaskExecutionService {
 
   async selectMostRelevantLinks(
     taskConfig: TaskConfig,
-    links: { id: string; title: string; selftext: string | undefined }[],
+    links: { id: string; title: string; selftext: string }[],
   ) {
     try {
       const { object: selectedLinkIds } = await generateObject({

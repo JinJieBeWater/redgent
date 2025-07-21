@@ -4,38 +4,21 @@ import { PrismaClient } from '@prisma/client'
 import { lastValueFrom, tap, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
-import { ReportContent } from '@redgent/types/analysis-report'
-import { TaskConfig, TaskStatus } from '@redgent/types/analysis-task'
+import { TaskStatus } from '@redgent/types/analysis-task'
 
+import { MOCK_RESPONSES } from '../src/ai-sdk/utils'
 import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'
 import { TaskExecutionService } from '../src/task-execution/task-execution.service'
+import { createMockTaskConfig } from './data-factory'
 
-const mockTaskConfig: TaskConfig = {
+const mockTaskConfig = createMockTaskConfig({
   id: 'task-1',
   name: '监测 ReactJs 动态',
-  cron: '0 0 * * *',
   prompt: '帮我每天6点监测一次有关 ReactJs 生态圈的动态',
   keywords: ['reactjs', 'react'],
   subreddits: ['react', 'reactjs'],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  status: 'active',
-  enableFiltering: true,
-  llmModel: 'test-model',
-}
-
-const mockAnalysisReport: ReportContent = {
-  title: '测试分析报告',
-  overallSummary: '这是一个测试分析报告的总结',
-  findings: [
-    {
-      point: '测试要点1',
-      elaboration: '这是要点1的详细阐述',
-      supportingPostIds: ['link-1'],
-    },
-  ],
-}
+})
 
 describe('analysis-task (e2e)', () => {
   let app: INestApplication<App>
@@ -79,7 +62,7 @@ describe('analysis-task (e2e)', () => {
         })
       jest
         .spyOn(analysisTaskExecutionService, 'analyze')
-        .mockImplementation(async () => mockAnalysisReport)
+        .mockImplementation(async () => MOCK_RESPONSES.analysisResult)
 
       const progressObservable =
         analysisTaskExecutionService.execute(mockTaskConfig)
