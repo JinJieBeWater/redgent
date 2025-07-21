@@ -1,22 +1,9 @@
-echo "🔍 Running pre-commit checks..."
+echo "🚀 Running lint-staged..."
+npx lint-staged
 
-# Check types
-echo "🔎 Checking types..."
-pnpm typecheck
-
-# Format code
-echo "✨ Checking code formatting..."
-pnpm format-check
-
-# Lint code
-echo "🔧 Linting code..."
-pnpm lint
-
-# Type check
 echo "📝 Type checking..."
 pnpm typecheck
 
-# Run tests
 echo "🧪 Running unit tests..."
 pnpm test
 
