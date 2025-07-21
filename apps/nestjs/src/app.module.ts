@@ -7,7 +7,6 @@ import { AnalysisReportModule } from './analysis-report/analysis-report.module'
 import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { MastraModule } from './mastra/mastra.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { RedditModule } from './reddit/reddit.module'
 
@@ -37,7 +36,6 @@ import { RedditModule } from './reddit/reddit.module'
     AnalysisTaskModule,
     PrismaModule,
     AnalysisReportModule,
-    MastraModule,
   ],
   controllers: [AppController],
   providers: [AppService],
