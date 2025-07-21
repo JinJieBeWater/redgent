@@ -15,8 +15,9 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "husky": "^9.1.7",
     "@redgent/prettier-config": "workspace:*",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
@@ -25,5 +26,14 @@
   "engines": {
     "node": ">=18"
   },
-  "prettier": "@redgent/prettier-config"
+  "prettier": "@redgent/prettier-config",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,mdx,html,css}": [
+      "prettier --write"
+    ]
+  }
 }
