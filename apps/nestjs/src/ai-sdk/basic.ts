@@ -19,6 +19,7 @@ export const TEST_PROMPTS: Record<string, ModelMessage> = {
             title: `link ${i}`,
             selftext: `Content of link ${i}`,
           })),
+          10,
         ),
       },
     ],

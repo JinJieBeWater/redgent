@@ -67,7 +67,7 @@ export const getResponseByPrompt = (
     return [
       {
         type: 'text',
-        text: `{"ids":[${ids.join(',')}]}`,
+        text: `[${ids.join(',')}]`,
       },
     ]
   }

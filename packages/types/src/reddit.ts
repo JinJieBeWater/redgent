@@ -92,6 +92,8 @@ export interface RedditLinkInfoUntrusted {
   score: number
   /** 评论总数 */
   num_comments: number
+  /** 赞数 */
+  ups: number
   /** 赞踩比（0.0 - 1.0） */
   upvote_ratio: number
   /** 跨帖子分享次数 */

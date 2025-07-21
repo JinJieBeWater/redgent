@@ -31,6 +31,8 @@ export const myProvider: Provider & {
     : customProvider({
         languageModels: {
           'chat-model': openRouter('deepseek/deepseek-chat-v3-0324'),
-          'structure-model': openRouter('x-ai/grok-2-1212'),
+          'structure-model': openRouter(
+            'google/gemini-2.5-flash-lite-preview-06-17',
+          ),
         },
       })

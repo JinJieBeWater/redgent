@@ -2,7 +2,7 @@ import type { Cache } from 'cache-manager'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { AnalysisTaskStatus } from '@prisma/client'
-import { generateObject } from 'ai'
+import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber } from 'rxjs'
 import z from 'zod'
 
@@ -116,7 +116,17 @@ export class AnalysisTaskExecutionService {
       taskConfig.subreddits,
     )
 
-    if (links.length === 0) {
+    // 过滤ups为0的帖子 和 评论数为0的帖子 和 为媒体帖子
+    let filteredLinks = links.filter(
+      (link) => link.ups > 0 || link.num_comments > 0 || !link.is_video,
+    )
+
+    // // 帖子数量大于30时，按照ups排序，取前30个
+    // if (filteredLinks.length > 30) {
+    //   filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 30)
+    // }
+
+    if (filteredLinks.length === 0) {
       subscriber.next({
         status: TaskStatus.TASK_CANCEL,
         message: '没有发现任何帖子，任务结束。',
@@ -124,11 +134,11 @@ export class AnalysisTaskExecutionService {
     } else {
       subscriber.next({
         status: TaskStatus.FETCH_COMPLETE,
-        message: `从 Reddit 抓取到 ${links.length} 个帖子`,
-        data: { count: links.length },
+        message: `从 Reddit 抓取到 ${filteredLinks.length} 个帖子`,
+        data: { count: filteredLinks.length },
       })
     }
-    return links
+    return filteredLinks
   }
 
   private async _filterLinks(
@@ -195,7 +205,7 @@ export class AnalysisTaskExecutionService {
       selftext: link.selftext,
     }))
 
-    const { ids: filteredLinkIds } = await this.selectMostRelevantLinks(
+    const filteredLinkIds = await this.selectMostRelevantLinks(
       taskConfig,
       linkInfoToSelect,
     )
@@ -215,6 +225,11 @@ export class AnalysisTaskExecutionService {
         data: {
           originalCount: links.length,
           uniqueCount: filteredLinks.length,
+          links: filteredLinks.map((link) => ({
+            id: link.id,
+            title: link.title,
+            selftext: link.selftext,
+          })),
         },
       })
     }
@@ -322,17 +337,28 @@ export class AnalysisTaskExecutionService {
     try {
       const { object: selectedLinkIds } = await generateObject({
         model: myProvider.languageModel('structure-model'),
-        schema: z.object({
-          ids: z
-            .array(z.string().describe('帖子id'))
-            .describe(`帖子的id数组，控制在${this.MAX_LINKS_PER_TASK}个以内`),
-        }),
-        prompt: selectMostRelevantLinksPrompt(taskConfig.prompt, links),
+        schema: z
+          .array(z.string().describe('帖子id'))
+          .describe(
+            `帖子的id数组，每个元素都是一个不重复的帖子id，控制在${this.MAX_LINKS_PER_TASK}个以内`,
+          ),
+        prompt: selectMostRelevantLinksPrompt(
+          taskConfig.prompt,
+          links,
+          this.MAX_LINKS_PER_TASK,
+        ),
       })
       return selectedLinkIds
     } catch (error) {
-      this.logger.error(error)
-      throw new Error('无法进行 AI 筛选，请稍后重试')
+      if (APICallError.isInstance(error) && error.responseBody) {
+        // Handle the API call error
+        const err = JSON.parse(error.responseBody)
+        this.logger.error(err)
+        throw new Error(err)
+      } else {
+        this.logger.error(error)
+        throw new Error('无法进行 AI 筛选，请稍后重试')
+      }
     }
   }
 

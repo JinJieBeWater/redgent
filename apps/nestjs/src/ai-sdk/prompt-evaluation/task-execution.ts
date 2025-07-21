@@ -48,7 +48,7 @@ async function evaluateTaskExecutionPrompt() {
       executionService.execute(taskConfig).pipe(
         tap({
           next: (progress) => {
-            console.log(`🔄 任务进度: ${progress.status} - ${progress.message}`)
+            console.log(`🔄 任务进度: ${JSON.stringify(progress, null, 2)}`)
           },
           error: (err) => {
             console.error('❌ 任务执行出错:', err)

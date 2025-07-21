@@ -150,6 +150,8 @@ export interface SelectCompleteProgress extends BaseProgress {
     originalCount: number
     /** 过滤后的新链接数 */
     uniqueCount: number
+    /** 筛选后的链接数组 */
+    links: { id: string; title: string; selftext: string | undefined }[]
   }
 }
 

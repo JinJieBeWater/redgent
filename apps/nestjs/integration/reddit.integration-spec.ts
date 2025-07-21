@@ -1,8 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
+import { Test, TestingModule } from '@nestjs/testing'
+
+import { RedditLinkInfoUntrusted, RedditSort } from '@redgent/types/reddit'
+
 import { AppModule } from '../src/app.module'
 import { RedditService } from '../src/reddit/reddit.service'
-import { RedditSort, RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
 // Helper to create a mock link
 const createMockLink = (
@@ -28,6 +30,7 @@ const createMockLink = (
   thumbnail: 'self',
   archived: false,
   locked: false,
+  ups: 100,
 })
 
 // Helper to create a mock API response
