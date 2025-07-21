@@ -53,14 +53,16 @@ describe('analysis-task (e2e)', () => {
     await app.init()
 
     // 确保测试任务不存在
-    await prismaService.task.delete({
+    const existingTask = await prismaService.task.findUnique({
       where: {
         id: mockTaskConfig.id,
       },
     })
-    await prismaService.task.create({
-      data: mockTaskConfig,
-    })
+    if (!existingTask) {
+      await prismaService.task.create({
+        data: mockTaskConfig,
+      })
+    }
   })
 
   afterAll(async () => {
