@@ -5,7 +5,7 @@
 /**
  * 代表一个具体的分析发现或要点。
  */
-export interface AnalysisFinding {
+export interface ReportContentFinding {
   /**
    * 发现的要点总结，类似小标题。
    * @example "市场对AI芯片的需求持续增长"
@@ -36,7 +36,7 @@ type Jsonifiable =
  * 代表整个 AI 生成的分析报告。
  * 这是 AI SDK `generateObject` 功能最终应该生成的对象结构。
  */
-export type AnalysisReportContent = Jsonifiable & {
+export type ReportContent = Jsonifiable & {
   /**
    * 报告的整体标题。
    */
@@ -48,13 +48,13 @@ export type AnalysisReportContent = Jsonifiable & {
   /**
    * 具体的、分点的分析发现列表。
    */
-  findings: AnalysisFinding[]
+  findings: ReportContentFinding[]
 }
 
 /**
  * 分析结果在数据库中的存储模型。
  */
-export interface AnalysisReportModel {
+export interface ReportModel {
   /** 结果的唯一标识符 */
   id: string
   /** 关联的任务ID */
@@ -62,5 +62,5 @@ export interface AnalysisReportModel {
   /** 创建时间 */
   createdAt: Date
   /** AI 生成的原始报告数据 */
-  content: AnalysisReportContent
+  content: ReportContent
 }

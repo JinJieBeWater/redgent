@@ -1,10 +1,10 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common'
 
-import { AnalysisReportService } from './analysis-report.service'
+import { ReportService } from './report.service'
 
 @Controller('analysis')
-export class AnalysisReportController {
-  constructor(private readonly analysisService: AnalysisReportService) {}
+export class ReportController {
+  constructor(private readonly analysisService: ReportService) {}
 
   /**
    * 根据任务ID获取其所有分析结果

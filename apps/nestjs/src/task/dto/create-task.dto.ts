@@ -1,4 +1,4 @@
-import { AnalysisTaskStatus } from '@prisma/client'
+import { TaskStatus as TaskStatusModel } from '@prisma/client'
 import {
   ArrayNotEmpty,
   IsArray,
@@ -9,7 +9,7 @@ import {
   IsString,
 } from 'class-validator'
 
-export class CreateAnalysisTaskDto {
+export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
   name!: string
@@ -40,7 +40,7 @@ export class CreateAnalysisTaskDto {
   @IsOptional()
   llmModel?: string
 
-  @IsEnum(AnalysisTaskStatus)
+  @IsEnum(TaskStatusModel)
   @IsOptional()
-  status?: AnalysisTaskStatus
+  status?: TaskStatusModel
 }

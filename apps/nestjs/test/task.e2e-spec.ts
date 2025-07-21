@@ -4,12 +4,12 @@ import { PrismaClient } from '@prisma/client'
 import { lastValueFrom, tap, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
-import { AnalysisReportContent } from '@redgent/types/analysis-report'
+import { ReportContent } from '@redgent/types/analysis-report'
 import { TaskConfig, TaskStatus } from '@redgent/types/analysis-task'
 
-import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
+import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'
-import { AppModule } from './../src/app.module'
+import { TaskExecutionService } from '../src/task-execution/task-execution.service'
 
 const mockTaskConfig: TaskConfig = {
   id: 'task-1',
@@ -25,7 +25,7 @@ const mockTaskConfig: TaskConfig = {
   llmModel: 'test-model',
 }
 
-const mockAnalysisReport: AnalysisReportContent = {
+const mockAnalysisReport: ReportContent = {
   title: '测试分析报告',
   overallSummary: '这是一个测试分析报告的总结',
   findings: [
@@ -39,7 +39,7 @@ const mockAnalysisReport: AnalysisReportContent = {
 
 describe('analysis-task (e2e)', () => {
   let app: INestApplication<App>
-  let analysisTaskExecutionService: AnalysisTaskExecutionService
+  let analysisTaskExecutionService: TaskExecutionService
   let prismaService: PrismaClient
 
   beforeAll(async () => {
@@ -48,19 +48,17 @@ describe('analysis-task (e2e)', () => {
     }).compile()
 
     app = moduleFixture.createNestApplication()
-    analysisTaskExecutionService = moduleFixture.get(
-      AnalysisTaskExecutionService,
-    )
+    analysisTaskExecutionService = moduleFixture.get(TaskExecutionService)
     prismaService = moduleFixture.get(PrismaService)
     await app.init()
 
     // 确保测试任务不存在
-    await prismaService.analysisTask.delete({
+    await prismaService.task.delete({
       where: {
         id: mockTaskConfig.id,
       },
     })
-    await prismaService.analysisTask.create({
+    await prismaService.task.create({
       data: mockTaskConfig,
     })
   })

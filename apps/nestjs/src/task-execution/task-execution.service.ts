@@ -1,12 +1,12 @@
 import type { Cache } from 'cache-manager'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { AnalysisTaskStatus } from '@prisma/client'
+import { TaskStatus as TaskStatusModel } from '@prisma/client'
 import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber } from 'rxjs'
 import z from 'zod'
 
-import { AnalysisReportContent } from '@redgent/types/analysis-report'
+import { ReportContent } from '@redgent/types/analysis-report'
 import {
   TaskConfig,
   TaskProgress,
@@ -16,20 +16,20 @@ import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
 import { selectMostRelevantLinksPrompt } from '../ai-sdk/prompts'
 import { myProvider } from '../ai-sdk/provider'
-import { AnalysisReportService } from '../analysis-report/analysis-report.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { CommentNode, RedditService } from '../reddit/reddit.service'
+import { ReportService } from '../report/report.service'
 
 @Injectable()
-export class AnalysisTaskExecutionService {
+export class TaskExecutionService {
   private readonly CACHE_KEY_PREFIX_POST = 'redgent:link:'
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
-  private readonly logger = new Logger(AnalysisTaskExecutionService.name)
+  private readonly logger = new Logger(TaskExecutionService.name)
 
   constructor(
     private readonly redditService: RedditService,
-    private readonly analysisService: AnalysisReportService,
+    private readonly analysisService: ReportService,
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -91,9 +91,9 @@ export class AnalysisTaskExecutionService {
     taskConfig: TaskConfig,
     subscriber: Subscriber<TaskProgress>,
   ) {
-    await this.prismaService.analysisTask.update({
+    await this.prismaService.task.update({
       where: { id: taskConfig.id },
-      data: { status: AnalysisTaskStatus.running },
+      data: { status: TaskStatusModel.running },
     })
     subscriber.next({
       status: TaskStatus.TASK_START,
@@ -281,18 +281,18 @@ export class AnalysisTaskExecutionService {
 
   private async _saveResults(
     taskConfig: TaskConfig,
-    analysisResult: AnalysisReportContent,
+    analysisResult: ReportContent,
     startTime: number,
     subscriber: Subscriber<TaskProgress>,
   ) {
     const executionDuration = performance.now() - startTime
 
     const [_, taskInfo] = await Promise.all([
-      this.prismaService.analysisTask.update({
+      this.prismaService.task.update({
         where: { id: taskConfig.id },
         data: {
           lastExecutedAt: new Date(),
-          status: AnalysisTaskStatus.active,
+          status: TaskStatusModel.active,
         },
       }),
       this.analysisService.create({
@@ -315,12 +315,12 @@ export class AnalysisTaskExecutionService {
     subscriber: Subscriber<TaskProgress>,
   ) {
     this.logger.error(error)
-    await this.prismaService.analysisTask.update({
+    await this.prismaService.task.update({
       where: { id: taskConfig.id },
       data: {
         lastFailureAt: new Date(),
         lastErrorMessage: (error as Error).message,
-        status: AnalysisTaskStatus.active,
+        status: TaskStatusModel.active,
       },
     })
 
@@ -368,10 +368,10 @@ export class AnalysisTaskExecutionService {
       content: RedditLinkInfoUntrusted
       comment: CommentNode[]
     }[],
-  ): Promise<AnalysisReportContent> {
+  ): Promise<ReportContent> {
     // TODO: 实现分析逻辑
     return {
       text: '分析结果',
-    } as unknown as AnalysisReportContent
+    } as unknown as ReportContent
   }
 }

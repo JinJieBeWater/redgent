@@ -1,5 +1,5 @@
 echo "🚀 Running lint-staged..."
-npx lint-staged
+pnpm dlx lint-staged
 
 echo "📝 Type checking..."
 pnpm typecheck

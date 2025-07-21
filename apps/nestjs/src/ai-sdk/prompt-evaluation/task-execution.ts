@@ -3,9 +3,9 @@ import { lastValueFrom, tap } from 'rxjs'
 
 import { TaskConfig } from '@redgent/types/analysis-task'
 
-import { AnalysisTaskExecutionService } from '../../analysis-task/analysis-task-execution.service'
 import { AppModule } from '../../app.module'
 import { PrismaService } from '../../prisma/prisma.service'
+import { TaskExecutionService } from '../../task-execution/task-execution.service'
 
 /**
  * 该脚本用于在真实环境中评估和调试 `selectMostRelevantLinks` 方法的 AI 提示词。
@@ -16,16 +16,15 @@ import { PrismaService } from '../../prisma/prisma.service'
  *  npx ts-node src\ai-sdk\prompt-evaluation\task-execution.ts
  */
 async function evaluateTaskExecutionPrompt() {
-  // 1. 创建一个独立的 NestJS 应用上下文
+  // 创建一个独立的 NestJS 应用上下文
   const app = await NestFactory.createApplicationContext(AppModule)
 
-  // 2. 从容器中获取服务实例
-  const executionService = app.get(AnalysisTaskExecutionService)
+  // 从容器中获取服务实例
+  const executionService = app.get(TaskExecutionService)
   const prismaService = app.get(PrismaService)
   console.log('🚀 服务已加载，开始准备测试数据...')
 
-  // 3. 准备用于测试的模拟数据
-  // 您可以修改这里的 prompt 和 links 来测试不同的场景
+  // 准备用于测试的模拟数据
   const mockTaskConfig: TaskConfig = {
     id: 'task-1',
     name: 'React 生态',
@@ -38,8 +37,15 @@ async function evaluateTaskExecutionPrompt() {
     status: 'active',
     enableFiltering: true,
   }
+
+  // 确保测试任务不存在
+  await prismaService.task.delete({
+    where: {
+      id: mockTaskConfig.id,
+    },
+  })
   // 插入任务
-  const taskConfig = await prismaService.analysisTask.create({
+  const taskConfig = await prismaService.task.create({
     data: mockTaskConfig,
   })
 
@@ -62,7 +68,7 @@ async function evaluateTaskExecutionPrompt() {
   } catch (error) {
     console.error('❌ 执行过程中发生错误:', error)
   } finally {
-    await prismaService.analysisTask.delete({
+    await prismaService.task.delete({
       where: {
         id: taskConfig.id,
       },

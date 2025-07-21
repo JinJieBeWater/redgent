@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { PrismaService } from '../prisma/prisma.service'
-import { AnalysisReportService } from './analysis-report.service'
+import { ReportService } from './report.service'
 
-describe('AnalysisReportService', () => {
-  let service: AnalysisReportService
+describe('ReportService', () => {
+  let service: ReportService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AnalysisReportService, PrismaService],
+      providers: [ReportService, PrismaService],
     }).compile()
 
-    service = module.get<AnalysisReportService>(AnalysisReportService)
+    service = module.get<ReportService>(ReportService)
   })
 
   it('应该被正确定义', () => {

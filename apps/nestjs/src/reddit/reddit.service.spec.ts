@@ -50,7 +50,7 @@ describe('RedditService', () => {
     expect(service).toBeDefined()
   })
 
-  describe('getRedditToken', () => {
+  describe(RedditService.prototype.getRedditToken, () => {
     it('应该返回访问令牌', async () => {
       const mockResponse: AxiosResponse<RedditAccessTokenResponse> = {
         data: {
@@ -71,7 +71,7 @@ describe('RedditService', () => {
     })
   })
 
-  describe('extractCommentNodes', () => {
+  describe(RedditService.prototype.extractCommentNodes, () => {
     it('应该从扁平评论列表中提取评论内容和作者', () => {
       const comments: RedditCommentInfoUntrusted[] = [
         {
