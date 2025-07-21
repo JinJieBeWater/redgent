@@ -3,7 +3,7 @@ import { Agent } from '@mastra/core/agent'
 import { PinoLogger } from '@mastra/loggers'
 
 import { weatherAgentConfig } from './agents/weather-agent'
-import { memory, storage } from './storage'
+import { memory } from './storage'
 import { weatherWorkflow } from './workflows/weather-workflow'
 
 export const mastra: Mastra = new Mastra({
@@ -18,5 +18,5 @@ export const mastra: Mastra = new Mastra({
       memory: memory,
     }),
   },
-  storage: storage,
+  // storage: storage,
 })

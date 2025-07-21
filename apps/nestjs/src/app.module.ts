@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
 
-import { AnalysisReportModule } from './analysis-report/analysis-report.module'
-import { AnalysisTaskModule } from './analysis-task/analysis-task.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { PrismaModule } from './prisma/prisma.module'
 import { RedditModule } from './reddit/reddit.module'
+import { ReportModule } from './report/report'
+import { TaskExecutionModule } from './task-execution/task-execution.module'
 
 @Module({
   imports: [
@@ -33,9 +33,9 @@ import { RedditModule } from './reddit/reddit.module'
       },
     }),
     RedditModule,
-    AnalysisTaskModule,
+    TaskExecutionModule,
     PrismaModule,
-    AnalysisReportModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

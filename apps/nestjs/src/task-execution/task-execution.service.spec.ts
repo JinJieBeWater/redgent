@@ -10,11 +10,11 @@ import {
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
-import { AnalysisReportService } from '../analysis-report/analysis-report.service'
 import { createMockContext } from '../prisma/context'
 import { PrismaService } from '../prisma/prisma.service'
 import { CommentNode, RedditService } from '../reddit/reddit.service'
-import { AnalysisTaskExecutionService } from './analysis-task-execution.service'
+import { ReportService } from '../report/report.service'
+import { TaskExecutionService } from './task-execution.service'
 
 // Mock data for testing
 const mockTaskConfig: TaskConfig = {
@@ -91,16 +91,16 @@ const mockCompleteLinkData: {
   },
 ]
 
-describe('AnalysisTaskExecutionService', () => {
-  let service: AnalysisTaskExecutionService
+describe(TaskExecutionService.name, () => {
+  let service: TaskExecutionService
   let redditService: jest.Mocked<RedditService>
   let cacheManager: jest.Mocked<Cache>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AnalysisTaskExecutionService,
-        AnalysisReportService,
+        TaskExecutionService,
+        ReportService,
         {
           provide: PrismaService,
           useValue: createMockContext().prisma,
@@ -128,7 +128,7 @@ describe('AnalysisTaskExecutionService', () => {
       ],
     }).compile()
 
-    service = module.get(AnalysisTaskExecutionService)
+    service = module.get(TaskExecutionService)
     redditService = module.get(RedditService)
     cacheManager = module.get(CACHE_MANAGER)
   })
@@ -137,7 +137,7 @@ describe('AnalysisTaskExecutionService', () => {
     expect(service).toBeDefined()
   })
 
-  describe('execute', () => {
+  describe(TaskExecutionService.prototype.execute.name, () => {
     it('应该在不过滤的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: false }
 

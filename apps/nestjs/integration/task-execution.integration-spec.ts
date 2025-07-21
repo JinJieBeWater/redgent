@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
 
-import { AnalysisReportContent } from '@redgent/types/analysis-report'
+import { ReportContent } from '@redgent/types/analysis-report'
 import {
   TaskCancelProgress,
   TaskCompleteProgress,
@@ -13,13 +13,13 @@ import {
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
 
-import { AnalysisReportService } from '../src/analysis-report/analysis-report.service'
-import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
 import { CommentNode, RedditService } from '../src/reddit/reddit.service'
+import { ReportService } from '../src/report/report.service'
+import { TaskExecutionService } from '../src/task-execution/task-execution.service'
 
-const mockAnalysisReport: AnalysisReportContent = {
+const mockReport: ReportContent = {
   title: '测试分析报告',
   overallSummary: '这是一个测试分析报告的总结',
   findings: [
@@ -120,11 +120,10 @@ const mockCompleteLinkData: {
   },
 ]
 
-describe('AnalysisTaskExecutionService (集成测试)', () => {
+describe(TaskExecutionService.name, () => {
   let app: INestApplication
-  let analysisTaskExecutionService: AnalysisTaskExecutionService
+  let taskExecutionService: TaskExecutionService
   let cacheManager: Cache
-  let mockRedditService: RedditService
 
   beforeEach(async () => {
     const mockRedditServiceProvider = {
@@ -151,8 +150,8 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
         }),
       ],
       providers: [
-        AnalysisTaskExecutionService,
-        AnalysisReportService,
+        TaskExecutionService,
+        ReportService,
         mockRedditServiceProvider,
         {
           provide: PrismaService,
@@ -164,12 +163,9 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
     app = moduleFixture.createNestApplication()
     await app.init()
 
-    analysisTaskExecutionService =
-      moduleFixture.get<AnalysisTaskExecutionService>(
-        AnalysisTaskExecutionService,
-      )
+    taskExecutionService =
+      moduleFixture.get<TaskExecutionService>(TaskExecutionService)
     cacheManager = moduleFixture.get<Cache>(CACHE_MANAGER)
-    mockRedditService = moduleFixture.get<RedditService>(RedditService)
 
     // 确保每个测试开始前缓存是干净的
     await cacheManager.clear()
@@ -181,12 +177,9 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
 
   it('应该获取链接，不过滤（全部为新链接），并缓存它们', async () => {
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
-    jest
-      .spyOn(analysisTaskExecutionService, 'analyze')
-      .mockResolvedValue(mockAnalysisReport)
+    jest.spyOn(taskExecutionService, 'analyze').mockResolvedValue(mockReport)
 
-    const progressObservable =
-      analysisTaskExecutionService.execute(mockTaskConfig)
+    const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
         // tap((data) => console.log(data)),
@@ -223,8 +216,7 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
 
-    const progressObservable =
-      analysisTaskExecutionService.execute(mockTaskConfig)
+    const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
         // tap((data) => console.log(data)),
@@ -267,10 +259,9 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
     ])
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
-    jest.spyOn(analysisTaskExecutionService, 'analyze')
+    jest.spyOn(taskExecutionService, 'analyze')
 
-    const progressObservable =
-      analysisTaskExecutionService.execute(mockTaskConfig)
+    const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
         // tap((data) => console.log(data)),
@@ -290,6 +281,6 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
       (p) => p.status === TaskStatus.ANALYZE_START,
     )
     expect(analyzeStart).toBeUndefined()
-    expect(analysisTaskExecutionService.analyze).not.toHaveBeenCalled()
+    expect(taskExecutionService.analyze).not.toHaveBeenCalled()
   })
 })

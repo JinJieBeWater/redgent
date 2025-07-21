@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
-import { CreateAnalysisReportDto } from './dto/create-analysis-report.dto'
+import { CreateReportDto } from './dto/create-report.dto'
 
 @Injectable()
-export class AnalysisReportService {
+export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
@@ -13,8 +13,8 @@ export class AnalysisReportService {
    * @param createAnalysisReportDto 包含任务ID和分析内容的DTO
    * @returns 创建后的分析结果
    */
-  create(createAnalysisReportDto: CreateAnalysisReportDto) {
-    return this.prisma.analysisReport.create({
+  create(createAnalysisReportDto: CreateReportDto) {
+    return this.prisma.report.create({
       data: createAnalysisReportDto,
     })
   }
@@ -25,7 +25,7 @@ export class AnalysisReportService {
    * @returns 分析结果列表
    */
   findAllByTaskId(taskId: string) {
-    return this.prisma.analysisReport.findMany({
+    return this.prisma.report.findMany({
       where: {
         taskId,
       },
