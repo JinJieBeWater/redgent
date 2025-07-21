@@ -116,7 +116,7 @@ export class AnalysisTaskExecutionService {
     )
 
     // 过滤ups为0的帖子 和 评论数为0的帖子 和 为媒体帖子
-    let filteredLinks = links.filter(
+    const filteredLinks = links.filter(
       (link) => link.ups > 0 || link.num_comments > 0 || !link.is_video,
     )
 

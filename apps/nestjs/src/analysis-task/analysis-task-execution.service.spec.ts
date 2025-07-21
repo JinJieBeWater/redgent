@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, tap, toArray } from 'rxjs'
 
-import { AnalysisReportContent } from '@redgent/types/analysis-report'
 import {
   TaskCompleteProgress,
   TaskConfig,
@@ -36,18 +35,6 @@ const mockRedditLinks: RedditLinkInfoUntrusted[] = [
   { id: 'link-1', title: 'Test Post 1' } as RedditLinkInfoUntrusted,
   { id: 'link-2', title: 'Test Post 2' } as RedditLinkInfoUntrusted,
 ]
-
-const mockAnalysisReport: AnalysisReportContent = {
-  title: '测试分析报告',
-  overallSummary: '这是一个测试分析报告的总结',
-  findings: [
-    {
-      point: '测试要点1',
-      elaboration: '这是要点1的详细阐述',
-      supportingPostIds: ['link-1'],
-    },
-  ],
-}
 
 const mockCompleteLinkData: {
   content: RedditLinkInfoUntrusted
