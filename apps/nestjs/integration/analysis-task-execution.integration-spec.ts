@@ -1,101 +1,114 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { INestApplication } from '@nestjs/common'
-import { Cache } from 'cache-manager'
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
-import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
-import { CommentNode, RedditService } from '../src/reddit/reddit.service'
-import { AiSdkService } from '../src/ai-sdk/ai-sdk.service'
+import { INestApplication } from '@nestjs/common'
+import { Test, TestingModule } from '@nestjs/testing'
+import { Cache } from 'cache-manager'
+import { lastValueFrom, toArray } from 'rxjs'
+
+import { AnalysisReportContent } from '@redgent/types/analysis-report'
 import {
   TaskCompleteProgress,
   TaskConfig,
   TaskStatus,
 } from '@redgent/types/analysis-task'
 import { RedditLinkInfoUntrusted } from '@redgent/types/reddit'
-import { lastValueFrom, toArray } from 'rxjs'
+
 import { AnalysisReportService } from '../src/analysis-report/analysis-report.service'
+import { AnalysisTaskExecutionService } from '../src/analysis-task/analysis-task-execution.service'
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
+import { CommentNode, RedditService } from '../src/reddit/reddit.service'
+
+const mockAnalysisReport: AnalysisReportContent = {
+  title: '测试分析报告',
+  overallSummary: '这是一个测试分析报告的总结',
+  findings: [
+    {
+      point: '测试要点1',
+      elaboration: '这是要点1的详细阐述',
+      supportingPostIds: ['link-1'],
+    },
+  ],
+}
+
+const mockRedditLinks: RedditLinkInfoUntrusted[] = [
+  { id: 'link-1', title: 'Test Post 1' } as RedditLinkInfoUntrusted,
+  { id: 'link-2', title: 'Test Post 2' } as RedditLinkInfoUntrusted,
+  { id: 'link-3', title: 'Test Post 3' } as RedditLinkInfoUntrusted,
+]
+
+const mockTaskConfig: TaskConfig = {
+  id: 'task-1',
+  name: 'Test Task',
+  cron: '0 0 * * *',
+  prompt: 'test prompt',
+  keywords: ['test'],
+  subreddits: ['test'],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  status: 'active',
+  enableFiltering: true,
+  llmModel: 'test-model',
+}
+const mockCompleteLinkData: {
+  content: RedditLinkInfoUntrusted
+  comment: CommentNode[]
+}[] = [
+  {
+    content: {
+      id: 'link-1',
+      title: 'Test Post 1',
+    } as RedditLinkInfoUntrusted,
+    comment: [
+      {
+        author: 'user1',
+        body: 'This is comment 1',
+        replies: [
+          {
+            author: 'user1_1',
+            body: 'Child comment 1.1',
+            replies: [
+              {
+                author: 'user1_1_1',
+                body: 'Grandchild comment 1.1.1',
+                replies: [],
+              },
+            ],
+          },
+          {
+            author: 'user1_2',
+            body: 'Child comment 1.2',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    content: {
+      id: 'link-2',
+      title: 'Test Post 2',
+    } as RedditLinkInfoUntrusted,
+    comment: [],
+  },
+  {
+    content: {
+      id: 'link-3',
+      title: 'Test Post 3',
+    } as RedditLinkInfoUntrusted,
+    comment: [
+      {
+        author: 'user3',
+        body: 'This is comment 3',
+        replies: [],
+      },
+    ],
+  },
+]
 
 describe('AnalysisTaskExecutionService (集成测试)', () => {
   let app: INestApplication
-  let taskExecutionService: AnalysisTaskExecutionService
+  let analysisTaskExecutionService: AnalysisTaskExecutionService
   let cacheManager: Cache
   let mockRedditService: RedditService
-  let mockAiSdkService: AiSdkService
-
-  const mockRedditLinks: RedditLinkInfoUntrusted[] = [
-    { id: 'link-1', title: 'Test Post 1' } as RedditLinkInfoUntrusted,
-    { id: 'link-2', title: 'Test Post 2' } as RedditLinkInfoUntrusted,
-    { id: 'link-3', title: 'Test Post 3' } as RedditLinkInfoUntrusted,
-  ]
-
-  const mockTaskConfig: TaskConfig = {
-    id: 'task-1',
-    name: 'Test Task',
-    cron: '0 0 * * *',
-    prompt: 'test prompt',
-    keywords: ['test'],
-    subreddits: ['test'],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-    enableFiltering: true,
-    llmModel: 'test-model',
-  }
-  const mockCompleteLinkData: {
-    content: RedditLinkInfoUntrusted
-    comment: CommentNode[]
-  }[] = [
-    {
-      content: {
-        id: 'link-1',
-        title: 'Test Post 1',
-      } as RedditLinkInfoUntrusted,
-      comment: [
-        {
-          author: 'user1',
-          body: 'This is comment 1',
-          replies: [
-            {
-              author: 'user1_1',
-              body: 'Child comment 1.1',
-              replies: [
-                {
-                  author: 'user1_1_1',
-                  body: 'Grandchild comment 1.1.1',
-                  replies: [],
-                },
-              ],
-            },
-            {
-              author: 'user1_2',
-              body: 'Child comment 1.2',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      content: {
-        id: 'link-2',
-        title: 'Test Post 2',
-      } as RedditLinkInfoUntrusted,
-      comment: [],
-    },
-    {
-      content: {
-        id: 'link-3',
-        title: 'Test Post 3',
-      } as RedditLinkInfoUntrusted,
-      comment: [
-        {
-          author: 'user3',
-          body: 'This is comment 3',
-          replies: [],
-        },
-      ],
-    },
-  ]
 
   beforeEach(async () => {
     const mockRedditServiceProvider = {
@@ -105,13 +118,6 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
           .fn()
           .mockResolvedValue(mockRedditLinks),
         getCommentsByLinkIds: jest.fn().mockResolvedValue(mockCompleteLinkData),
-      },
-    }
-
-    const mockAiSdkServiceProvider = {
-      provide: AiSdkService,
-      useValue: {
-        analyze: jest.fn().mockResolvedValue('AI Analysis Result'),
       },
     }
 
@@ -126,7 +132,6 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
         AnalysisTaskExecutionService,
         AnalysisReportService,
         mockRedditServiceProvider,
-        mockAiSdkServiceProvider,
         {
           provide: PrismaService,
           useValue: createMockContext().prisma,
@@ -137,12 +142,12 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
     app = moduleFixture.createNestApplication()
     await app.init()
 
-    taskExecutionService = moduleFixture.get<AnalysisTaskExecutionService>(
-      AnalysisTaskExecutionService,
-    )
+    analysisTaskExecutionService =
+      moduleFixture.get<AnalysisTaskExecutionService>(
+        AnalysisTaskExecutionService,
+      )
     cacheManager = moduleFixture.get<Cache>(CACHE_MANAGER)
     mockRedditService = moduleFixture.get<RedditService>(RedditService)
-    mockAiSdkService = moduleFixture.get<AiSdkService>(AiSdkService)
 
     // 确保每个测试开始前缓存是干净的
     await cacheManager.clear()
@@ -154,8 +159,12 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
 
   it('应该获取链接，不过滤（全部为新链接），并缓存它们', async () => {
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
+    jest
+      .spyOn(analysisTaskExecutionService, 'analyze')
+      .mockResolvedValue(mockAnalysisReport)
 
-    const progressObservable = taskExecutionService.execute(mockTaskConfig)
+    const progressObservable =
+      analysisTaskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(toArray()),
     )
@@ -184,7 +193,7 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
     expect(msetArgs[0].key).toContain('redgent:link:link-1')
 
     // 4. 验证 AI 服务被调用
-    expect(mockAiSdkService.analyze).toHaveBeenCalledWith(
+    expect(analysisTaskExecutionService.analyze).toHaveBeenCalledWith(
       mockTaskConfig,
       mockCompleteLinkData,
     )
@@ -202,7 +211,8 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
 
-    const progressObservable = taskExecutionService.execute(mockTaskConfig)
+    const progressObservable =
+      analysisTaskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(toArray()),
     )
@@ -242,8 +252,12 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
     ])
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
+    jest
+      .spyOn(analysisTaskExecutionService, 'analyze')
+      .mockResolvedValue(mockAnalysisReport)
 
-    const progressObservable = taskExecutionService.execute(mockTaskConfig)
+    const progressObservable =
+      analysisTaskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(toArray()),
     )
@@ -263,7 +277,7 @@ describe('AnalysisTaskExecutionService (集成测试)', () => {
       (p) => p.status === TaskStatus.ANALYZE_START,
     )
     expect(analyzeStart).toBeUndefined()
-    expect(mockAiSdkService.analyze).not.toHaveBeenCalled()
+    expect(analysisTaskExecutionService.analyze).not.toHaveBeenCalled()
 
     // 4. 验证任务因为没有新帖子而提前取消
     const cancelEvent = progressEvents.find(

@@ -36,7 +36,7 @@ type Jsonifiable =
  * 代表整个 AI 生成的分析报告。
  * 这是 AI SDK `generateObject` 功能最终应该生成的对象结构。
  */
-export type AnalysisReport = Jsonifiable & {
+export type AnalysisReportContent = Jsonifiable & {
   /**
    * 报告的整体标题。
    */
@@ -62,5 +62,5 @@ export interface AnalysisReportModel {
   /** 创建时间 */
   createdAt: Date
   /** AI 生成的原始报告数据 */
-  content: AnalysisReport
+  content: AnalysisReportContent
 }
