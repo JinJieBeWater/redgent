@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Task {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   name String
 
@@ -38,7 +38,7 @@ model Task {
 
   lastErrorMessage String?
 
-  results Report[]
+  reports Report[]
 
   createdAt DateTime @default(now())
 
