@@ -2,8 +2,22 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { ScheduleType, Task, TaskStatus } from '@prisma/client'
 import { CronJob } from 'cron'
+import z from 'zod'
 
 import { PrismaService } from '../prisma/prisma.service'
+
+export const createTaskSchema = z.object({
+  name: z.string().describe('简短任务名称'),
+  prompt: z.string().describe('用户原封不动的输入'),
+  keywords: z.array(z.string()).describe('关键词列表'),
+  subreddits: z.array(z.string()).describe('Reddit 子版块列表'),
+  scheduleType: z.enum(ScheduleType).describe('定时类型'),
+  scheduleExpression: z.string().describe('Cron表达式或间隔时间'),
+  status: z.enum([TaskStatus.active, TaskStatus.paused]).describe('任务状态'),
+  enableFiltering: z
+    .boolean()
+    .describe('是否启用过滤，3天内处理过的帖子不再处理'),
+})
 
 @Injectable()
 export class TaskScheduleService implements OnModuleInit {
@@ -154,5 +168,32 @@ export class TaskScheduleService implements OnModuleInit {
     } catch (e) {
       this.logger.warn(`无法移除任务 ${taskName}，可能不存在或已被删除`, e)
     }
+  }
+
+  async listAll() {
+    const tasks = await this.prismaService.task.findMany()
+    return tasks
+  }
+
+  async createTask(task: z.infer<typeof createTaskSchema>) {
+    const createdTask = await this.prismaService.task.create({
+      data: task,
+    })
+    this.registerTask(createdTask)
+    return createdTask
+  }
+
+  async updateTask(
+    task: Partial<z.infer<typeof createTaskSchema>> & Pick<Task, 'id'>,
+  ) {
+    const updatedTask = await this.prismaService.task.update({
+      where: { id: task.id },
+      data: task,
+    })
+    this.removeTask(`${task.scheduleType}:${task.name}:${task.id}`)
+    if (task.status !== TaskStatus.paused) {
+      this.registerTask(updatedTask)
+    }
+    return updatedTask
   }
 }

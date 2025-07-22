@@ -22,16 +22,11 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config ./integration/jest-integration.json",
     "repl": "npm run start -- --entryFile repl",
-    "mastra": "mastra dev",
     "typecheck": "tsc --noEmit",
     "task-execution": "ts-node src/ai-sdk/prompt-evaluation/task-execution.ts"
   },
   "dependencies": {
     "@ai-sdk/provider": "^2.0.0-beta.1",
-    "@mastra/core": "0.0.0-ai-v5-20250718021026",
-    "@mastra/loggers": "^0.10.3",
-    "@mastra/memory": "0.0.0-ai-v5-20250718021026",
-    "@mastra/pg": "^0.12.3",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -50,7 +45,6 @@
     "cron": "4.3.0",
     "https-proxy-agent": "^7.0.6",
     "joi": "^17.13.3",
-    "mastra": "0.0.0-ai-v5-20250718021026",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.0.5"
