@@ -301,7 +301,8 @@ export function createMockTaskConfig(
   return {
     id: 'task-1',
     name: 'React 生态',
-    cron: '0 0 * * *',
+    scheduleType: 'cron',
+    scheduleExpression: '0 0 * * *',
     prompt: '每天早上6点抓取reactjs生态圈的最新动态',
     keywords: ['react', 'reactjs'],
     subreddits: ['react', 'reactjs'],

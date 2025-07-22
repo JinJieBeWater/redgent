@@ -97,3 +97,47 @@ Redgent 是基于 Turborepo 的 monorepo 项目，包含以下应用：
 - ESLint + Prettier（代码规范）
 - Husky + lint-staged（Git hooks）
 - 共享的 TypeScript/ESLint/Prettier 配置包
+
+## 功能开发模式 (Feature Development Model)
+
+为了确保开发过程的清晰、高效和一致性，所有新功能的开发都应遵循以下“设计优先”的模式。
+
+---
+
+## 第一阶段：设计 (Design Phase)
+
+在编写任何功能代码之前，必须先完成详细的设计。
+
+1.  **需求分析 (Requirement Analysis)**
+    - 与产品或需求方充分沟通，深入理解功能目标、用户场景和验收标准。
+
+2.  **技术方案设计 (Technical Design)**
+    - 分析现有代码库、架构和技术栈，确保新功能与之兼容和协调。
+    - 确定实现该功能所需的核心技术、关键依赖库或框架。
+    - 设计数据模型（如数据库表结构、API 数据契约等）。
+    - 规划模块结构、类和函数的职责。
+
+3.  **编写设计文档 (Write Design Document)**
+    - 将技术方案编写成一个清晰的 Markdown (`.md`) 文件。
+    - **存储位置**: 设计文档应存放在对应应用或包的 `designs/` 目录下（例如 `apps/nestjs/designs/`）。
+    - **文档内容应至少包含**:
+      - **目标 (Goal)**: 清晰描述本功能要达成的最终目标。
+      - **核心依赖 (Core Dependencies)**: 列出并说明关键的第三方库或内部模块。
+      - **数据模型 (Data Model)**: 使用代码块展示 Prisma Schema、TypeScript Interface 或其他数据结构定义。
+      - **实现步骤 (Implementation Plan)**: 提供一个分步的、可执行的开发路线图。
+      - **代码/API 结构 (Code/API Structure)**: 给出核心伪代码、函数签名或 API 端点定义。
+
+## 第二阶段：执行 (Implementation Phase)
+
+在设计文档获得确认后，开始编码实现。
+
+1.  **编码 (Coding)**
+    - 严格遵循设计文档中的规划和技术方案进行编码。
+    - 保持代码风格与项目现有风格一致。
+
+2.  **测试 (Testing)**
+    - 编写单元测试和/或集成测试，确保代码的正确性和健壮性。
+    - 测试用例应覆盖主要逻辑、边界条件和异常情况。
+
+3.  **验证 (Verification)**
+    - 在本地环境中运行并测试完整的功能，确保其符合设计文档和初始需求。

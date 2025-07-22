@@ -1,4 +1,4 @@
-import { TaskStatus as TaskStatusModel } from '@prisma/client'
+import { ScheduleType, TaskStatus as TaskStatusModel } from '@prisma/client'
 import {
   ArrayNotEmpty,
   IsArray,
@@ -14,9 +14,13 @@ export class CreateTaskDto {
   @IsNotEmpty()
   name!: string
 
+  @IsEnum(ScheduleType)
+  @IsNotEmpty()
+  scheduleType!: ScheduleType
+
   @IsString()
   @IsNotEmpty()
-  cron!: string
+  scheduleExpression!: string
 
   @IsString()
   @IsNotEmpty()
@@ -35,10 +39,6 @@ export class CreateTaskDto {
   @IsBoolean()
   @IsOptional()
   enableFiltering?: boolean
-
-  @IsString()
-  @IsOptional()
-  llmModel?: string
 
   @IsEnum(TaskStatusModel)
   @IsOptional()
