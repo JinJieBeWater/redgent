@@ -8,6 +8,7 @@ import { AppService } from './app.service'
 import { PrismaModule } from './prisma/prisma.module'
 import { RedditModule } from './reddit/reddit.module'
 import { ReportModule } from './report/report'
+import { TaskAgentModule } from './task-agent/task-agent.module'
 import { TaskExecutionModule } from './task-execution/task-execution.module'
 import { TaskScheduleModule } from './task-schedule/task-schedule.module'
 
@@ -38,6 +39,7 @@ import { TaskScheduleModule } from './task-schedule/task-schedule.module'
     PrismaModule,
     ReportModule,
     TaskScheduleModule,
+    TaskAgentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
