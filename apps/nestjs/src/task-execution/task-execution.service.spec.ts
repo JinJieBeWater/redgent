@@ -146,8 +146,6 @@ describe(TaskExecutionService.name, () => {
       // Mock mget to return all links as cached
       cacheManager.mget.mockResolvedValue(mockRedditLinks.map(() => 1))
 
-      jest.spyOn(service, 'analyze')
-
       const progressObservable = service.execute(taskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
@@ -160,14 +158,11 @@ describe(TaskExecutionService.name, () => {
         TaskStatus.FILTER_START,
         TaskStatus.TASK_CANCEL,
       ])
-      expect(service.analyze).not.toHaveBeenCalled()
       expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
     })
 
     it('应该在从 Reddit 获取不到链接时取消任务', async () => {
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue([])
-
-      jest.spyOn(service, 'analyze')
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -179,7 +174,6 @@ describe(TaskExecutionService.name, () => {
         TaskStatus.FETCH_START,
         TaskStatus.TASK_CANCEL,
       ])
-      expect(service.analyze).not.toHaveBeenCalled()
       expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
     })
 
@@ -188,22 +182,6 @@ describe(TaskExecutionService.name, () => {
       redditService.getHotLinksByQueriesAndSubreddits.mockRejectedValue(
         new Error(errorMessage),
       )
-
-      const progressObservable = service.execute(mockTaskConfig)
-
-      await expect(
-        lastValueFrom(progressObservable.pipe(toArray())),
-      ).rejects.toMatchObject({
-        status: TaskStatus.TASK_ERROR,
-        message: `任务 "${mockTaskConfig.name}" 执行失败`,
-      })
-    })
-
-    it('应该正确处理 AiSdkService 的错误', async () => {
-      const errorMessage = '测试预期的报错 AI analysis failed'
-
-      cacheManager.mget.mockResolvedValue([undefined, undefined]) // All links are new
-      jest.spyOn(service, 'analyze').mockRejectedValue(new Error(errorMessage))
 
       const progressObservable = service.execute(mockTaskConfig)
 

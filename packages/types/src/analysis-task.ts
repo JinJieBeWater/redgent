@@ -1,11 +1,20 @@
+export const ScheduleType = {
+  cron: 'cron',
+  interval: 'interval',
+} as const
+
+export type ScheduleType = (typeof ScheduleType)[keyof typeof ScheduleType]
+
 // 任务配置字段
 export interface TaskConfig {
   /** 任务唯一标识符 */
   id: string
   /** 任务名称 */
   name: string
-  /** 定时任务的 cron 表达式 */
-  cron: string
+  /** 定时任务的调度类型 */
+  scheduleType: ScheduleType
+  /** 定时任务的调度表达式 */
+  scheduleExpression: string
   /** 用户的任务提示词 */
   prompt: string
   /** 关键词列表，用于 Reddit 搜索 */
@@ -16,8 +25,6 @@ export interface TaskConfig {
   status: 'active' | 'paused' | 'running'
   /** 是否启用过滤机制，通过缓存（ttl=36）过滤之前已经抓取过的内容 */
   enableFiltering: boolean
-  /** 自定义分析模型 */
-  llmModel?: string | null
   /** 最后执行时间 */
   lastExecutedAt?: Date | null
   /** 上次执行失败的时间 */

@@ -47,7 +47,7 @@
     "cache-manager": "^7.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
-    "cron": "^4.3.2",
+    "cron": "4.3.0",
     "https-proxy-agent": "^7.0.6",
     "joi": "^17.13.3",
     "mastra": "0.0.0-ai-v5-20250718021026",

@@ -6,7 +6,6 @@ import { App } from 'supertest/types'
 
 import { TaskStatus } from '@redgent/types/analysis-task'
 
-import { MOCK_RESPONSES } from '../src/ai-sdk/utils'
 import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'
 import { TaskExecutionService } from '../src/task-execution/task-execution.service'
@@ -60,9 +59,6 @@ describe('analysis-task (e2e)', () => {
         .mockImplementation(async (_, links) => {
           return links.slice(0, 10).map((link) => link.id)
         })
-      jest
-        .spyOn(analysisTaskExecutionService, 'analyze')
-        .mockImplementation(async () => MOCK_RESPONSES.analysisResult)
 
       const progressObservable =
         analysisTaskExecutionService.execute(mockTaskConfig)
