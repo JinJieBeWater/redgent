@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
 
-import { ReportContent } from '@redgent/types/analysis-report'
 import {
   TaskCancelProgress,
   TaskCompleteProgress,
@@ -21,18 +20,6 @@ import {
   createMockTaskConfig,
   TEST_DATA_PRESETS,
 } from '../test/data-factory'
-
-const mockReport: ReportContent = {
-  title: '测试分析报告',
-  overallSummary: '这是一个测试分析报告的总结',
-  findings: [
-    {
-      point: '测试要点1',
-      elaboration: '这是要点1的详细阐述',
-      supportingPostIds: ['link-1'],
-    },
-  ],
-}
 
 // 使用 data-factory 创建测试数据
 const mockRedditLinks = createMockLinks(3, 'test')
@@ -96,7 +83,6 @@ describe(TaskExecutionService.name, () => {
 
   it('应该获取链接，不过滤（全部为新链接），并缓存它们', async () => {
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
-    jest.spyOn(taskExecutionService, 'analyze').mockResolvedValue(mockReport)
 
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
@@ -178,7 +164,6 @@ describe(TaskExecutionService.name, () => {
     ])
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
-    jest.spyOn(taskExecutionService, 'analyze')
 
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
@@ -200,6 +185,5 @@ describe(TaskExecutionService.name, () => {
       (p) => p.status === TaskStatus.ANALYZE_START,
     )
     expect(analyzeStart).toBeUndefined()
-    expect(taskExecutionService.analyze).not.toHaveBeenCalled()
   })
 })

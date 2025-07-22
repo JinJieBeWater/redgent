@@ -35,6 +35,11 @@ export class TaskExecutionService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
+  /**
+   * 执行任务
+   * @param taskConfig 任务配置
+   * @returns Observable<TaskProgress>
+   */
   execute(taskConfig: TaskConfig): Observable<TaskProgress> {
     return new Observable((subscriber: Subscriber<TaskProgress>) => {
       const run = async () => {
@@ -366,7 +371,13 @@ export class TaskExecutionService {
     }
   }
 
-  async analyze(
+  /**
+   * 使用 AI 分析 Reddit 内容
+   * @param taskConfig 任务配置
+   * @param completeLinkData 完整的链接数据和评论
+   * @returns 分析报告内容
+   */
+  private async analyze(
     taskConfig: TaskConfig,
     completeLinkData: {
       content: RedditLinkInfoUntrusted

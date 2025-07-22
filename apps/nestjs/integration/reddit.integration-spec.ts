@@ -5,7 +5,7 @@ import { RedditSort } from '@redgent/types/reddit'
 
 import { AppModule } from '../src/app.module'
 import { RedditService } from '../src/reddit/reddit.service'
-import { createMockLink, createMockResponse } from '../test/data-factory'
+import { createMockLinks, createMockResponse } from '../test/data-factory'
 
 describe(RedditService.name, () => {
   let app: INestApplication
@@ -18,7 +18,7 @@ describe(RedditService.name, () => {
     app = moduleFixture.createNestApplication()
     await app.init()
     redditService = app.get<RedditService>(RedditService)
-  })
+  }, 30000)
 
   afterAll(async () => {
     await app.close()
@@ -52,13 +52,13 @@ describe(RedditService.name, () => {
       expect(firstLink.kind).toBe('t3') // t3 类型表示链接
       expect(firstLink.data).toBeDefined()
       expect(firstLink.data.subreddit).toBe(subreddit)
-    })
+    }, 15000)
   })
 
   describe(RedditService.prototype.getHotLinksBySubreddits.name, () => {
     it('应该优雅地处理部分失败', async () => {
-      const link1 = createMockLink('link1', 'nestjs')
-      const nestjsResponse = createMockResponse([link1])
+      const mockLinks = createMockLinks(1, 'nestjs', 'link')
+      const nestjsResponse = createMockResponse(mockLinks)
 
       const loggerErrorSpy = jest
         .spyOn(redditService['logger'], 'error')
@@ -83,7 +83,7 @@ describe(RedditService.name, () => {
 
       expect(result).toBeDefined()
       expect(result.length).toBe(1)
-      expect(result[0].id).toBe('link1')
+      expect(result[0].id).toBe('link-1')
       expect(redditService.getHotLinksBySubreddit).toHaveBeenCalledTimes(2)
 
       expect(loggerErrorSpy).toHaveBeenCalledTimes(1)
@@ -155,11 +155,25 @@ describe(RedditService.name, () => {
 
   describe(RedditService.prototype.getCommentsByLinkId.name, () => {
     it('应该通过链接 ID 从真实的 Reddit API 获取评论', async () => {
-      const linkId = '1lwstfd'
-      const result = await redditService.getCommentsByLinkId(linkId)
+      // 先获取真实的链接，再用其 ID 获取评论
+      const subredditResult = await redditService.getHotLinksByQueries([
+        'reactjs',
+      ])
+
+      // 确保我们有链接数据
+      expect(subredditResult.length).toBeGreaterThan(0)
+
+      // 获取有评论的链接 ID
+      const linkWithComments = subredditResult.find(
+        (link) => link.num_comments > 0,
+      )
+      expect(linkWithComments).toBeDefined()
+
+      const realLinkId = linkWithComments!.id
+      const result = await redditService.getCommentsByLinkId(realLinkId)
 
       expect(result).toBeDefined()
       expect(Array.isArray(result)).toBe(true)
-    })
+    }, 30000)
   })
 })

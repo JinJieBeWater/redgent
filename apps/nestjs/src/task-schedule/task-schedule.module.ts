@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 
 import { PrismaModule } from '../prisma/prisma.module'
-import { TaskService } from './task.service'
+import { TaskScheduleService } from './task-schedule.service'
 
 @Module({
   imports: [ScheduleModule.forRoot(), PrismaModule],
-  providers: [TaskService],
-  exports: [TaskService],
+  providers: [TaskScheduleService],
+  exports: [TaskScheduleService],
 })
-export class TaskModule {}
+export class TaskScheduleModule {}

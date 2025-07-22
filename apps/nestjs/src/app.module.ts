@@ -9,7 +9,7 @@ import { PrismaModule } from './prisma/prisma.module'
 import { RedditModule } from './reddit/reddit.module'
 import { ReportModule } from './report/report'
 import { TaskExecutionModule } from './task-execution/task-execution.module'
-import { TaskModule } from './task/task.module'
+import { TaskScheduleModule } from './task-schedule/task-schedule.module'
 
 @Module({
   imports: [
@@ -37,7 +37,7 @@ import { TaskModule } from './task/task.module'
     TaskExecutionModule,
     PrismaModule,
     ReportModule,
-    TaskModule,
+    TaskScheduleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
