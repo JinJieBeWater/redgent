@@ -4,10 +4,10 @@
 
 ## ✨ 主要特性
 
-- **Reddit 趋势追踪**: 创建定时任务，自动监控指定子版块（subreddits）的热门帖子和讨论。
+- **Reddit 趋势追踪**: 创建定时任务，自动监控热门帖子和讨论。
 - **LLM 智能分析**: 利用大语言模型，自动提炼 Reddit 帖子的核心观点、情感倾向和关键信息。
 - **自动化报告生成**: 将分析结果整理成简洁的报告，方便用户快速回顾和查阅。
-- **灵活的任务管理**: 通过友好的界面轻松创建、暂停、编辑和删除你的 Reddit 监控任务。
+- **灵活的任务管理**: 通过 Agent 对话，可以实现任务的自动化和管理。
 
 ## 🛠️ 技术栈
 
@@ -15,30 +15,6 @@
 - **前端**: [React](https://react.dev/), TypeScript
 - **数据库**: PostgreSQL (Prisma)
 - **Monorepo 工具**: [Turborepo](https://turbo.build/repo), [pnpm](https://pnpm.io/)
-- **核心依赖**: Reddit API
-
-## 🚀 快速开始
-
-### 1. 安装依赖
-
-克隆项目仓库后，在项目根目录执行以下命令来安装所有依赖：
-
-```bash
-pnpm install
-```
-
-### 2. 启动开发服务
-
-您可以一键启动所有应用（Web 前端、NestJS 后端等）的开发模式：
-
-```bash
-pnpm dev
-```
-
-该命令会通过 `turbo` 同时启动所有应用。服务启动后：
-
-- **Web 前端**: 访问 `http://localhost:3000`
-- **NestJS 后端**: 运行于 `http://localhost:3002`
 
 ## 📂 项目结构
 
@@ -47,7 +23,6 @@ pnpm dev
 ```
 /
 ├── apps/
-│   ├── docs/         # 文档服务 (NextJS)
 │   ├── nestjs/       # 后端服务 (NestJS)
 │   └── web/          # 前端应用 (React)
 ├── packages/
@@ -88,7 +63,7 @@ sequenceDiagram
 
     %% 4. 修改任务
     U->>AI: 「把执行频率改成每天一次」
-    AI->>PG: 更新 cron 表达式
+    AI->>PG: 更新调度表达式
     PG-->>U: ✅ 任务已更新
 ```
 
@@ -158,7 +133,7 @@ sequenceDiagram
 
 ## 🤖 任务执行逻辑
 
-任务创建后，调度器会根据其 `cron` 表达式定时触发执行。
+任务创建后，调度器会根据其调度表达式定时触发执行。
 
 执行流程如下：
 
@@ -175,7 +150,7 @@ sequenceDiagram
     participant LLM as 大语言模型
     participant U as 用户
 
-    loop 按 cron 表达式定时触发
+    loop 按 调度表达式定时触发
         SCH->>DB: 读取到期的 TaskConfig
         SCH->>WF: 触发分析工作流
         WF->>LLM: 根据配置抓取 Reddit 内容并请求分析
