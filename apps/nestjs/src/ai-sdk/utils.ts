@@ -20,13 +20,13 @@ import { TEST_PROMPTS } from './basic'
 
 /**
  * 响应处理器接口
- * @template T 响应数据的类型
+ * 支持直接响应数据或响应生成函数两种形式
  */
-interface ResponseHandler<T = any> {
+interface ResponseHandler {
   /** 匹配函数，判断是否应该使用此处理器 */
   matcher: (prompt: ModelMessage[]) => boolean
   /** 响应数据或生成响应数据的函数 */
-  response: T | (() => T)
+  response: string | (() => string)
 }
 
 // ============================================================================
@@ -79,7 +79,7 @@ const responseHandlers: ResponseHandler[] = []
  * 注册响应处理器到全局注册表
  * @param handler 响应处理器配置
  */
-function registerResponseHandler<T>(handler: ResponseHandler<T>): void {
+function registerResponseHandler(handler: ResponseHandler): void {
   responseHandlers.push(handler)
 }
 
@@ -99,9 +99,9 @@ function findMatchingHandler(
  * @param matcher 匹配函数
  * @param response 响应数据或生成函数
  */
-export function addCustomResponseHandler<T>(
+export function addCustomResponseHandler(
   matcher: (prompt: ModelMessage[]) => boolean,
-  response: T | (() => T),
+  response: string | (() => string),
 ): void {
   registerResponseHandler({ matcher, response })
 }

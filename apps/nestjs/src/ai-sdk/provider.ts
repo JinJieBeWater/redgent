@@ -1,4 +1,4 @@
-import { createOpenRouter, LanguageModelV2 } from '@openrouter/ai-sdk-provider'
+import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { customProvider } from 'ai'
 
 import { analysisModel, chatModel, structureModel } from './models.test'

@@ -22,7 +22,11 @@ export class TaskAgentService {
       inputSchema: z.void(),
       execute: async () => {
         try {
-          this.taskScheduleService.listAll()
+          const tasks = this.taskScheduleService.listAll()
+          return {
+            tasks: tasks,
+            message: '任务列表获取成功',
+          }
         } catch (error) {
           return {
             error: error instanceof Error ? error.message : '未知错误',

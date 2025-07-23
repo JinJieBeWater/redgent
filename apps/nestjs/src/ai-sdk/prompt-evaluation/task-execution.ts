@@ -73,4 +73,7 @@ async function evaluateTaskExecutionPrompt() {
 }
 
 // 运行评估函数
-evaluateTaskExecutionPrompt()
+evaluateTaskExecutionPrompt().catch(error => {
+  console.error('❌ 评估脚本执行出错:', error)
+  process.exit(1)
+})

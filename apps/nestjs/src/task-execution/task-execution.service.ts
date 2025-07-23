@@ -160,8 +160,6 @@ export class TaskExecutionService {
     const newLinks = links.filter(
       (_, index) => cachedValues[index] === undefined,
     )
-    this.logger.log('cacheKeys: ' + cacheKeys)
-
     if (newLinks.length > 0) {
       const pairsToCache = newLinks.map(p => ({
         key: `${this.CACHE_KEY_PREFIX_POST}${p.id}`,
@@ -293,7 +291,7 @@ export class TaskExecutionService {
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [_, taskInfo] = await Promise.all([
+    const [, taskInfo] = await Promise.all([
       this.prismaService.task.update({
         where: { id: taskConfig.id },
         data: {
@@ -361,7 +359,7 @@ export class TaskExecutionService {
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         // Handle the API call error
-        const err = JSON.parse(error.responseBody)
+        const err = error.responseBody
         this.logger.error(err)
         throw new Error(err)
       } else {
@@ -408,7 +406,7 @@ export class TaskExecutionService {
       return analysisResult as ReportContent
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
-        const err = JSON.parse(error.responseBody)
+        const err = error.responseBody
         this.logger.error(err)
         throw new Error(err)
       } else {

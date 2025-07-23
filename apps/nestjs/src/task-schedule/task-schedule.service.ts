@@ -87,7 +87,7 @@ export class TaskScheduleService implements OnModuleInit {
         break
 
       default:
-        this.logger.warn(`不支持的调度类型: ${scheduleType} 任务 ${name}`)
+        this.logger.warn(`任务 ${name} 持有不支持的调度类型`)
     }
   }
 

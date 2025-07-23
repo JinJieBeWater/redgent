@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { lastValueFrom, tap, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
-import { TaskStatus } from '@redgent/types/analysis-task'
+import { TaskProgress, TaskStatus } from '@redgent/types/analysis-task'
 
 import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'
@@ -63,7 +63,7 @@ describe('analysis-task (e2e)', () => {
       const progressObservable =
         analysisTaskExecutionService.execute(mockTaskConfig)
 
-      const progressEvents = await lastValueFrom(
+      const progressEvents = await lastValueFrom<TaskProgress[]>(
         progressObservable.pipe(tap(console.log), toArray()),
       )
 
