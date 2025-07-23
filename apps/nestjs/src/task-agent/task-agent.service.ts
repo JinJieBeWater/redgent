@@ -35,7 +35,7 @@ export class TaskAgentService {
     createTask: tool({
       description: '创建一个Reddit抓取任务',
       inputSchema: createTaskSchema,
-      execute: async (input) => {
+      execute: async input => {
         try {
           const task = await this.taskScheduleService.createTask(input)
           return {
@@ -57,7 +57,7 @@ export class TaskAgentService {
         id: z.uuid().describe('任务id'),
         data: createTaskSchema.partial(),
       }),
-      execute: async (input) => {
+      execute: async input => {
         try {
           const task = await this.taskScheduleService.updateTask({
             id: input.id,

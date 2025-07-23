@@ -34,14 +34,14 @@ export class TaskAgentController {
         messages: chat.messages,
         system: RedgentAgentSystem,
         tools: this.taskAgentService.tools,
-        onError: (error) => {
+        onError: error => {
           // 记录错误日志但不暴露敏感信息
           this.logger.error('Task agent error:', error)
         },
       })
 
       result.pipeUIMessageStreamToResponse(res, {
-        onError: (error) => {
+        onError: error => {
           // 记录错误日志但不暴露敏感信息
           this.logger.error('Task agent error:', error)
           return error instanceof Error

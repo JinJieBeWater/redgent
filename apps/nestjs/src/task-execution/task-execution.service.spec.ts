@@ -92,7 +92,7 @@ describe(TaskExecutionService.name, () => {
         progressObservable.pipe(toArray()),
       )
 
-      expect(progressEvents.map((p) => p.status)).toEqual([
+      expect(progressEvents.map(p => p.status)).toEqual([
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.FETCH_COMPLETE,
@@ -117,7 +117,7 @@ describe(TaskExecutionService.name, () => {
         progressObservable.pipe(toArray()),
       )
 
-      expect(progressEvents.map((p) => p.status)).toEqual([
+      expect(progressEvents.map(p => p.status)).toEqual([
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.FETCH_COMPLETE,
@@ -151,7 +151,7 @@ describe(TaskExecutionService.name, () => {
         progressObservable.pipe(toArray()),
       )
 
-      expect(progressEvents.map((p) => p.status)).toEqual([
+      expect(progressEvents.map(p => p.status)).toEqual([
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.FETCH_COMPLETE,
@@ -169,7 +169,7 @@ describe(TaskExecutionService.name, () => {
         progressObservable.pipe(toArray()),
       )
 
-      expect(progressEvents.map((p) => p.status)).toEqual([
+      expect(progressEvents.map(p => p.status)).toEqual([
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.TASK_CANCEL,
@@ -195,7 +195,7 @@ describe(TaskExecutionService.name, () => {
 
     it('应该在链接数量超过 MAX_LINKS_PER_TASK 时使用 AI 过滤链接', async () => {
       const tooManyLinks = createTooManyLinks(15)
-      const inputLinkData = tooManyLinks.map((link) => ({
+      const inputLinkData = tooManyLinks.map(link => ({
         id: link.id,
         title: link.title,
         selftext: link.selftext,
@@ -218,7 +218,7 @@ describe(TaskExecutionService.name, () => {
 
       // 注册基于精确消息匹配的响应处理器
       addCustomResponseHandler(
-        (prompt) => compareMessages(prompt.at(-1)!, expectedPrompt),
+        prompt => compareMessages(prompt.at(-1)!, expectedPrompt),
         () => JSON.stringify(MOCK_RESPONSES.linkSelection),
       )
 
@@ -234,7 +234,7 @@ describe(TaskExecutionService.name, () => {
         progressObservable.pipe(toArray()),
       )
 
-      expect(progressEvents.map((p) => p.status)).toEqual([
+      expect(progressEvents.map(p => p.status)).toEqual([
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.FETCH_COMPLETE,
@@ -269,7 +269,7 @@ describe(TaskExecutionService.name, () => {
         progressObservable.pipe(toArray()),
       )
 
-      expect(progressEvents.map((p) => p.status)).toEqual([
+      expect(progressEvents.map(p => p.status)).toEqual([
         TaskStatus.TASK_START,
         TaskStatus.FETCH_START,
         TaskStatus.FETCH_COMPLETE,

@@ -102,7 +102,7 @@ export function createMockResponse(
       dist: links.length,
       modhash: 'mock_modhash',
       geo_filter: null,
-      children: links.map((link) => ({ kind: 't3', data: link })),
+      children: links.map(link => ({ kind: 't3', data: link })),
     },
   }
 }
@@ -221,7 +221,7 @@ export function createMockRedditCommentWithReplies(
         dist: nestedComments.length,
         modhash: 'mock_modhash',
         geo_filter: null,
-        children: nestedComments.map((nested) => ({
+        children: nestedComments.map(nested => ({
           kind: 't1',
           data: nested,
         })) as RedditCommentWrapper[],

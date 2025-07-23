@@ -57,7 +57,7 @@ describe('analysis-task (e2e)', () => {
       jest
         .spyOn(analysisTaskExecutionService, 'selectMostRelevantLinks')
         .mockImplementation(async (_, links) => {
-          return links.slice(0, 10).map((link) => link.id)
+          return links.slice(0, 10).map(link => link.id)
         })
 
       const progressObservable =

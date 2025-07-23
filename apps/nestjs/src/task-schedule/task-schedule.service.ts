@@ -52,9 +52,9 @@ export class TaskScheduleService implements OnModuleInit {
       where: { status: TaskStatus.active },
     })
 
-    const cron = tasks.filter((task) => task.scheduleType === ScheduleType.cron)
+    const cron = tasks.filter(task => task.scheduleType === ScheduleType.cron)
     const interval = tasks.filter(
-      (task) => task.scheduleType === ScheduleType.interval,
+      task => task.scheduleType === ScheduleType.interval,
     )
     this.logger.log(
       `从数据库加载 ${tasks.length} 个任务，其中 Cron 任务: ${cron.length}, Interval 任务: ${interval.length}`,
