@@ -7,6 +7,7 @@
     "./base": "./base.js",
     "./next-js": "./next.js",
     "./nest-js": "./nest.js",
+    "./react-js": "./react.js",
     "./react-internal": "./react-internal.js"
   },
   "devDependencies": {
@@ -14,6 +15,7 @@
     "@next/eslint-plugin-next": "^15.3.0",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
