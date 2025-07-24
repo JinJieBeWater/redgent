@@ -2,10 +2,9 @@ import { Injectable, Logger } from '@nestjs/common'
 import { tool } from 'ai'
 import z from 'zod'
 
-import {
-  createTaskSchema,
-  TaskScheduleService,
-} from '../task-schedule/task-schedule.service'
+import { createTaskSchema } from '@redgent/validators'
+
+import { TaskScheduleService } from '../task-schedule/task-schedule.service'
 
 @Injectable()
 export class TaskAgentService {
