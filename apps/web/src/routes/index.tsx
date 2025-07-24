@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Send } from 'lucide-react'
 
@@ -26,6 +26,31 @@ function App() {
     }
   }
 
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const resizeTextarea = useCallback(() => {
+    if (!inputRef.current) return
+
+    const target = inputRef.current
+
+    target.style.height = 'auto'
+
+    const scrollHeight = target.scrollHeight
+    const maxHeight = 300
+
+    if (scrollHeight > maxHeight) {
+      target.style.height = `${maxHeight}px`
+      target.style.overflowY = 'auto'
+    } else {
+      target.style.height = `${scrollHeight}px`
+      target.style.overflowY = 'hidden'
+    }
+  }, [inputRef])
+
+  useEffect(() => {
+    resizeTextarea()
+  }, [input])
+
   return (
     <div className="container mx-auto -mt-6 flex min-h-[calc(100vh-3rem)] max-w-2xl items-center justify-center p-4">
       <div className="w-full">
@@ -38,6 +63,7 @@ function App() {
         <div className="relative mb-6">
           <div className="bg-muted border-border focus-within:border-ring rounded-xl border transition-colors duration-200">
             <Textarea
+              ref={inputRef}
               placeholder="添加一个定时分析任务"
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -47,8 +73,8 @@ function App() {
                   handleSubmit()
                 }
               }}
-              className="dark:bg-input/30 text-foreground flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
-              rows={6}
+              className="dark:bg-input/30 text-foreground scrollbar-hide flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
+              rows={1}
             />
             <div className="flex items-center justify-end p-2">
               <Button
