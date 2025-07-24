@@ -114,7 +114,7 @@ apps/nestjs/src/
 
 ```
 NODE_ENV=development|production|test
-PORT=3002                    # 服务器端口
+PORT=8000                    # 服务器端口
 PROXY=7890                   # 可选代理端口
 REDDIT_CLIENT_ID=            # Reddit API 必需
 REDDIT_SECRET=               # Reddit API 必需
