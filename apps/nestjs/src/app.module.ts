@@ -29,6 +29,8 @@ import { TaskScheduleModule } from './task-schedule/task-schedule.module'
         PROXY: Joi.number().default(7890),
         REDDIT_CLIENT_ID: Joi.string().required(),
         REDDIT_SECRET: Joi.string().required(),
+        // OPENROUTER_API_KEY: Joi.string().required(),
+        DEEPSEEK_API_KEY: Joi.string().required(),
       }),
       validationOptions: {
         abortEarly: true,

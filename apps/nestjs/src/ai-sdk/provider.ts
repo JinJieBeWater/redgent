@@ -1,10 +1,16 @@
-import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import { createDeepSeek } from '@ai-sdk/deepseek'
+import { LanguageModelV2 } from '@ai-sdk/provider'
+// import { createOpenRouter} from '@openrouter/ai-sdk-provider'
 import { customProvider } from 'ai'
 
 import { analysisModel, chatModel, structureModel } from './models.test'
 
-const openRouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
+// const openRouter = createOpenRouter({
+//   apiKey: process.env.OPENROUTER_API_KEY,
+// })
+
+const deepseek = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY ?? '',
 })
 
 export const myProvider =
@@ -18,10 +24,8 @@ export const myProvider =
       })
     : customProvider({
         languageModels: {
-          'chat-model': openRouter('deepseek/deepseek-chat-v3-0324'),
-          'structure-model': openRouter(
-            'google/gemini-2.5-flash-lite-preview-06-17',
-          ),
-          'analysis-model': openRouter('google/gemini-2.0-flash-001'),
+          'chat-model': deepseek.chat('deepseek-chat'),
+          'structure-model': deepseek.chat('deepseek-chat'),
+          'analysis-model': deepseek.chat('deepseek-chat'),
         },
       })

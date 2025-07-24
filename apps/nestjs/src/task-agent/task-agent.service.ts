@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { tool } from 'ai'
 import z from 'zod'
 
@@ -9,6 +9,7 @@ import {
 
 @Injectable()
 export class TaskAgentService {
+  private readonly logger = new Logger(TaskAgentService.name)
   constructor(private readonly taskScheduleService: TaskScheduleService) {}
   readonly tools = {
     validateTaskConfig: tool({
@@ -19,10 +20,11 @@ export class TaskAgentService {
 
     listAllTasks: tool({
       description: '列出所有Reddit抓取任务',
-      inputSchema: z.void(),
+      inputSchema: z.object({}),
       execute: async () => {
         try {
-          const tasks = this.taskScheduleService.listAll()
+          this.logger.debug('listAllTasks 工具被调用')
+          const tasks = await this.taskScheduleService.listAll()
           return {
             tasks: tasks,
             message: '任务列表获取成功',
@@ -41,6 +43,7 @@ export class TaskAgentService {
       inputSchema: createTaskSchema,
       execute: async input => {
         try {
+          this.logger.debug('createTask 工具被调用')
           const task = await this.taskScheduleService.createTask(input)
           return {
             task: task,
@@ -63,6 +66,7 @@ export class TaskAgentService {
       }),
       execute: async input => {
         try {
+          this.logger.debug('updateTask 工具被调用')
           const task = await this.taskScheduleService.updateTask({
             id: input.id,
             ...input.data,
