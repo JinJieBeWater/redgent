@@ -1,79 +1,68 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Send } from 'lucide-react'
 
-import { MarkdownRenderer } from '@/components/markdown'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
 function App() {
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: '/api/task-agent',
-    }),
-  })
+  const navigate = useNavigate()
   const [input, setInput] = useState('')
 
+  const handleSubmit = () => {
+    if (input.trim()) {
+      // 导航到聊天页面，携带输入参数
+      navigate({
+        to: '/chat',
+        search: {
+          mode: 'create-task',
+          input: input.trim(),
+        },
+      })
+    }
+  }
+
   return (
-    <div className="container mx-auto max-w-4xl p-4">
-      <div className="mb-6 space-y-4">
-        {messages.map(message => (
-          <div
-            key={message.id}
-            className={`rounded-lg p-4 ${
-              message.role === 'user'
-                ? 'bg-primary/10 ml-8'
-                : 'bg-muted/50 mr-8'
-            }`}
-          >
-            <div className="text-muted-foreground mb-2 text-sm font-semibold">
-              {message.role === 'user' ? '用户' : 'AI 助手'}
-            </div>
-            <div className="prose prose-sm max-w-none">
-              {message.parts.map((part, index) =>
-                part.type === 'text' ? (
-                  message.role === 'assistant' ? (
-                    <MarkdownRenderer key={index} content={part.text} />
-                  ) : (
-                    <div key={index} className="whitespace-pre-wrap">
-                      {part.text}
-                    </div>
-                  )
-                ) : null,
-              )}
+    <div className="container mx-auto -mt-6 flex min-h-[calc(100vh-3rem)] max-w-2xl items-center justify-center p-4">
+      <div className="w-full">
+        {/* Logo */}
+        <div className="mb-6 text-center">
+          <h1 className="text-foreground text-4xl">Redgent</h1>
+        </div>
+
+        {/* 输入框 */}
+        <div className="relative mb-6">
+          <div className="bg-muted border-border focus-within:border-ring rounded-xl border transition-colors duration-200">
+            <Textarea
+              placeholder="添加一个定时分析任务"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSubmit()
+                }
+              }}
+              className="dark:bg-input/30 text-foreground flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+              rows={6}
+            />
+            <div className="flex items-center justify-end p-2">
+              <Button
+                onClick={handleSubmit}
+                size="sm"
+                className="h-7.5 w-7.5 cursor-pointer"
+                disabled={!input.trim()}
+              >
+                <Send className="h-3.5 w-3.5" />
+              </Button>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-
-      <form
-        onSubmit={e => {
-          e.preventDefault()
-          if (input.trim()) {
-            sendMessage({ text: input })
-            setInput('')
-          }
-        }}
-        className="flex gap-2"
-      >
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          disabled={status !== 'ready'}
-          placeholder="输入您的问题..."
-          className="border-border focus:ring-primary/50 flex-1 rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={status !== 'ready'}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {status === 'ready' ? '发送' : '发送中...'}
-        </button>
-      </form>
     </div>
   )
 }
