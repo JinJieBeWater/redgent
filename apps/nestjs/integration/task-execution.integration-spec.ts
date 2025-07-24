@@ -17,14 +17,17 @@ import { ReportService } from '../src/report/report.service'
 import { TaskExecutionService } from '../src/task-execution/task-execution.service'
 import {
   createMockLinks,
+  createMockLinkWithComments,
   createMockTaskConfig,
-  TEST_DATA_PRESETS,
 } from '../test/data-factory'
 
 // 使用 data-factory 创建测试数据
 const mockRedditLinks = createMockLinks(3, 'test')
 const mockTaskConfig = createMockTaskConfig()
-const mockCompleteLinkData = [...TEST_DATA_PRESETS.completeLinkData]
+// 为集成测试创建匹配的完整链接数据
+const mockCompleteLinkData = mockRedditLinks.map(link =>
+  createMockLinkWithComments(link.id),
+)
 
 describe(TaskExecutionService.name, () => {
   let app: INestApplication

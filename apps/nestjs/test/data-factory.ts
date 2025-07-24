@@ -333,13 +333,6 @@ export const TEST_DATA_PRESETS = {
   /** 大量链接（触发筛选） */
   manyLinks: createTooManyLinks(15),
 
-  /** 完整的链接内容数据（包含评论） */
-  completeLinkData: [
-    createMockLinkWithComments(),
-    createMockLinkWithComments(),
-    createMockLinkWithComments(),
-  ],
-
   /** 标准任务配置 */
   standardTask: createMockTaskConfig(),
 

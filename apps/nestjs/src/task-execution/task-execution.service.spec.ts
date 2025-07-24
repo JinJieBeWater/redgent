@@ -7,6 +7,7 @@ import { lastValueFrom, toArray } from 'rxjs'
 import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/types'
 
 import {
+  createMockLinkWithComments,
   createMockTaskConfig,
   createTooManyLinks,
   TEST_DATA_PRESETS,
@@ -27,7 +28,9 @@ import { TaskExecutionService } from './task-execution.service'
 // 使用数据工厂创建测试数据
 const mockTaskConfig = createMockTaskConfig()
 const mockRedditLinks = TEST_DATA_PRESETS.fewLinks
-const mockCompleteLinkData = [...TEST_DATA_PRESETS.completeLinkData]
+const mockCompleteLinkData = mockRedditLinks.map(link =>
+  createMockLinkWithComments(link.id),
+)
 
 describe(TaskExecutionService.name, () => {
   let service: TaskExecutionService
