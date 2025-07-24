@@ -7,6 +7,7 @@ import { lastValueFrom, toArray } from 'rxjs'
 import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/types'
 
 import {
+  createMockLinkWithComments,
   createMockTaskConfig,
   createTooManyLinks,
   TEST_DATA_PRESETS,
@@ -27,7 +28,9 @@ import { TaskExecutionService } from './task-execution.service'
 // 使用数据工厂创建测试数据
 const mockTaskConfig = createMockTaskConfig()
 const mockRedditLinks = TEST_DATA_PRESETS.fewLinks
-const mockCompleteLinkData = TEST_DATA_PRESETS.completeLinkData
+const mockCompleteLinkData = mockRedditLinks.map(link =>
+  createMockLinkWithComments(link.id),
+)
 
 describe(TaskExecutionService.name, () => {
   let service: TaskExecutionService
@@ -84,6 +87,14 @@ describe(TaskExecutionService.name, () => {
   })
 
   describe(TaskExecutionService.prototype.execute.name, () => {
+    beforeEach(() => {
+      // Mock Reddit service to return test data
+      redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
+        mockRedditLinks,
+      )
+      redditService.getCommentsByLinkIds.mockResolvedValue(mockCompleteLinkData)
+    })
+
     it('应该在不过滤的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableFiltering: false }
 
@@ -130,10 +141,11 @@ describe(TaskExecutionService.name, () => {
         TaskProgressStatus.TASK_COMPLETE,
       ])
 
-      expect(cacheManager.mget).toHaveBeenCalledWith([
-        'redgent:link:link-1',
-        'redgent:link:link-2',
-      ])
+      // 验证缓存调用使用了正确的链接ID（从mockRedditLinks获取）
+      const expectedCacheKeys = mockRedditLinks.map(
+        link => `redgent:link:${link.id}`,
+      )
+      expect(cacheManager.mget).toHaveBeenCalledWith(expectedCacheKeys)
       expect(cacheManager.mset).toHaveBeenCalled()
 
       const completeEvent = progressEvents.pop() as TaskCompleteProgress
@@ -216,10 +228,13 @@ describe(TaskExecutionService.name, () => {
         ],
       }
 
+      // 动态生成链接选择响应，使用前10个实际的链接ID
+      const selectedLinkIds = tooManyLinks.slice(0, 10).map(link => link.id)
+
       // 注册基于精确消息匹配的响应处理器
       addCustomResponseHandler(
         prompt => compareMessages(prompt.at(-1)!, expectedPrompt),
-        () => JSON.stringify(MOCK_RESPONSES.linkSelection),
+        () => JSON.stringify(selectedLinkIds),
       )
 
       jest.spyOn(service, 'selectMostRelevantLinks')

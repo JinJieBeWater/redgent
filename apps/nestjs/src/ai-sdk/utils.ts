@@ -57,12 +57,6 @@ export const MOCK_RESPONSES = {
     ],
   } satisfies TaskReport['content'],
 
-  /** 链接筛选结果数组 */
-  linkSelection: Array.from(
-    { length: 10 },
-    (_, i) => `link-${i}`,
-  ) satisfies string[],
-
   /** 默认任务创建确认消息 */
   defaultMessage:
     '好的，已为您创建定时任务，是否需要立即执行？' satisfies string,
