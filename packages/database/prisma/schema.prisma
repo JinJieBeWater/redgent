@@ -6,6 +6,11 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
 }
 
 datasource db {
@@ -14,7 +19,7 @@ datasource db {
 }
 
 model Task {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   name String
 
@@ -38,7 +43,7 @@ model Task {
 
   lastErrorMessage String?
 
-  reports Report[]
+  reports TaskReport[]
 
   createdAt DateTime @default(now())
 
@@ -60,16 +65,17 @@ enum TaskStatus {
 }
 
 /// 分析报告模型 - 存储AI分析Reddit内容后生成的结果
-model Report {
-  id String @id @default(cuid())
+model TaskReport {
+  id String @id @default(uuid()) @db.Uuid
 
   createdAt DateTime @default(now())
 
+  /// [ReportContent]
   content Json
 
   executionDuration Int?
 
-  taskId String
+  taskId String @db.Uuid
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }

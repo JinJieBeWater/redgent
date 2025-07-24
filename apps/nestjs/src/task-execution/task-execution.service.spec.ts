@@ -4,7 +4,7 @@ import { ModelMessage } from 'ai'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
 
-import { TaskCompleteProgress, TaskStatus } from '@redgent/types/analysis-task'
+import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/types'
 
 import {
   createMockTaskConfig,
@@ -93,17 +93,17 @@ describe(TaskExecutionService.name, () => {
       )
 
       expect(progressEvents.map(p => p.status)).toEqual([
-        TaskStatus.TASK_START,
-        TaskStatus.FETCH_START,
-        TaskStatus.FETCH_COMPLETE,
-        TaskStatus.FETCH_CONTENT_START,
-        TaskStatus.FETCH_CONTENT_COMPLETE,
-        TaskStatus.ANALYZE_START,
-        TaskStatus.ANALYZE_COMPLETE,
-        TaskStatus.TASK_COMPLETE,
+        TaskProgressStatus.TASK_START,
+        TaskProgressStatus.FETCH_START,
+        TaskProgressStatus.FETCH_COMPLETE,
+        TaskProgressStatus.FETCH_CONTENT_START,
+        TaskProgressStatus.FETCH_CONTENT_COMPLETE,
+        TaskProgressStatus.ANALYZE_START,
+        TaskProgressStatus.ANALYZE_COMPLETE,
+        TaskProgressStatus.TASK_COMPLETE,
       ])
       const completeEvent = progressEvents.pop() as TaskCompleteProgress
-      expect(completeEvent.status).toBe(TaskStatus.TASK_COMPLETE)
+      expect(completeEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
     })
 
     it('应该在过滤新链接的情况下成功执行任务', async () => {
@@ -118,16 +118,16 @@ describe(TaskExecutionService.name, () => {
       )
 
       expect(progressEvents.map(p => p.status)).toEqual([
-        TaskStatus.TASK_START,
-        TaskStatus.FETCH_START,
-        TaskStatus.FETCH_COMPLETE,
-        TaskStatus.FILTER_START,
-        TaskStatus.FILTER_COMPLETE,
-        TaskStatus.FETCH_CONTENT_START,
-        TaskStatus.FETCH_CONTENT_COMPLETE,
-        TaskStatus.ANALYZE_START,
-        TaskStatus.ANALYZE_COMPLETE,
-        TaskStatus.TASK_COMPLETE,
+        TaskProgressStatus.TASK_START,
+        TaskProgressStatus.FETCH_START,
+        TaskProgressStatus.FETCH_COMPLETE,
+        TaskProgressStatus.FILTER_START,
+        TaskProgressStatus.FILTER_COMPLETE,
+        TaskProgressStatus.FETCH_CONTENT_START,
+        TaskProgressStatus.FETCH_CONTENT_COMPLETE,
+        TaskProgressStatus.ANALYZE_START,
+        TaskProgressStatus.ANALYZE_COMPLETE,
+        TaskProgressStatus.TASK_COMPLETE,
       ])
 
       expect(cacheManager.mget).toHaveBeenCalledWith([
@@ -137,7 +137,7 @@ describe(TaskExecutionService.name, () => {
       expect(cacheManager.mset).toHaveBeenCalled()
 
       const completeEvent = progressEvents.pop() as TaskCompleteProgress
-      expect(completeEvent.status).toBe(TaskStatus.TASK_COMPLETE)
+      expect(completeEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
     })
 
     it('应该在启用过滤且没有找到新链接时取消任务', async () => {
@@ -152,13 +152,13 @@ describe(TaskExecutionService.name, () => {
       )
 
       expect(progressEvents.map(p => p.status)).toEqual([
-        TaskStatus.TASK_START,
-        TaskStatus.FETCH_START,
-        TaskStatus.FETCH_COMPLETE,
-        TaskStatus.FILTER_START,
-        TaskStatus.TASK_CANCEL,
+        TaskProgressStatus.TASK_START,
+        TaskProgressStatus.FETCH_START,
+        TaskProgressStatus.FETCH_COMPLETE,
+        TaskProgressStatus.FILTER_START,
+        TaskProgressStatus.TASK_CANCEL,
       ])
-      expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
+      expect(progressEvents.pop()?.status).toBe(TaskProgressStatus.TASK_CANCEL)
     })
 
     it('应该在从 Reddit 获取不到链接时取消任务', async () => {
@@ -170,11 +170,11 @@ describe(TaskExecutionService.name, () => {
       )
 
       expect(progressEvents.map(p => p.status)).toEqual([
-        TaskStatus.TASK_START,
-        TaskStatus.FETCH_START,
-        TaskStatus.TASK_CANCEL,
+        TaskProgressStatus.TASK_START,
+        TaskProgressStatus.FETCH_START,
+        TaskProgressStatus.TASK_CANCEL,
       ])
-      expect(progressEvents.pop()?.status).toBe(TaskStatus.TASK_CANCEL)
+      expect(progressEvents.pop()?.status).toBe(TaskProgressStatus.TASK_CANCEL)
     })
 
     it('应该正确处理 RedditService 的错误', async () => {
@@ -188,7 +188,7 @@ describe(TaskExecutionService.name, () => {
       await expect(
         lastValueFrom(progressObservable.pipe(toArray())),
       ).rejects.toMatchObject({
-        status: TaskStatus.TASK_ERROR,
+        status: TaskProgressStatus.TASK_ERROR,
         message: `任务 "${mockTaskConfig.name}" 执行失败`,
       })
     })
@@ -235,18 +235,18 @@ describe(TaskExecutionService.name, () => {
       )
 
       expect(progressEvents.map(p => p.status)).toEqual([
-        TaskStatus.TASK_START,
-        TaskStatus.FETCH_START,
-        TaskStatus.FETCH_COMPLETE,
-        TaskStatus.FILTER_START,
-        TaskStatus.FILTER_COMPLETE,
-        TaskStatus.SELECT_START,
-        TaskStatus.SELECT_COMPLETE,
-        TaskStatus.FETCH_CONTENT_START,
-        TaskStatus.FETCH_CONTENT_COMPLETE,
-        TaskStatus.ANALYZE_START,
-        TaskStatus.ANALYZE_COMPLETE,
-        TaskStatus.TASK_COMPLETE,
+        TaskProgressStatus.TASK_START,
+        TaskProgressStatus.FETCH_START,
+        TaskProgressStatus.FETCH_COMPLETE,
+        TaskProgressStatus.FILTER_START,
+        TaskProgressStatus.FILTER_COMPLETE,
+        TaskProgressStatus.SELECT_START,
+        TaskProgressStatus.SELECT_COMPLETE,
+        TaskProgressStatus.FETCH_CONTENT_START,
+        TaskProgressStatus.FETCH_CONTENT_COMPLETE,
+        TaskProgressStatus.ANALYZE_START,
+        TaskProgressStatus.ANALYZE_COMPLETE,
+        TaskProgressStatus.TASK_COMPLETE,
       ])
 
       expect(service.selectMostRelevantLinks).toHaveBeenCalledWith(
@@ -270,16 +270,16 @@ describe(TaskExecutionService.name, () => {
       )
 
       expect(progressEvents.map(p => p.status)).toEqual([
-        TaskStatus.TASK_START,
-        TaskStatus.FETCH_START,
-        TaskStatus.FETCH_COMPLETE,
-        TaskStatus.FILTER_START,
-        TaskStatus.FILTER_COMPLETE,
-        TaskStatus.FETCH_CONTENT_START,
-        TaskStatus.FETCH_CONTENT_COMPLETE,
-        TaskStatus.ANALYZE_START,
-        TaskStatus.ANALYZE_COMPLETE,
-        TaskStatus.TASK_COMPLETE,
+        TaskProgressStatus.TASK_START,
+        TaskProgressStatus.FETCH_START,
+        TaskProgressStatus.FETCH_COMPLETE,
+        TaskProgressStatus.FILTER_START,
+        TaskProgressStatus.FILTER_COMPLETE,
+        TaskProgressStatus.FETCH_CONTENT_START,
+        TaskProgressStatus.FETCH_CONTENT_COMPLETE,
+        TaskProgressStatus.ANALYZE_START,
+        TaskProgressStatus.ANALYZE_COMPLETE,
+        TaskProgressStatus.TASK_COMPLETE,
       ])
 
       expect(service.selectMostRelevantLinks).not.toHaveBeenCalled()
@@ -295,7 +295,7 @@ describe(TaskExecutionService.name, () => {
       await expect(
         lastValueFrom(progressObservable.pipe(toArray())),
       ).rejects.toMatchObject({
-        status: TaskStatus.TASK_ERROR,
+        status: TaskProgressStatus.TASK_ERROR,
         message: `任务 "${mockTaskConfig.name}" 执行失败`,
       })
     })

@@ -12,7 +12,7 @@ export class ReportService {
    * @returns 分析结果列表
    */
   findAllByTaskId(taskId: string) {
-    return this.prisma.report.findMany({
+    return this.prisma.taskReport.findMany({
       where: {
         taskId,
       },

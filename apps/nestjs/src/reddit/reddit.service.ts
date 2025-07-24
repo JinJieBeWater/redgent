@@ -14,8 +14,8 @@ import {
   RedditLinkWrapper,
   RedditListingResponse,
   RedditSort,
-} from '@redgent/types/reddit'
-import { SubredditWrapper } from '@redgent/types/subreddit'
+  SubredditWrapper,
+} from '@redgent/types'
 
 @Injectable()
 export class RedditService implements OnModuleInit {

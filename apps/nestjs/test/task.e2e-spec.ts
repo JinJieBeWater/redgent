@@ -1,10 +1,10 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { PrismaClient } from '@prisma/client'
 import { lastValueFrom, tap, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
-import { TaskProgress, TaskStatus } from '@redgent/types/analysis-task'
+import { PrismaClient } from '@redgent/db'
+import { TaskProgress, TaskProgressStatus } from '@redgent/types'
 
 import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'
@@ -69,11 +69,12 @@ describe('analysis-task (e2e)', () => {
 
       const finalEvent = progressEvents[progressEvents.length - 1]
 
-      expect([TaskStatus.TASK_COMPLETE, TaskStatus.TASK_CANCEL]).toContain(
-        finalEvent.status,
-      )
+      expect([
+        TaskProgressStatus.TASK_COMPLETE,
+        TaskProgressStatus.TASK_CANCEL,
+      ]).toContain(finalEvent.status)
 
-      if (finalEvent.status === TaskStatus.TASK_COMPLETE) {
+      if (finalEvent.status === TaskProgressStatus.TASK_COMPLETE) {
         expect(finalEvent.message).toBe('任务成功执行完毕')
       }
     }, 30000)

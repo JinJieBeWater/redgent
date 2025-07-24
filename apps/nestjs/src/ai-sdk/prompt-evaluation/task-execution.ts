@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { lastValueFrom, tap } from 'rxjs'
 
-import { TaskConfig } from '@redgent/types/analysis-task'
+import { Task } from '@redgent/db'
 
 import { createMockTaskConfig } from '../../../test/data-factory'
 import { AppModule } from '../../app.module'
@@ -26,7 +26,7 @@ async function evaluateTaskExecutionPrompt() {
   console.log('🚀 服务已加载，开始准备测试数据...')
 
   // 准备用于测试的模拟数据
-  const mockTaskConfig: TaskConfig = createMockTaskConfig()
+  const mockTaskConfig: Task = createMockTaskConfig()
 
   let taskConfig = await prismaService.task.findUnique({
     where: {

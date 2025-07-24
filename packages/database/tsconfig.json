@@ -1,0 +1,8 @@
+{
+  "extends": "@redgent/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src", "./prisma/types.ts"],
+  "exclude": ["node_modules", "dist"]
+}

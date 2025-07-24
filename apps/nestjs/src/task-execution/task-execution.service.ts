@@ -1,18 +1,17 @@
 import type { Cache } from 'cache-manager'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { TaskStatus as TaskStatusModel } from '@prisma/client'
 import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber } from 'rxjs'
 import z from 'zod'
 
-import { ReportContent } from '@redgent/types/analysis-report'
+import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
 import {
-  TaskConfig,
+  CommentNode,
+  RedditLinkInfoUntrusted,
   TaskProgress,
-  TaskStatus,
-} from '@redgent/types/analysis-task'
-import { CommentNode, RedditLinkInfoUntrusted } from '@redgent/types/reddit'
+  TaskProgressStatus,
+} from '@redgent/types'
 
 import {
   analyzeRedditContentPrompt,
@@ -40,7 +39,7 @@ export class TaskExecutionService {
    * @param taskConfig 任务配置
    * @returns Observable<TaskProgress>
    */
-  execute(taskConfig: TaskConfig): Observable<TaskProgress> {
+  execute(taskConfig: Task): Observable<TaskProgress> {
     return new Observable((subscriber: Subscriber<TaskProgress>) => {
       const run = async () => {
         const startTime = performance.now()
@@ -94,7 +93,7 @@ export class TaskExecutionService {
   }
 
   private async _startTask(
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     subscriber: Subscriber<TaskProgress>,
   ) {
     await this.prismaService.task.update({
@@ -102,17 +101,17 @@ export class TaskExecutionService {
       data: { status: TaskStatusModel.running },
     })
     subscriber.next({
-      status: TaskStatus.TASK_START,
+      status: TaskProgressStatus.TASK_START,
       message: `任务 "${taskConfig.name}" 已开始`,
     })
   }
 
   private async _fetchLinks(
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     subscriber: Subscriber<TaskProgress>,
   ): Promise<RedditLinkInfoUntrusted[]> {
     subscriber.next({
-      status: TaskStatus.FETCH_START,
+      status: TaskProgressStatus.FETCH_START,
       message: '正在从 Reddit 抓取帖子...',
     })
 
@@ -133,12 +132,12 @@ export class TaskExecutionService {
 
     if (filteredLinks.length === 0) {
       subscriber.next({
-        status: TaskStatus.TASK_CANCEL,
+        status: TaskProgressStatus.TASK_CANCEL,
         message: '没有发现任何帖子，任务结束。',
       })
     } else {
       subscriber.next({
-        status: TaskStatus.FETCH_COMPLETE,
+        status: TaskProgressStatus.FETCH_COMPLETE,
         message: `从 Reddit 抓取到 ${filteredLinks.length} 个帖子`,
         data: { count: filteredLinks.length },
       })
@@ -151,7 +150,7 @@ export class TaskExecutionService {
     subscriber: Subscriber<TaskProgress>,
   ): Promise<RedditLinkInfoUntrusted[]> {
     subscriber.next({
-      status: TaskStatus.FILTER_START,
+      status: TaskProgressStatus.FILTER_START,
       message: '开始查询缓存，并进行过滤',
     })
 
@@ -173,12 +172,12 @@ export class TaskExecutionService {
 
     if (newLinks.length === 0) {
       subscriber.next({
-        status: TaskStatus.TASK_CANCEL,
+        status: TaskProgressStatus.TASK_CANCEL,
         message: '所有帖子都已被处理过，没有新内容，任务结束。',
       })
     } else {
       subscriber.next({
-        status: TaskStatus.FILTER_COMPLETE,
+        status: TaskProgressStatus.FILTER_COMPLETE,
         message: `缓存查询完成，发现 ${newLinks.length} 个新帖子`,
         data: {
           originalCount: links.length,
@@ -190,7 +189,7 @@ export class TaskExecutionService {
   }
 
   private async _selectLinks(
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     links: RedditLinkInfoUntrusted[],
     subscriber: Subscriber<TaskProgress>,
   ): Promise<RedditLinkInfoUntrusted[]> {
@@ -199,7 +198,7 @@ export class TaskExecutionService {
     }
 
     subscriber.next({
-      status: TaskStatus.SELECT_START,
+      status: TaskProgressStatus.SELECT_START,
       message: `帖子过多（${links.length} > ${this.MAX_LINKS_PER_TASK}），开始筛选...`,
     })
 
@@ -219,12 +218,12 @@ export class TaskExecutionService {
 
     if (filteredLinks.length === 0) {
       subscriber.next({
-        status: TaskStatus.TASK_CANCEL,
+        status: TaskProgressStatus.TASK_CANCEL,
         message: '筛选后没有帖子，任务结束。',
       })
     } else {
       subscriber.next({
-        status: TaskStatus.SELECT_COMPLETE,
+        status: TaskProgressStatus.SELECT_COMPLETE,
         message: `筛选完成，选出 ${filteredLinks.length} 个最相关的帖子`,
         data: {
           originalCount: links.length,
@@ -245,7 +244,7 @@ export class TaskExecutionService {
     subscriber: Subscriber<TaskProgress>,
   ) {
     subscriber.next({
-      status: TaskStatus.FETCH_CONTENT_START,
+      status: TaskProgressStatus.FETCH_CONTENT_START,
       message: `正在为 ${links.length} 个帖子获取完整内容...`,
     })
 
@@ -254,14 +253,14 @@ export class TaskExecutionService {
     )
 
     subscriber.next({
-      status: TaskStatus.FETCH_CONTENT_COMPLETE,
+      status: TaskProgressStatus.FETCH_CONTENT_COMPLETE,
       message: '获取完整内容完成',
     })
     return completeLinkData
   }
 
   private async _analyzeContent(
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     completeLinkData: {
       content: RedditLinkInfoUntrusted
       comment: CommentNode[]
@@ -269,7 +268,7 @@ export class TaskExecutionService {
     subscriber: Subscriber<TaskProgress>,
   ) {
     subscriber.next({
-      status: TaskStatus.ANALYZE_START,
+      status: TaskProgressStatus.ANALYZE_START,
       message: `正在调用 AI 服务分析 ${completeLinkData.length} 个帖子...`,
       data: { count: completeLinkData.length },
     })
@@ -277,15 +276,15 @@ export class TaskExecutionService {
     const analysisResult = await this.analyze(taskConfig, completeLinkData)
 
     subscriber.next({
-      status: TaskStatus.ANALYZE_COMPLETE,
+      status: TaskProgressStatus.ANALYZE_COMPLETE,
       message: 'AI 分析完成',
     })
     return analysisResult
   }
 
   private async _saveResults(
-    taskConfig: TaskConfig,
-    analysisResult: ReportContent,
+    taskConfig: Task,
+    analysisResult: TaskReport['content'],
     startTime: number,
     subscriber: Subscriber<TaskProgress>,
   ) {
@@ -300,7 +299,7 @@ export class TaskExecutionService {
         },
       }),
 
-      this.prismaService.report.create({
+      this.prismaService.taskReport.create({
         data: {
           taskId: taskConfig.id,
           content: analysisResult,
@@ -310,7 +309,7 @@ export class TaskExecutionService {
     ])
 
     subscriber.next({
-      status: TaskStatus.TASK_COMPLETE,
+      status: TaskProgressStatus.TASK_COMPLETE,
       message: '任务成功执行完毕',
       data: taskInfo,
     })
@@ -318,7 +317,7 @@ export class TaskExecutionService {
 
   private async _handleError(
     error: unknown,
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     subscriber: Subscriber<TaskProgress>,
   ) {
     this.logger.error(error)
@@ -332,13 +331,13 @@ export class TaskExecutionService {
     })
 
     subscriber.error({
-      status: TaskStatus.TASK_ERROR,
+      status: TaskProgressStatus.TASK_ERROR,
       message: `任务 "${taskConfig.name}" 执行失败`,
     })
   }
 
   async selectMostRelevantLinks(
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     links: { id: string; title: string; selftext: string }[],
   ) {
     try {
@@ -376,12 +375,12 @@ export class TaskExecutionService {
    * @returns 分析报告内容
    */
   private async analyze(
-    taskConfig: TaskConfig,
+    taskConfig: Task,
     completeLinkData: {
       content: RedditLinkInfoUntrusted
       comment: CommentNode[]
     }[],
-  ): Promise<ReportContent> {
+  ): Promise<TaskReport['content']> {
     try {
       const { object: analysisResult } = await generateObject({
         model: myProvider.languageModel('analysis-model'),
@@ -403,7 +402,7 @@ export class TaskExecutionService {
         prompt: analyzeRedditContentPrompt(taskConfig.prompt, completeLinkData),
       })
 
-      return analysisResult as ReportContent
+      return analysisResult
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         const err = error.responseBody
