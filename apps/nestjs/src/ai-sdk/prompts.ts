@@ -2,7 +2,7 @@
  * @fileoverview 该文件包含AI SDK使用的所有提示.
  */
 
-import { CommentNode, RedditLinkInfoUntrusted } from '@redgent/types/reddit'
+import { CommentNode, RedditLinkInfoUntrusted } from '@redgent/types'
 
 export const redgentAgentSystem = `
 你是 Redgent Agent，一个专业的 Reddit 内容抓取任务管理助手。

@@ -1,46 +1,7 @@
-export const ScheduleType = {
-  cron: 'cron',
-  interval: 'interval',
-} as const
-
-export type ScheduleType = (typeof ScheduleType)[keyof typeof ScheduleType]
-
-// 任务配置字段
-export interface TaskConfig {
-  /** 任务唯一标识符 */
-  id: string
-  /** 任务名称 */
-  name: string
-  /** 定时任务的调度类型 */
-  scheduleType: ScheduleType
-  /** 定时任务的调度表达式 */
-  scheduleExpression: string
-  /** 用户的任务提示词 */
-  prompt: string
-  /** 关键词列表，用于 Reddit 搜索 */
-  keywords: string[]
-  /** 相关的 Reddit 子版块列表 */
-  subreddits: string[]
-  /** 任务状态（如：active, paused） */
-  status: 'active' | 'paused' | 'running'
-  /** 是否启用过滤机制，通过缓存（ttl=36）过滤之前已经抓取过的内容 */
-  enableFiltering: boolean
-  /** 最后执行时间 */
-  lastExecutedAt?: Date | null
-  /** 上次执行失败的时间 */
-  lastFailureAt?: Date | null
-  /** 上次执行失败的错误信息 */
-  lastErrorMessage?: string | null
-  /** 创建时间 */
-  createdAt: Date
-  /** 更新时间 */
-  updatedAt: Date
-}
-
 /**
  * 定义所有可能的任务进度状态
  */
-export const TaskStatus = {
+export const TaskProgressStatus = {
   /** 任务已开始 */
   TASK_START: 'TASK_START',
   /** 任务已成功完成 */
@@ -79,7 +40,8 @@ export const TaskStatus = {
   INFO: 'INFO',
 } as const
 
-export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
+export type TaskProgressStatus =
+  (typeof TaskProgressStatus)[keyof typeof TaskProgressStatus]
 
 // =================================================================
 // 进度更新的类型定义
@@ -87,17 +49,17 @@ export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
 
 /** 基础进度接口 */
 interface BaseProgress {
-  status: TaskStatus
+  status: TaskProgressStatus
   message: string
 }
 
 // 1. 任务生命周期状态
 export interface TaskStartProgress extends BaseProgress {
-  status: typeof TaskStatus.TASK_START
+  status: typeof TaskProgressStatus.TASK_START
 }
 
 export interface TaskCompleteProgress extends BaseProgress {
-  status: typeof TaskStatus.TASK_COMPLETE
+  status: typeof TaskProgressStatus.TASK_COMPLETE
   data: {
     id: string
     createdAt: Date
@@ -107,11 +69,11 @@ export interface TaskCompleteProgress extends BaseProgress {
 }
 
 export interface TaskCancelProgress extends BaseProgress {
-  status: typeof TaskStatus.TASK_CANCEL
+  status: typeof TaskProgressStatus.TASK_CANCEL
 }
 
 export interface TaskErrorProgress extends BaseProgress {
-  status: typeof TaskStatus.TASK_ERROR
+  status: typeof TaskProgressStatus.TASK_ERROR
   data: {
     error: Error
   }
@@ -119,11 +81,11 @@ export interface TaskErrorProgress extends BaseProgress {
 
 // 2. 数据抓取阶段
 export interface FetchStartProgress extends BaseProgress {
-  status: typeof TaskStatus.FETCH_START
+  status: typeof TaskProgressStatus.FETCH_START
 }
 
 export interface FetchCompleteProgress extends BaseProgress {
-  status: typeof TaskStatus.FETCH_COMPLETE
+  status: typeof TaskProgressStatus.FETCH_COMPLETE
   data: {
     /** 本次抓取到的链接总数 */
     count: number
@@ -132,11 +94,11 @@ export interface FetchCompleteProgress extends BaseProgress {
 
 // 3. 数据过滤阶段
 export interface FilterStartProgress extends BaseProgress {
-  status: typeof TaskStatus.FILTER_START
+  status: typeof TaskProgressStatus.FILTER_START
 }
 
 export interface FilterCompleteProgress extends BaseProgress {
-  status: typeof TaskStatus.FILTER_COMPLETE
+  status: typeof TaskProgressStatus.FILTER_COMPLETE
   data: {
     /** 过滤前的链接数 */
     originalCount: number
@@ -147,11 +109,11 @@ export interface FilterCompleteProgress extends BaseProgress {
 
 // 4. 筛选阶段
 export interface SelectStartProgress extends BaseProgress {
-  status: typeof TaskStatus.SELECT_START
+  status: typeof TaskProgressStatus.SELECT_START
 }
 
 export interface SelectCompleteProgress extends BaseProgress {
-  status: typeof TaskStatus.SELECT_COMPLETE
+  status: typeof TaskProgressStatus.SELECT_COMPLETE
   data: {
     /** 过滤前的链接数 */
     originalCount: number
@@ -164,16 +126,16 @@ export interface SelectCompleteProgress extends BaseProgress {
 
 // 5. 获取完整内容阶段
 export interface FetchContentStartProgress extends BaseProgress {
-  status: typeof TaskStatus.FETCH_CONTENT_START
+  status: typeof TaskProgressStatus.FETCH_CONTENT_START
 }
 
 export interface FetchContentCompleteProgress extends BaseProgress {
-  status: typeof TaskStatus.FETCH_CONTENT_COMPLETE
+  status: typeof TaskProgressStatus.FETCH_CONTENT_COMPLETE
 }
 
 // 6. AI 分析阶段
 export interface AnalyzeStartProgress extends BaseProgress {
-  status: typeof TaskStatus.ANALYZE_START
+  status: typeof TaskProgressStatus.ANALYZE_START
   data: {
     /** 待分析的链接数 */
     count: number
@@ -181,12 +143,12 @@ export interface AnalyzeStartProgress extends BaseProgress {
 }
 
 export interface AnalyzeCompleteProgress extends BaseProgress {
-  status: typeof TaskStatus.ANALYZE_COMPLETE
+  status: typeof TaskProgressStatus.ANALYZE_COMPLETE
 }
 
 // 7. 通用信息
 export interface InfoProgress extends BaseProgress {
-  status: typeof TaskStatus.INFO
+  status: typeof TaskProgressStatus.INFO
 }
 
 /**

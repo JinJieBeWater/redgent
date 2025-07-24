@@ -3,7 +3,6 @@
  * 提供创建各种测试数据的工厂函数，避免在多个测试文件中重复定义
  */
 
-import type { TaskConfig } from '@redgent/types/analysis-task'
 import type {
   CommentNode,
   RedditCommentInfoUntrusted,
@@ -11,7 +10,8 @@ import type {
   RedditLinkInfoUntrusted,
   RedditLinkWrapper,
   RedditListingResponse,
-} from '@redgent/types/reddit'
+} from '@redgent/types'
+import { Task } from '@redgent/db'
 
 // ============================================================================
 // Reddit 数据工厂
@@ -295,9 +295,7 @@ export function createMockLinkWithComments(linkId: string) {
  * @param overrides 可选的覆盖属性
  * @returns 任务配置对象
  */
-export function createMockTaskConfig(
-  overrides?: Partial<TaskConfig>,
-): TaskConfig {
+export function createMockTaskConfig(overrides?: Partial<Task>): Task {
   return {
     id: 'task-1',
     name: 'React 生态',
@@ -310,6 +308,9 @@ export function createMockTaskConfig(
     updatedAt: new Date(),
     status: 'active',
     enableFiltering: true,
+    lastExecutedAt: null,
+    lastFailureAt: null,
+    lastErrorMessage: null,
     ...overrides,
   }
 }

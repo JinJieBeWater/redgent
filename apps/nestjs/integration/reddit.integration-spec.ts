@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { RedditSort } from '@redgent/types/reddit'
+import { RedditSort } from '@redgent/types'
 
 import { AppModule } from '../src/app.module'
 import { RedditService } from '../src/reddit/reddit.service'
@@ -66,7 +66,7 @@ describe(RedditService.name, () => {
 
       jest
         .spyOn(redditService, 'getHotLinksBySubreddit')
-        .mockImplementation(async (subreddit) => {
+        .mockImplementation(async subreddit => {
           if (subreddit === 'nestjs') {
             return nestjsResponse.data
           }
@@ -101,7 +101,7 @@ describe(RedditService.name, () => {
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
       // Check if there are no duplicate links
-      const uniqueLinks = new Set(result.map((link) => link.id))
+      const uniqueLinks = new Set(result.map(link => link.id))
       expect(uniqueLinks.size).toBe(result.length)
     })
   })
@@ -127,7 +127,7 @@ describe(RedditService.name, () => {
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
       // Check if there are no duplicate links
-      const uniqueLinks = new Set(result.map((link) => link.id))
+      const uniqueLinks = new Set(result.map(link => link.id))
       expect(uniqueLinks.size).toBe(result.length)
     })
   })
@@ -147,7 +147,7 @@ describe(RedditService.name, () => {
         expect(Array.isArray(result)).toBe(true)
         expect(result.length).toBeGreaterThan(0)
         // Check if there are no duplicate links
-        const uniqueLinks = new Set(result.map((link) => link.id))
+        const uniqueLinks = new Set(result.map(link => link.id))
         expect(uniqueLinks.size).toBe(result.length)
       })
     },
@@ -165,7 +165,7 @@ describe(RedditService.name, () => {
 
       // 获取有评论的链接 ID
       const linkWithComments = subredditResult.find(
-        (link) => link.num_comments > 0,
+        link => link.num_comments > 0,
       )
       expect(linkWithComments).toBeDefined()
 

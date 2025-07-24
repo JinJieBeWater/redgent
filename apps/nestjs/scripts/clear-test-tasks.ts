@@ -8,7 +8,7 @@ async function clearTestTasks() {
   try {
     // 显示清除前的统计信息
     const beforeCount = await prisma.task.count()
-    const reportCount = await prisma.report.count()
+    const reportCount = await prisma.taskReport.count()
 
     console.log(`📊 清除前统计:`)
     console.log(`  任务数: ${beforeCount}`)
@@ -20,7 +20,7 @@ async function clearTestTasks() {
     }
 
     // 由于外键约束，需要先删除报告，再删除任务
-    const deletedReports = await prisma.report.deleteMany({})
+    const deletedReports = await prisma.taskReport.deleteMany({})
     console.log(`🗑️  删除了 ${deletedReports.count} 个报告`)
 
     const deletedTasks = await prisma.task.deleteMany({})
@@ -28,7 +28,7 @@ async function clearTestTasks() {
 
     // 显示清除后的统计信息
     const afterTaskCount = await prisma.task.count()
-    const afterReportCount = await prisma.report.count()
+    const afterReportCount = await prisma.taskReport.count()
 
     console.log('\n📈 清除后统计:')
     console.log(`  任务数: ${afterTaskCount}`)

@@ -7,8 +7,8 @@ import { lastValueFrom, toArray } from 'rxjs'
 import {
   TaskCancelProgress,
   TaskCompleteProgress,
-  TaskStatus,
-} from '@redgent/types/analysis-task'
+  TaskProgressStatus,
+} from '@redgent/types'
 
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
@@ -40,9 +40,7 @@ describe(TaskExecutionService.name, () => {
           .mockResolvedValue(mockRedditLinks),
         getCommentsByLinkIds: jest.fn().mockImplementation((ids: string[]) => {
           return Promise.resolve(
-            mockCompleteLinkData.filter((data) =>
-              ids.includes(data.content.id),
-            ),
+            mockCompleteLinkData.filter(data => ids.includes(data.content.id)),
           )
         }),
       },
@@ -94,10 +92,10 @@ describe(TaskExecutionService.name, () => {
 
     // 1. 验证过滤状态和结果
     const filterStart = progressEvents.find(
-      (p) => p.status === TaskStatus.FILTER_START,
+      p => p.status === TaskProgressStatus.FILTER_START,
     )
     const filterComplete = progressEvents.find(
-      (p) => p.status === TaskStatus.FILTER_COMPLETE,
+      p => p.status === TaskProgressStatus.FILTER_COMPLETE,
     )!
     expect(filterStart).toBeDefined()
     expect(filterComplete).toBeDefined()
@@ -112,7 +110,7 @@ describe(TaskExecutionService.name, () => {
 
     // 5. 验证任务最后走到了 TASK_COMPLETE 状态
     const lastEvent = progressEvents.at(-1) as TaskCompleteProgress
-    expect(lastEvent.status).toBe(TaskStatus.TASK_COMPLETE)
+    expect(lastEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
   })
 
   it('应该获取链接，过滤掉已缓存的链接，只缓存新链接', async () => {
@@ -131,7 +129,7 @@ describe(TaskExecutionService.name, () => {
 
     // 1. 验证过滤结果
     const filterComplete = progressEvents.find(
-      (p) => p.status === TaskStatus.FILTER_COMPLETE,
+      p => p.status === TaskProgressStatus.FILTER_COMPLETE,
     )!
     expect(filterComplete).toBeDefined()
     expect(filterComplete.data.uniqueCount).toBe(2)
@@ -146,13 +144,13 @@ describe(TaskExecutionService.name, () => {
 
     // 3. 验证 AI 分析的是过滤后的链接
     const analyzeStart = progressEvents.find(
-      (p) => p.status === TaskStatus.ANALYZE_START,
+      p => p.status === TaskProgressStatus.ANALYZE_START,
     )!
     expect(analyzeStart.data.count).toBe(2)
 
     // 4. 验证任务最后走到了 TASK_COMPLETE 状态
     const lastEvent = progressEvents[progressEvents.length - 1]
-    expect(lastEvent.status).toBe(TaskStatus.TASK_COMPLETE)
+    expect(lastEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
   })
 
   it('应该在所有获取的链接都已在缓存中时停止执行', async () => {
@@ -175,14 +173,14 @@ describe(TaskExecutionService.name, () => {
 
     // 1. 验证最后一个事件是 TASK_CANCEL
     const lastEvent = progressEvents.at(-1) as TaskCancelProgress
-    expect(lastEvent.status).toBe(TaskStatus.TASK_CANCEL)
+    expect(lastEvent.status).toBe(TaskProgressStatus.TASK_CANCEL)
 
     // 2. 验证 mset 没有被调用
     expect(cacheMsetSpy).not.toHaveBeenCalled()
 
     // 3. 验证 AI 分析步骤没有被执行
     const analyzeStart = progressEvents.find(
-      (p) => p.status === TaskStatus.ANALYZE_START,
+      p => p.status === TaskProgressStatus.ANALYZE_START,
     )
     expect(analyzeStart).toBeUndefined()
   })

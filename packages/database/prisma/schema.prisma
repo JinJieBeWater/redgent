@@ -9,6 +9,10 @@ generator client {
   output   = "../generated/prisma"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -39,7 +43,7 @@ model Task {
 
   lastErrorMessage String?
 
-  reports Report[]
+  reports TaskReport[]
 
   createdAt DateTime @default(now())
 
@@ -61,11 +65,12 @@ enum TaskStatus {
 }
 
 /// 分析报告模型 - 存储AI分析Reddit内容后生成的结果
-model Report {
+model TaskReport {
   id String @id @default(uuid()) @db.Uuid
 
   createdAt DateTime @default(now())
 
+  /// [ReportContent]
   content Json
 
   executionDuration Int?

@@ -10,7 +10,7 @@ import type {
 import type { ModelMessage } from 'ai'
 import { generateId } from 'ai'
 
-import type { ReportContent } from '@redgent/types/analysis-report'
+import { TaskReport } from '@redgent/db'
 
 import { TEST_PROMPTS } from './basic'
 
@@ -55,7 +55,7 @@ export const MOCK_RESPONSES = {
         supportingPostIds: ['link-2', 'link-3'],
       },
     ],
-  } satisfies ReportContent,
+  } satisfies TaskReport['content'],
 
   /** 链接筛选结果数组 */
   linkSelection: Array.from(
