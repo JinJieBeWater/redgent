@@ -20,13 +20,13 @@ import { TEST_PROMPTS } from './basic'
 
 /**
  * 响应处理器接口
- * @template T 响应数据的类型
+ * 支持直接响应数据或响应生成函数两种形式
  */
-interface ResponseHandler<T = any> {
+interface ResponseHandler {
   /** 匹配函数，判断是否应该使用此处理器 */
   matcher: (prompt: ModelMessage[]) => boolean
   /** 响应数据或生成响应数据的函数 */
-  response: T | (() => T)
+  response: string | (() => string)
 }
 
 // ============================================================================
@@ -79,7 +79,7 @@ const responseHandlers: ResponseHandler[] = []
  * 注册响应处理器到全局注册表
  * @param handler 响应处理器配置
  */
-function registerResponseHandler<T>(handler: ResponseHandler<T>): void {
+function registerResponseHandler(handler: ResponseHandler): void {
   responseHandlers.push(handler)
 }
 
@@ -91,7 +91,7 @@ function registerResponseHandler<T>(handler: ResponseHandler<T>): void {
 function findMatchingHandler(
   prompt: ModelMessage[],
 ): ResponseHandler | undefined {
-  return responseHandlers.find((handler) => handler.matcher(prompt))
+  return responseHandlers.find(handler => handler.matcher(prompt))
 }
 
 /**
@@ -99,9 +99,9 @@ function findMatchingHandler(
  * @param matcher 匹配函数
  * @param response 响应数据或生成函数
  */
-export function addCustomResponseHandler<T>(
+export function addCustomResponseHandler(
   matcher: (prompt: ModelMessage[]) => boolean,
-  response: T | (() => T),
+  response: string | (() => string),
 ): void {
   registerResponseHandler({ matcher, response })
 }
@@ -169,25 +169,25 @@ export function compareMessages(
 
 // 注册精确匹配的响应处理器
 registerResponseHandler({
-  matcher: (prompt) =>
+  matcher: prompt =>
     compareMessages(prompt.at(-1)!, TEST_PROMPTS.USER_NEW_TASK),
   response: MOCK_RESPONSES.defaultMessage,
 })
 
 registerResponseHandler({
-  matcher: (prompt) =>
+  matcher: prompt =>
     compareMessages(prompt.at(-1)!, TEST_PROMPTS.ANALYZE_CONTENT),
   response: () => JSON.stringify(MOCK_RESPONSES.analysisResult),
 })
 
 // 注册分析内容的响应处理器（用于 generateObject）
 registerResponseHandler({
-  matcher: (prompt) => {
+  matcher: prompt => {
     const lastMessage = prompt.at(-1)
     if (!lastMessage || !Array.isArray(lastMessage.content)) return false
 
     const textContent =
-      lastMessage.content.find((c) => c.type === 'text')?.text || ''
+      lastMessage.content.find(c => c.type === 'text')?.text || ''
     return (
       textContent.includes('你是一个专业的内容分析师') &&
       textContent.includes('请分析以下 Reddit 帖子')
@@ -292,7 +292,7 @@ export const getResponseChunksByPrompt = (
 const textToDeltas = (text: string): LanguageModelV2StreamPart[] => {
   const id = generateId()
 
-  const deltas = text.split(' ').map((char) => ({
+  const deltas = text.split(' ').map(char => ({
     id,
     type: 'text-delta' as const,
     delta: `${char} `,

@@ -100,7 +100,7 @@ export const analyzeRedditContentPrompt = (
 分析的内容包括：
 ${completeLinkData
   .map(
-    (data) => `
+    data => `
 - ID: ${data.content.id}
 - 标题: ${data.content.title}
 - 内容: ${data.content.selftext || '(无文本内容)'}

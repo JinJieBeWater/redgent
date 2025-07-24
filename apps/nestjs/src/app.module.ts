@@ -25,10 +25,12 @@ import { TaskScheduleModule } from './task-schedule/task-schedule.module'
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
-        PORT: Joi.number().default(3002),
+        PORT: Joi.number().default(8000),
         PROXY: Joi.number().default(7890),
         REDDIT_CLIENT_ID: Joi.string().required(),
         REDDIT_SECRET: Joi.string().required(),
+        // OPENROUTER_API_KEY: Joi.string().required(),
+        DEEPSEEK_API_KEY: Joi.string().required(),
       }),
       validationOptions: {
         abortEarly: true,

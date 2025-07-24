@@ -1,10 +1,15 @@
-import { ModelMessage } from 'ai'
+import { UIMessage } from 'ai'
 import { Type } from 'class-transformer'
-import { IsArray, ValidateNested } from 'class-validator'
+import { IsArray, IsOptional, IsString } from 'class-validator'
 
 export class ChatDto {
+  @IsString()
+  id!: string
+
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Object)
-  messages: ModelMessage[] = [] // AI SDK 标准消息格式
+  messages: UIMessage[] = []
+
+  @IsOptional()
+  @IsString()
+  trigger?: string
 }

@@ -47,10 +47,10 @@ async function evaluateTaskExecutionPrompt() {
     await lastValueFrom(
       executionService.execute(taskConfig).pipe(
         tap({
-          next: (progress) => {
+          next: progress => {
             console.log(`🔄 任务进度: ${JSON.stringify(progress, null, 2)}`)
           },
-          error: (err) => {
+          error: err => {
             console.error('❌ 任务执行出错:', err)
           },
           complete: () => {
@@ -73,4 +73,7 @@ async function evaluateTaskExecutionPrompt() {
 }
 
 // 运行评估函数
-evaluateTaskExecutionPrompt()
+evaluateTaskExecutionPrompt().catch(error => {
+  console.error('❌ 评估脚本执行出错:', error)
+  process.exit(1)
+})

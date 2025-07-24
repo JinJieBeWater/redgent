@@ -56,7 +56,7 @@ export class RedditService implements OnModuleInit {
             },
           },
         )
-        .pipe(map((res) => res.data)),
+        .pipe(map(res => res.data)),
     )
 
     return response.access_token
@@ -67,7 +67,7 @@ export class RedditService implements OnModuleInit {
     const response = await firstValueFrom(
       this.httpService
         .get<RedditListingResponse<SubredditWrapper>>(url)
-        .pipe(map((res) => res.data)),
+        .pipe(map(res => res.data)),
     )
     return response.data
   }
@@ -80,7 +80,7 @@ export class RedditService implements OnModuleInit {
     const response = await firstValueFrom(
       this.httpService
         .get<RedditListingResponse<RedditLinkWrapper>>(url)
-        .pipe(map((res) => res.data)),
+        .pipe(map(res => res.data)),
     )
     return response.data
   }
@@ -89,7 +89,7 @@ export class RedditService implements OnModuleInit {
     subreddits: string[],
     sort: RedditSort = RedditSort.Hot,
   ) {
-    const requests = subreddits.map((subreddit) =>
+    const requests = subreddits.map(subreddit =>
       this.getHotLinksBySubreddit(subreddit, sort),
     )
 
@@ -99,7 +99,7 @@ export class RedditService implements OnModuleInit {
     for (const result of results) {
       if (result.status === 'fulfilled') {
         // 直接添加所有链接，不进行去重和排序
-        allLinks.push(...result.value.children.map((link) => link.data))
+        allLinks.push(...result.value.children.map(link => link.data))
       } else {
         this.logger.error(
           `Failed to fetch links for a subreddit: ${result.reason}`,
@@ -115,7 +115,7 @@ export class RedditService implements OnModuleInit {
     const response = await firstValueFrom(
       this.httpService
         .get<RedditListingResponse<RedditLinkWrapper>>(url)
-        .pipe(map((res) => res.data)),
+        .pipe(map(res => res.data)),
     )
     return response.data
   }
@@ -126,7 +126,7 @@ export class RedditService implements OnModuleInit {
   ) {
     if (querys.length === 0) return []
 
-    const requests = querys.map((query) => this.getHotLinksByQuery(query, sort))
+    const requests = querys.map(query => this.getHotLinksByQuery(query, sort))
     const results = await Promise.allSettled(requests)
 
     const uniqueLinksMap = new Map<string, RedditLinkInfoUntrusted>()
@@ -151,8 +151,8 @@ export class RedditService implements OnModuleInit {
     sort: RedditSort = RedditSort.Hot,
   ) {
     const requests = [
-      ...querys.map((query) => this.getHotLinksByQuery(query, sort)),
-      ...subreddits.map((subreddit) =>
+      ...querys.map(query => this.getHotLinksByQuery(query, sort)),
+      ...subreddits.map(subreddit =>
         this.getHotLinksBySubreddit(subreddit, sort),
       ),
     ]
@@ -163,7 +163,7 @@ export class RedditService implements OnModuleInit {
     for (const result of results) {
       if (result.status === 'fulfilled') {
         // 直接添加所有链接，不进行去重和排序
-        allLinks.push(...result.value.children.map((link) => link.data))
+        allLinks.push(...result.value.children.map(link => link.data))
       }
     }
 
@@ -175,13 +175,13 @@ export class RedditService implements OnModuleInit {
     const response = await firstValueFrom(
       this.httpService
         .get<RedditCommentResponse>(url)
-        .pipe(map((res) => res.data)),
+        .pipe(map(res => res.data)),
     )
     return response
   }
 
   async getCommentsByLinkIds(linkIds: string[]) {
-    const requests = linkIds.map((linkId) => this.getCommentsByLinkId(linkId))
+    const requests = linkIds.map(linkId => this.getCommentsByLinkId(linkId))
     const results = await Promise.allSettled(requests)
     const currentData: {
       content: RedditLinkInfoUntrusted
@@ -192,7 +192,7 @@ export class RedditService implements OnModuleInit {
         currentData.push({
           content: result.value[0].data.children[0].data,
           comment: this.extractCommentNodes(
-            result.value[1].data.children.map((c) => c.data),
+            result.value[1].data.children.map(c => c.data),
           ),
         })
       }

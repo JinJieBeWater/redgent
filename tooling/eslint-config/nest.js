@@ -1,10 +1,9 @@
-
-import { config as baseConfig } from "./base.js"
 import eslint from '@eslint/js'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
+import { config as baseConfig } from './base.js'
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -37,8 +36,12 @@ export const nestJsConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      "@typescript-eslint/require-await": 'off',
-      "@typescript-eslint/unbound-method": 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
     },
   },
 ]

@@ -123,7 +123,7 @@ export class TaskExecutionService {
 
     // 过滤ups为0的帖子 和 评论数为0的帖子
     const filteredLinks = links.filter(
-      (link) => link.ups > 0 || link.num_comments > 0,
+      link => link.ups > 0 || link.num_comments > 0,
     )
 
     // // 帖子数量大于30时，按照ups排序，取前30个
@@ -155,20 +155,18 @@ export class TaskExecutionService {
       message: '开始查询缓存，并进行过滤',
     })
 
-    const cacheKeys = links.map((l) => `${this.CACHE_KEY_PREFIX_POST}${l.id}`)
+    const cacheKeys = links.map(l => `${this.CACHE_KEY_PREFIX_POST}${l.id}`)
     const cachedValues = await this.cacheManager.mget(cacheKeys)
     const newLinks = links.filter(
       (_, index) => cachedValues[index] === undefined,
     )
-    this.logger.log('cacheKeys: ' + cacheKeys)
-
     if (newLinks.length > 0) {
-      const pairsToCache = newLinks.map((p) => ({
+      const pairsToCache = newLinks.map(p => ({
         key: `${this.CACHE_KEY_PREFIX_POST}${p.id}`,
         value: 1,
         ttl: this.CACHE_TTL,
       }))
-      this.cacheManager.mset(pairsToCache).catch((err) => {
+      this.cacheManager.mset(pairsToCache).catch(err => {
         this.logger.warn('Failed to cache new links in the background', err)
       })
     }
@@ -205,7 +203,7 @@ export class TaskExecutionService {
       message: `帖子过多（${links.length} > ${this.MAX_LINKS_PER_TASK}），开始筛选...`,
     })
 
-    const linkInfoToSelect = links.map((link) => ({
+    const linkInfoToSelect = links.map(link => ({
       id: link.id,
       title: link.title,
       selftext: link.selftext,
@@ -215,7 +213,7 @@ export class TaskExecutionService {
       taskConfig,
       linkInfoToSelect,
     )
-    const filteredLinks = links.filter((link) =>
+    const filteredLinks = links.filter(link =>
       filteredLinkIds.includes(link.id),
     )
 
@@ -231,7 +229,7 @@ export class TaskExecutionService {
         data: {
           originalCount: links.length,
           uniqueCount: filteredLinks.length,
-          links: filteredLinks.map((link) => ({
+          links: filteredLinks.map(link => ({
             id: link.id,
             title: link.title,
             selftext: link.selftext,
@@ -252,7 +250,7 @@ export class TaskExecutionService {
     })
 
     const completeLinkData = await this.redditService.getCommentsByLinkIds(
-      links.map((p) => p.id),
+      links.map(p => p.id),
     )
 
     subscriber.next({
@@ -293,7 +291,7 @@ export class TaskExecutionService {
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [_, taskInfo] = await Promise.all([
+    const [, taskInfo] = await Promise.all([
       this.prismaService.task.update({
         where: { id: taskConfig.id },
         data: {
@@ -361,7 +359,7 @@ export class TaskExecutionService {
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         // Handle the API call error
-        const err = JSON.parse(error.responseBody)
+        const err = error.responseBody
         this.logger.error(err)
         throw new Error(err)
       } else {
@@ -408,7 +406,7 @@ export class TaskExecutionService {
       return analysisResult as ReportContent
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
-        const err = JSON.parse(error.responseBody)
+        const err = error.responseBody
         this.logger.error(err)
         throw new Error(err)
       } else {

@@ -6,7 +6,6 @@ import { RedditService } from './reddit.service'
 
 describe('RedditService', () => {
   let service: RedditService
-  let httpService: HttpService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,7 +33,6 @@ describe('RedditService', () => {
     }).compile()
 
     service = module.get<RedditService>(RedditService)
-    httpService = module.get<HttpService>(HttpService)
   })
 
   it('应该被正确定义', () => {

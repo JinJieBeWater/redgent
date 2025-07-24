@@ -7,7 +7,7 @@
     "dev:server": "turbo run dev --filter=nestjs",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "format-check": "turbo run format-check",
+    "format:check": "turbo run format:check",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
