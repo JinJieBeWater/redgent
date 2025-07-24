@@ -12,7 +12,6 @@ import { TaskExecutionService } from '../src/task-execution/task-execution.servi
 import { createMockTaskConfig } from './data-factory'
 
 const mockTaskConfig = createMockTaskConfig({
-  id: 'task-1',
   name: '监测 ReactJs 动态',
   prompt: '帮我每天6点监测一次有关 ReactJs 生态圈的动态',
   keywords: ['reactjs', 'react'],

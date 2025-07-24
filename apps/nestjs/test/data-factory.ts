@@ -3,6 +3,8 @@
  * 提供创建各种测试数据的工厂函数，避免在多个测试文件中重复定义
  */
 
+import { randomUUID } from 'crypto'
+
 import type {
   CommentNode,
   RedditCommentInfoUntrusted,
@@ -68,7 +70,7 @@ export function createMockLinks(
   prefix: string = 'link',
 ): RedditLinkInfoUntrusted[] {
   return Array.from({ length: count }, (_, i) =>
-    createMockLink(`${prefix}-${i + 1}`, subreddit, {
+    createMockLink(randomUUID(), subreddit, {
       title: `${prefix} ${i + 1}`,
       selftext: `Content of ${prefix} ${i + 1}`,
     }),
@@ -139,7 +141,7 @@ export function createMockRedditComment(
     replies: '',
     user_reports: [],
     saved: false,
-    id: `comment_${Date.now()}_${Math.random()}`,
+    id: randomUUID(),
     banned_at_utc: null,
     mod_reason_title: null,
     gilded: 0,
@@ -160,7 +162,7 @@ export function createMockRedditComment(
     edited: false,
     top_awarded_type: null,
     author_flair_css_class: null,
-    name: `t1_comment_${Date.now()}`,
+    name: `t1_${randomUUID()}`,
     is_submitter: false,
     downs: 0,
     author_flair_richtext: [],
@@ -176,7 +178,7 @@ export function createMockRedditComment(
     unrepliable_reason: null,
     author_flair_text_color: null,
     score_hidden: false,
-    permalink: `/r/test/comments/test/_/comment_${Date.now()}/`,
+    permalink: `/r/test/comments/test/_/${randomUUID()}/`,
     subreddit_type: 'public',
     locked: false,
     report_reasons: null,
@@ -272,9 +274,10 @@ export function createMockComment(
  * @param linkId 关联的链接ID
  * @returns 完整的链接内容对象（包含评论）
  */
-export function createMockLinkWithComments(linkId: string) {
+export function createMockLinkWithComments(linkId?: string) {
+  const id = linkId || randomUUID()
   return {
-    content: createMockLink(linkId, 'test'),
+    content: createMockLink(id, 'test'),
     comment: [
       createMockComment('user1', 'This is comment 1', [
         createMockComment('user1_1', 'Child comment 1.1', [
@@ -297,7 +300,7 @@ export function createMockLinkWithComments(linkId: string) {
  */
 export function createMockTaskConfig(overrides?: Partial<Task>): Task {
   return {
-    id: 'task-1',
+    id: randomUUID(),
     name: 'React 生态',
     scheduleType: 'cron',
     scheduleExpression: '0 0 * * *',
@@ -332,9 +335,9 @@ export const TEST_DATA_PRESETS = {
 
   /** 完整的链接内容数据（包含评论） */
   completeLinkData: [
-    createMockLinkWithComments('link-1'),
-    createMockLinkWithComments('link-2'),
-    createMockLinkWithComments('link-3'),
+    createMockLinkWithComments(),
+    createMockLinkWithComments(),
+    createMockLinkWithComments(),
   ],
 
   /** 标准任务配置 */

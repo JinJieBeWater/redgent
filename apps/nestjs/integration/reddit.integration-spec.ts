@@ -83,7 +83,7 @@ describe(RedditService.name, () => {
 
       expect(result).toBeDefined()
       expect(result.length).toBe(1)
-      expect(result[0].id).toBe('link-1')
+      expect(result[0].id).toBe(mockLinks[0].id)
       expect(redditService.getHotLinksBySubreddit).toHaveBeenCalledTimes(2)
 
       expect(loggerErrorSpy).toHaveBeenCalledTimes(1)

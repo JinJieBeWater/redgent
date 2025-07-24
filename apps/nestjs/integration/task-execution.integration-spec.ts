@@ -24,7 +24,7 @@ import {
 // 使用 data-factory 创建测试数据
 const mockRedditLinks = createMockLinks(3, 'test')
 const mockTaskConfig = createMockTaskConfig()
-const mockCompleteLinkData = TEST_DATA_PRESETS.completeLinkData
+const mockCompleteLinkData = [...TEST_DATA_PRESETS.completeLinkData]
 
 describe(TaskExecutionService.name, () => {
   let app: INestApplication
@@ -106,7 +106,8 @@ describe(TaskExecutionService.name, () => {
     expect(cacheMsetSpy).toHaveBeenCalledTimes(1)
     const msetArgs = cacheMsetSpy.mock.calls[0][0]
     expect(msetArgs).toHaveLength(3)
-    expect(msetArgs[0].key).toContain('redgent:link:link-1')
+    // 验证缓存键名包含第一个链接的ID
+    expect(msetArgs[0].key).toContain(`redgent:link:${mockRedditLinks[0].id}`)
 
     // 5. 验证任务最后走到了 TASK_COMPLETE 状态
     const lastEvent = progressEvents.at(-1) as TaskCompleteProgress
@@ -114,8 +115,8 @@ describe(TaskExecutionService.name, () => {
   })
 
   it('应该获取链接，过滤掉已缓存的链接，只缓存新链接', async () => {
-    // 预先缓存 link1
-    await cacheManager.set('redgent:link:link-1', 1)
+    // 预先缓存第一个链接
+    await cacheManager.set(`redgent:link:${mockRedditLinks[0].id}`, 1)
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
 
@@ -139,8 +140,8 @@ describe(TaskExecutionService.name, () => {
     expect(cacheMsetSpy).toHaveBeenCalledTimes(1)
     const msetArgs = cacheMsetSpy.mock.calls[0][0]
     expect(msetArgs).toHaveLength(2)
-    expect(msetArgs[0].key).toContain('redgent:link:link-2')
-    expect(msetArgs[1].key).toContain('redgent:link:link-3')
+    expect(msetArgs[0].key).toContain(`redgent:link:${mockRedditLinks[1].id}`)
+    expect(msetArgs[1].key).toContain(`redgent:link:${mockRedditLinks[2].id}`)
 
     // 3. 验证 AI 分析的是过滤后的链接
     const analyzeStart = progressEvents.find(
@@ -156,9 +157,9 @@ describe(TaskExecutionService.name, () => {
   it('应该在所有获取的链接都已在缓存中时停止执行', async () => {
     // 预先缓存所有链接
     await cacheManager.mset([
-      { key: 'redgent:link:link-1', value: 1 },
-      { key: 'redgent:link:link-2', value: 1 },
-      { key: 'redgent:link:link-3', value: 1 },
+      { key: `redgent:link:${mockRedditLinks[0].id}`, value: 1 },
+      { key: `redgent:link:${mockRedditLinks[1].id}`, value: 1 },
+      { key: `redgent:link:${mockRedditLinks[2].id}`, value: 1 },
     ])
 
     const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
