@@ -68,6 +68,9 @@ importers:
       '@redgent/db':
         specifier: workspace:*
         version: link:../../packages/database
+      '@redgent/validators':
+        specifier: workspace:*
+        version: link:../../packages/validators
       ai:
         specifier: 5.0.0-beta.25
         version: 5.0.0-beta.25(zod@4.0.5)
@@ -384,6 +387,40 @@ importers:
       eslint:
         specifier: ^9.31.0
         version: 9.31.0(jiti@2.4.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/validators:
+    dependencies:
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
+    devDependencies:
+      '@redgent/db':
+        specifier: workspace:*
+        version: link:../database
+      '@redgent/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint-config
+      '@redgent/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier-config
+      '@redgent/types':
+        specifier: workspace:*
+        version: link:../types
+      '@redgent/typescript-config':
+        specifier: workspace:*
+        version: link:../../tooling/typescript-config
+      '@types/node':
+        specifier: ^22.15.29
+        version: 22.16.5
+      eslint:
+        specifier: ^9.31.0
+        version: 9.31.0(jiti@2.4.2)
+      prettier:
+        specifier: ^3.4.2
+        version: 3.6.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
