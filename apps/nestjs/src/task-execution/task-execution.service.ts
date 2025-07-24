@@ -1,11 +1,11 @@
 import type { Cache } from 'cache-manager'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { TaskStatus as TaskStatusModel } from '@prisma/client'
 import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber } from 'rxjs'
 import z from 'zod'
 
+import { TaskStatus as TaskStatusModel } from '@redgent/db'
 import { ReportContent } from '@redgent/types/analysis-report'
 import {
   TaskConfig,

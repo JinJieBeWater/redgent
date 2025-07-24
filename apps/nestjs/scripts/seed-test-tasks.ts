@@ -1,4 +1,4 @@
-import { PrismaClient, ScheduleType, Task, TaskStatus } from '@prisma/client'
+import { PrismaClient, ScheduleType, Task, TaskStatus } from '@redgent/db'
 
 const prisma = new PrismaClient()
 

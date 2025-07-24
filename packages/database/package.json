@@ -1,0 +1,23 @@
+{
+  "name": "@redgent/db",
+  "version": "0.0.0",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --skip-generate",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "prisma": "^6.12.0",
+    "@redgent/eslint-config": "workspace:*",
+    "@redgent/typescript-config": "workspace:*",
+    "eslint": "^9.31.0",
+    "typescript": "^5.8.3"
+  }
+}

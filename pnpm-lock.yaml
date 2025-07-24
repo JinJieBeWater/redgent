@@ -65,9 +65,9 @@ importers:
       '@openrouter/ai-sdk-provider':
         specifier: 1.0.0-beta.5
         version: 1.0.0-beta.5(ai@5.0.0-beta.25(zod@4.0.5))(zod@4.0.5)
-      '@prisma/client':
-        specifier: ^6.12.0
-        version: 6.12.0(prisma@6.12.0(typescript@5.8.3))(typescript@5.8.3)
+      '@redgent/db':
+        specifier: workspace:*
+        version: link:../../packages/database
       ai:
         specifier: 5.0.0-beta.25
         version: 5.0.0-beta.25(zod@4.0.5)
@@ -168,9 +168,6 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.6.2
-      prisma:
-        specifier: ^6.12.0
-        version: 6.12.0(typescript@5.8.3)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -313,6 +310,31 @@ importers:
       web-vitals:
         specifier: ^4.2.4
         version: 4.2.4
+
+  packages/database:
+    dependencies:
+      '@prisma/client':
+        specifier: ^6.12.0
+        version: 6.12.0(prisma@6.12.0(typescript@5.8.3))(typescript@5.8.3)
+    devDependencies:
+      '@redgent/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint-config
+      '@redgent/typescript-config':
+        specifier: workspace:*
+        version: link:../../tooling/typescript-config
+      '@types/node':
+        specifier: ^22.15.29
+        version: 22.16.5
+      eslint:
+        specifier: ^9.31.0
+        version: 9.31.0(jiti@2.4.2)
+      prisma:
+        specifier: ^6.12.0
+        version: 6.12.0(typescript@5.8.3)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
   packages/types:
     devDependencies:

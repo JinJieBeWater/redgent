@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,7 +15,7 @@ datasource db {
 }
 
 model Task {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   name String
 
@@ -61,7 +62,7 @@ enum TaskStatus {
 
 /// 分析报告模型 - 存储AI分析Reddit内容后生成的结果
 model Report {
-  id String @id @default(cuid())
+  id String @id @default(uuid()) @db.Uuid
 
   createdAt DateTime @default(now())
 
@@ -69,7 +70,7 @@ model Report {
 
   executionDuration Int?
 
-  taskId String
+  taskId String @db.Uuid
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }

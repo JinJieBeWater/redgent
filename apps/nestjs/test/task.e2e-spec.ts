@@ -1,9 +1,9 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { PrismaClient } from '@prisma/client'
 import { lastValueFrom, tap, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
+import { PrismaClient } from '@redgent/db'
 import { TaskProgress, TaskStatus } from '@redgent/types/analysis-task'
 
 import { AppModule } from '../src/app.module'
