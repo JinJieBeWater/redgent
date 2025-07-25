@@ -1,6 +1,6 @@
 import type { UIMessage } from 'ai'
 import { useCallback, useEffect, useRef } from 'react'
-import { RotateCcw, Send, X } from 'lucide-react'
+import { Loader2, RotateCcw, Send, X } from 'lucide-react'
 
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
@@ -61,12 +61,17 @@ export const FormComponent: React.FC<FormComponentProps> = ({
             handleSubmit()
           }
         }}
-        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none outline-none transition-[color,box-shadow] focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
         rows={1}
       />
       <div className="flex items-center justify-end gap-2 p-2">
         {clearMessages && messages?.length !== 0 && (
-          <Button onClick={clearMessages} size="sm" className="h-7.5">
+          <Button
+            onClick={clearMessages}
+            size="sm"
+            className="h-7.5"
+            disabled={status !== 'ready' && status !== 'error'}
+          >
             <>
               <X className="h-3.5 w-3.5" />
               <span className="">Clear messages</span>
@@ -79,15 +84,30 @@ export const FormComponent: React.FC<FormComponentProps> = ({
           className="h-7.5 w-auto cursor-pointer"
           disabled={!input.trim() || (status !== 'ready' && status !== 'error')}
         >
-          {status === 'error' ? (
+          {status === 'error' && (
             <>
               <RotateCcw className="h-3.5 w-3.5" />
               <span className="ml-1">重试</span>
             </>
-          ) : (
+          )}
+          {status === 'ready' && (
             <>
               <Send className="h-3.5 w-3.5" />
               <span className="ml-1">发送</span>
+            </>
+          )}
+          {status === 'submitted' && (
+            <>
+              {/* 提交状态 */}
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span className="ml-1">提交中...</span>
+            </>
+          )}
+          {status === 'streaming' && (
+            <>
+              {/* 流式响应状态 */}
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span className="ml-1">生成中...</span>
             </>
           )}
         </Button>
