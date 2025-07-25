@@ -2,11 +2,19 @@
   "name": "@redgent/types",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    }
   },
   "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --outDir dist",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
@@ -15,6 +23,7 @@
     "@redgent/eslint-config": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
     "eslint": "^9.31.0",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   }
 }
