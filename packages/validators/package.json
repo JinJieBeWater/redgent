@@ -10,8 +10,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --outDir dist",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build": "tsup src/index.ts --format esm,cjs --outDir dist && tsc --emitDeclarationOnly --outDir dist",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\"  --ignore-path ../../.gitignore",

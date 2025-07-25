@@ -63,7 +63,7 @@ const MessageListAllTasks = ({ part }: { part: ToolUIPart<APPUITools> }) => {
           <div className="mb-3 flex items-start justify-between">
             <div className="flex min-w-0 flex-1 items-start space-x-2">
               <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
-              <h3 className="text-foreground text-sm font-medium leading-tight">
+              <h3 className="text-foreground text-sm leading-tight font-medium">
                 {task.name}
               </h3>
             </div>
