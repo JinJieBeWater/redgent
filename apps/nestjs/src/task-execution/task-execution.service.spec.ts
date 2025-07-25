@@ -17,7 +17,6 @@ import {
   addCustomResponseHandler,
   clearCustomHandlers,
   compareMessages,
-  MOCK_RESPONSES,
 } from '../ai-sdk/utils'
 import { createMockContext } from '../prisma/context'
 import { PrismaService } from '../prisma/prisma.service'

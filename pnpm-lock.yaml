@@ -68,6 +68,9 @@ importers:
       '@redgent/db':
         specifier: workspace:*
         version: link:../../packages/database
+      '@redgent/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@redgent/validators':
         specifier: workspace:*
         version: link:../../packages/validators
@@ -126,9 +129,6 @@ importers:
       '@redgent/prettier-config':
         specifier: workspace:*
         version: link:../../tooling/prettier-config
-      '@redgent/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@redgent/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript-config
@@ -352,10 +352,11 @@ importers:
         version: 5.8.3
 
   packages/types:
-    devDependencies:
+    dependencies:
       '@redgent/db':
         specifier: workspace:*
         version: link:../database
+    devDependencies:
       '@redgent/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint-config
@@ -405,22 +406,22 @@ importers:
 
   packages/validators:
     dependencies:
+      '@redgent/db':
+        specifier: workspace:*
+        version: link:../database
+      '@redgent/types':
+        specifier: workspace:*
+        version: link:../types
       zod:
         specifier: ^4.0.5
         version: 4.0.5
     devDependencies:
-      '@redgent/db':
-        specifier: workspace:*
-        version: link:../database
       '@redgent/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint-config
       '@redgent/prettier-config':
         specifier: workspace:*
         version: link:../../tooling/prettier-config
-      '@redgent/types':
-        specifier: workspace:*
-        version: link:../types
       '@redgent/typescript-config':
         specifier: workspace:*
         version: link:../../tooling/typescript-config
@@ -433,6 +434,9 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.6.2
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.0(@swc/core@1.12.14(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.3)(typescript@5.8.3)(yaml@2.8.0)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

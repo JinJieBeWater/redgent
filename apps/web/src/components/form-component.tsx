@@ -47,7 +47,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
 
   useEffect(() => {
     resizeTextarea()
-  }, [input])
+  }, [input, resizeTextarea])
   return (
     <div className="bg-muted border-border focus-within:border-primary rounded-xl border transition-colors duration-200">
       <Textarea
@@ -61,7 +61,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
             handleSubmit()
           }
         }}
-        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none outline-none transition-[color,box-shadow] focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
         rows={1}
       />
       <div className="flex items-center justify-end gap-2 p-2">

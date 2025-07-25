@@ -18,8 +18,10 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@redgent/db": "workspace:*"
+  },
   "devDependencies": {
-    "@redgent/db": "workspace:*",
     "@redgent/eslint-config": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
     "eslint": "^9.31.0",

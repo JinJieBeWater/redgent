@@ -5,30 +5,32 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc",
+    "build": "tsup src/index.ts --format esm,cjs --outDir dist",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\"  --ignore-path ../../.gitignore",
     "format:check": "prettier --check \"src/**/*.ts\"  --ignore-path ../../.gitignore"
   },
   "dependencies": {
-    "zod": "^4.0.5"
+    "zod": "^4.0.5",
+    "@redgent/db": "workspace:*",
+    "@redgent/types": "workspace:*"
   },
   "devDependencies": {
-    "@redgent/db": "workspace:*",
-    "@redgent/types": "workspace:*",
     "@redgent/eslint-config": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
     "@redgent/prettier-config": "workspace:*",
     "eslint": "^9.31.0",
     "@types/node": "^22.15.29",
     "typescript": "^5.8.3",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "tsup": "^8.5.0"
   },
   "prettier": "@redgent/prettier-config"
 }

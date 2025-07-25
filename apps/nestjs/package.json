@@ -28,6 +28,7 @@
   "dependencies": {
     "@redgent/db": "workspace:*",
     "@redgent/validators": "workspace:*",
+    "@redgent/types": "workspace:*",
     "@ai-sdk/deepseek": "1.0.0-beta.8",
     "@ai-sdk/provider": "^2.0.0-beta.1",
     "@nestjs/axios": "^4.0.1",
@@ -59,7 +60,6 @@
     "@nestjs/testing": "^11.0.1",
     "@redgent/eslint-config": "workspace:*",
     "@redgent/prettier-config": "workspace:*",
-    "@redgent/types": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
