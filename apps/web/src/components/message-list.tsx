@@ -4,9 +4,14 @@ import { cn } from '@/lib/utils'
 
 import { MarkdownRenderer } from './markdown'
 
-export function MessagesList({ messages }: { messages: UIMessage[] }) {
+interface MessagesListProps {
+  messages: UIMessage[]
+  className?: string
+}
+
+export function MessagesList({ messages, className }: MessagesListProps) {
   return (
-    <div className="grid grid-cols-1 space-y-4">
+    <div className={cn('grid w-full grid-cols-1 space-y-4', className)}>
       {messages.map(message => (
         <div
           key={message.id}

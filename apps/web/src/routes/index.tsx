@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import { toast } from 'sonner'
 
 import { FormComponent } from '@/components/form-component'
 import { MessagesList } from '@/components/message-list'
+import { useOptimizedScroll } from '@/hooks/use-optimized-scroll'
 import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
@@ -13,35 +15,79 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
-    onError: error => {
-      console.log(error)
+    onError: () => {
+      toast.error('发生错误，请重试！')
     },
   })
 
+  useEffect(() => {
+    if (status === 'error') {
+      // 取出最后一条消息 如果是用户的输入 则重新赋值到 input 中 然后弹出这条消息
+      const lastMessage = messages[messages.length - 1]
+      if (
+        lastMessage?.role === 'user' &&
+        lastMessage?.parts[0]?.type === 'text'
+      ) {
+        setInput(lastMessage?.parts[0]?.text || '')
+        // 清理掉导致错误的上一条消息
+        setMessages(messages.slice(0, -1))
+      }
+    }
+  }, [status, messages])
+
   const handleSubmit = () => {
-    if (input.trim() && status == 'ready') {
+    if (input.trim() && (status == 'ready' || status == 'error')) {
       sendMessage({
         text: input.trim(),
       })
+      setInput('')
     }
   }
 
+  const clearMessages = () => {
+    setMessages([])
+  }
+
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  const { isAtBottom, scrollToElement, hasManuallyScrolled } =
+    useOptimizedScroll(bottomRef, {
+      enabled: true,
+      threshold: 100,
+      behavior: 'smooth',
+      debounceMs: 100,
+    })
+
+  useEffect(() => {
+    if (status === 'streaming' && (isAtBottom || !hasManuallyScrolled)) {
+      scrollToElement()
+    } else if (messages.length > 0 && (isAtBottom || !hasManuallyScrolled)) {
+      scrollToElement()
+    }
+  }, [
+    messages.length,
+    status,
+    isAtBottom,
+    hasManuallyScrolled,
+    scrollToElement,
+  ])
   return (
     <div
       className={cn(
-        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl items-center justify-center px-4',
-        messages.length > 0 && 'items-start',
+        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
+        messages.length > 0 && 'justify-start pt-4 pb-64',
       )}
     >
       {/* 消息列表 */}
       {messages.length > 0 && (
-        <div className="w-full py-4">
-          <MessagesList messages={messages} />
-        </div>
+        <>
+          <MessagesList messages={messages} />{' '}
+          <div ref={bottomRef} className="h-64"></div>
+        </>
       )}
 
       {/* 输入框容器 */}
@@ -66,6 +112,7 @@ function App() {
           handleSubmit={handleSubmit}
           messages={messages}
           status={status}
+          clearMessages={clearMessages}
         />
       </div>
 
