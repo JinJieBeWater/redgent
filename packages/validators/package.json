@@ -19,8 +19,7 @@
   },
   "dependencies": {
     "zod": "^4.0.5",
-    "@redgent/db": "workspace:*",
-    "@redgent/types": "workspace:*"
+    "@redgent/db": "workspace:*"
   },
   "devDependencies": {
     "@redgent/eslint-config": "workspace:*",

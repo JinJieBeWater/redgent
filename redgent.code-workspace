@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": ".",
+		},
+		{
+			"path": "apps/nestjs"
+		},
+		{
+			"path": "apps/web"
+		},
+		{
+			"path": "packages/types"
+		},
+		{
+			"path": "packages/database"
+		},
+		{
+			"path": "packages/validators"
+		}
+	],
+	"settings": {}
+}

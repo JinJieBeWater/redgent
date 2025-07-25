@@ -14,3 +14,5 @@ export const createTaskSchema = z.object({
     .boolean()
     .describe('是否启用过滤，3天内处理过的帖子不再处理'),
 })
+
+export const updateTaskSchema = createTaskSchema.partial()

@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:types": "turbo run build:types",
     "dev": "turbo run dev",
     "dev:server": "turbo run dev --filter=nestjs",
     "lint": "turbo run lint",

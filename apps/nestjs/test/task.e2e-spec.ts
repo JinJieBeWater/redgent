@@ -47,6 +47,12 @@ describe('analysis-task (e2e)', () => {
   })
 
   afterAll(async () => {
+    // 删除测试任务
+    await prismaService.task.delete({
+      where: {
+        id: mockTaskConfig.id,
+      },
+    })
     await app.close()
   })
 

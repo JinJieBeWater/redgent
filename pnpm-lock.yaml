@@ -213,6 +213,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@19.1.0)(react@19.1.0)
+      '@redgent/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@tailwindcss/vite':
         specifier: ^4.0.6
         version: 4.1.11(vite@6.3.5(@types/node@22.16.5)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.8.0))
@@ -356,6 +359,15 @@ importers:
       '@redgent/db':
         specifier: workspace:*
         version: link:../database
+      '@redgent/validators':
+        specifier: workspace:*
+        version: link:../validators
+      ai:
+        specifier: 5.0.0-beta.25
+        version: 5.0.0-beta.25(zod@4.0.5)
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
     devDependencies:
       '@redgent/eslint-config':
         specifier: workspace:*
@@ -409,9 +421,6 @@ importers:
       '@redgent/db':
         specifier: workspace:*
         version: link:../database
-      '@redgent/types':
-        specifier: workspace:*
-        version: link:../types
       zod:
         specifier: ^4.0.5
         version: 4.0.5

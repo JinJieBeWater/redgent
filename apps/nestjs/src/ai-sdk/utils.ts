@@ -3,11 +3,11 @@
  * 提供可扩展的 Mock 响应系统，支持动态注册和管理测试响应处理器
  */
 
-import type {
+import type { ModelMessage } from 'ai'
+import {
   LanguageModelV2Content,
   LanguageModelV2StreamPart,
 } from '@ai-sdk/provider'
-import type { ModelMessage } from 'ai'
 import { generateId } from 'ai'
 
 import { TaskReport } from '@redgent/db'

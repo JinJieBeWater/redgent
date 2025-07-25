@@ -19,7 +19,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@redgent/db": "workspace:*"
+    "@redgent/db": "workspace:*",
+    "@redgent/validators": "workspace:*",
+    "ai": "5.0.0-beta.25",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@redgent/eslint-config": "workspace:*",

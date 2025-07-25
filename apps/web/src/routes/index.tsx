@@ -1,8 +1,11 @@
+import type { UIDataTypes, UIMessage } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
+
+import type { APPUITools } from '@redgent/types'
 
 import { FormComponent } from '@/components/form-component'
 import { MessagesList } from '@/components/message-list'
@@ -15,7 +18,9 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat<
+    UIMessage<unknown, UIDataTypes, APPUITools>
+  >({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),

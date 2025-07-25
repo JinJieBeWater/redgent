@@ -1,11 +1,14 @@
-import type { UIMessage } from 'ai'
+import type { UIDataTypes, UIMessage } from 'ai'
+
+import type { APPUITools } from '@redgent/types'
 
 import { cn } from '@/lib/utils'
 
 import { MarkdownRenderer } from './markdown'
+import { MessageAssistant } from './message-assistant'
 
 interface MessagesListProps {
-  messages: UIMessage[]
+  messages: UIMessage<unknown, UIDataTypes, APPUITools>[]
   className?: string
 }
 
@@ -25,7 +28,7 @@ export function MessagesList({ messages, className }: MessagesListProps) {
           {message.parts.map((part, index) =>
             part.type === 'text' ? (
               message.role === 'assistant' ? (
-                <MarkdownRenderer key={index} content={part.text} />
+                <MessageAssistant key={index} message={message} />
               ) : (
                 <MarkdownRenderer key={index} content={part.text} />
               )
