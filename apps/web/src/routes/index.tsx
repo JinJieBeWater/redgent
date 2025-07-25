@@ -1,79 +1,190 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import { toast } from 'sonner'
 
-import { MarkdownRenderer } from '@/components/markdown'
+import { FormComponent } from '@/components/form-component'
+import { MessagesList } from '@/components/message-list'
+import { useOptimizedScroll } from '@/hooks/use-optimized-scroll'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
 function App() {
-  const { messages, sendMessage, status } = useChat({
+  const [input, setInput] = useState('')
+  const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
+    onError: () => {
+      toast.error('发生错误，请重试！')
+    },
   })
-  const [input, setInput] = useState('')
 
+  useEffect(() => {
+    if (status === 'error') {
+      // 取出最后一条消息 如果是用户的输入 则重新赋值到 input 中 然后弹出这条消息
+      const lastMessage = messages[messages.length - 1]
+      if (
+        lastMessage?.role === 'user' &&
+        lastMessage?.parts[0]?.type === 'text'
+      ) {
+        setInput(lastMessage?.parts[0]?.text || '')
+        // 清理掉导致错误的上一条消息
+        setMessages(messages.slice(0, -1))
+      }
+    }
+  }, [status, messages])
+
+  const handleSubmit = () => {
+    if (input.trim() && (status == 'ready' || status == 'error')) {
+      sendMessage({
+        text: input.trim(),
+      })
+      setInput('')
+    }
+  }
+
+  const clearMessages = () => {
+    setMessages([])
+  }
+
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  const { isAtBottom, scrollToElement, hasManuallyScrolled } =
+    useOptimizedScroll(bottomRef, {
+      enabled: true,
+      threshold: 100,
+      behavior: 'smooth',
+      debounceMs: 100,
+    })
+
+  useEffect(() => {
+    if (status === 'streaming' && (isAtBottom || !hasManuallyScrolled)) {
+      scrollToElement()
+    } else if (messages.length > 0 && (isAtBottom || !hasManuallyScrolled)) {
+      scrollToElement()
+    }
+  }, [
+    messages.length,
+    status,
+    isAtBottom,
+    hasManuallyScrolled,
+    scrollToElement,
+  ])
   return (
-    <div className="container mx-auto max-w-4xl p-4">
-      <div className="mb-6 space-y-4">
-        {messages.map(message => (
-          <div
-            key={message.id}
-            className={`rounded-lg p-4 ${
-              message.role === 'user'
-                ? 'bg-primary/10 ml-8'
-                : 'bg-muted/50 mr-8'
-            }`}
-          >
-            <div className="text-muted-foreground mb-2 text-sm font-semibold">
-              {message.role === 'user' ? '用户' : 'AI 助手'}
-            </div>
-            <div className="prose prose-sm max-w-none">
-              {message.parts.map((part, index) =>
-                part.type === 'text' ? (
-                  message.role === 'assistant' ? (
-                    <MarkdownRenderer key={index} content={part.text} />
-                  ) : (
-                    <div key={index} className="whitespace-pre-wrap">
-                      {part.text}
-                    </div>
-                  )
-                ) : null,
-              )}
-            </div>
+    <div
+      className={cn(
+        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
+        messages.length > 0 && 'justify-start pt-4 pb-64',
+      )}
+    >
+      {/* 消息列表 */}
+      {messages.length > 0 && (
+        <>
+          <MessagesList messages={messages} />{' '}
+          <div ref={bottomRef} className="h-64"></div>
+        </>
+      )}
+
+      {/* 输入框容器 */}
+      <div
+        className={cn(
+          'my-4 grid w-full gap-6',
+          messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+        )}
+      >
+        {/* Logo */}
+        {messages.length === 0 && (
+          <div className="text-center">
+            <h1 className="text-foreground text-4xl">Redgent</h1>
           </div>
-        ))}
+        )}
+        {/* 输入框 */}
+
+        <FormComponent
+          input={input}
+          placeholder="添加一个定时分析任务..."
+          setInput={setInput}
+          handleSubmit={handleSubmit}
+          messages={messages}
+          status={status}
+          clearMessages={clearMessages}
+        />
       </div>
 
-      <form
-        onSubmit={e => {
-          e.preventDefault()
-          if (input.trim()) {
-            sendMessage({ text: input })
-            setInput('')
-          }
-        }}
-        className="flex gap-2"
-      >
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          disabled={status !== 'ready'}
-          placeholder="输入您的问题..."
-          className="border-border focus:ring-primary/50 flex-1 rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={status !== 'ready'}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {status === 'ready' ? '发送' : '发送中...'}
-        </button>
-      </form>
+      {/* 最新分析报告 - 简化显示 */}
+      {/* <div className="space-y-3">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-foreground text-sm font-medium">最新分析报告</h2>
+
+          <Button variant={'ghost'} size={'sm'} className="w-auto">
+            查看全部
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {latestReports.map(report => (
+            <div
+              key={report.id}
+              className="bg-card hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg border p-4 transition-all duration-150 active:scale-[0.98]"
+              onClick={() => {
+                console.log(`Navigate to report detail: ${report.id}`)
+              }}
+            >
+              <div className="mb-3 flex items-start justify-between">
+                <div className="flex min-w-0 flex-1 items-start space-x-2">
+                  <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <h3 className="text-foreground text-sm leading-tight font-medium">
+                    {report.content.title}
+                  </h3>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-2 h-6 w-6 flex-shrink-0"
+                      onClick={e => {
+                        e.stopPropagation()
+                      }}
+                    >
+                      <MoreHorizontal className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={e => {
+                        e.stopPropagation()
+                      }}
+                    >
+                      <Eye className="mr-2 h-3 w-3" />
+                      查看详情
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <p className="text-muted-foreground mb-3 line-clamp-2 text-xs leading-relaxed">
+                {report.content.summary}
+              </p>
+
+              <div className="text-muted-foreground flex items-center justify-between text-xs">
+                <div className="flex items-center">
+                  <Clock className="mr-1 h-3 w-3" />
+                  <span>{formatRelativeTime(report.createdAt)}</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {report.task.name}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div> */}
     </div>
   )
 }
