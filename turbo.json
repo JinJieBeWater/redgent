@@ -10,12 +10,17 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": ["DATABASE_URL"]
     },
+    "build:types": {
+      "dependsOn": ["build", "^build:types"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"],
+      "outputs": ["dist/**"]
+    },
     "lint": {
-      "dependsOn": ["^lint"],
+      "dependsOn": ["^build", "^build:types"],
       "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*", "eslint.config.*"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": ["^build", "^build:types"],
       "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"]
     },
     "format": {
@@ -25,31 +30,34 @@
       "inputs": ["$TURBO_DEFAULT$", ".prettierrc.*", "prettier.config.*"]
     },
     "test": {
-      "dependsOn": ["^test"],
+      "dependsOn": ["^build", "^build:types"],
       "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*"]
     },
     "test:integration": {
-      "dependsOn": ["^test:integration"],
+      "dependsOn": ["^build", "^build:types"],
       "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*"]
     },
     "test:e2e": {
-      "dependsOn": ["^test:e2e"],
+      "dependsOn": ["^build", "^build:types"],
       "inputs": ["$TURBO_DEFAULT$", "playwright.config.*", "cypress.config.*"]
     },
     "dev": {
-      "dependsOn": ["^db:generate"],
+      "dependsOn": ["^build", "^build:types", "^db:generate"],
       "cache": false,
       "persistent": true,
       "outputs": []
     },
     "db:generate": {
-      "cache": false
+      "cache": false,
+      "outputs": ["generated/**"]
     },
     "db:migrate": {
+      "dependsOn": ["db:generate"],
       "cache": false,
       "persistent": true
     },
     "db:deploy": {
+      "dependsOn": ["db:generate"],
       "cache": false
     }
   }
