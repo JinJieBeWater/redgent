@@ -2,9 +2,6 @@
   "extends": "@redgent/typescript-config/nestjs.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "baseUrl": "./",
-    "paths": {
-      "@redgent/*": ["../../packages/*/src"]
-    }
+    "baseUrl": "./"
   }
 }

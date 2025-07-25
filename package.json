@@ -15,12 +15,12 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@redgent/prettier-config": "workspace:*",
     "@redgent/eslint-config": "workspace:*",
+    "@redgent/prettier-config": "workspace:*",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
-    "turbo": "^2.5.4",
+    "turbo": "^2.5.5",
     "typescript": "^5.8.3"
   },
   "packageManager": "pnpm@9.0.0",

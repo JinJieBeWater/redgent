@@ -1,5 +1,4 @@
 import { createDeepSeek } from '@ai-sdk/deepseek'
-import { LanguageModelV2 } from '@ai-sdk/provider'
 // import { createOpenRouter} from '@openrouter/ai-sdk-provider'
 import { customProvider } from 'ai'
 

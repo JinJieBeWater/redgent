@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.v2.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV", "PORT", "OPENROUTER_API_KEY"],
+  "globalEnv": ["NODE_ENV", "PORT", "DEEPSEEK_API_KEY"],
   "globalDependencies": [".env*", ".env.*"],
   "tasks": {
     "build": {

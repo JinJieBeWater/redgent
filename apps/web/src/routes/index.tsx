@@ -37,7 +37,7 @@ function App() {
         setMessages(messages.slice(0, -1))
       }
     }
-  }, [status, messages])
+  }, [status, messages, setMessages])
 
   const handleSubmit = () => {
     if (input.trim() && (status == 'ready' || status == 'error')) {
@@ -79,7 +79,7 @@ function App() {
     <div
       className={cn(
         'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
-        messages.length > 0 && 'justify-start pt-4 pb-64',
+        messages.length > 0 && 'justify-start pb-64 pt-4',
       )}
     >
       {/* 消息列表 */}
