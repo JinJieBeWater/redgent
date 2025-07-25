@@ -1,94 +1,143 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Send } from 'lucide-react'
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { FormComponent } from '@/components/form-component'
+import { MessagesList } from '@/components/message-list'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
 function App() {
-  const navigate = useNavigate()
   const [input, setInput] = useState('')
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/task-agent',
+    }),
+    onError: error => {
+      console.log(error)
+    },
+  })
 
   const handleSubmit = () => {
-    if (input.trim()) {
-      // 导航到聊天页面，携带输入参数
-      navigate({
-        to: '/chat',
-        search: {
-          mode: 'create-task',
-          input: input.trim(),
-        },
+    if (input.trim() && status == 'ready') {
+      sendMessage({
+        text: input.trim(),
       })
     }
   }
 
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  const resizeTextarea = useCallback(() => {
-    if (!inputRef.current) return
-
-    const target = inputRef.current
-
-    target.style.height = 'auto'
-
-    const scrollHeight = target.scrollHeight
-    const maxHeight = 300
-
-    if (scrollHeight > maxHeight) {
-      target.style.height = `${maxHeight}px`
-      target.style.overflowY = 'auto'
-    } else {
-      target.style.height = `${scrollHeight}px`
-      target.style.overflowY = 'hidden'
-    }
-  }, [inputRef])
-
-  useEffect(() => {
-    resizeTextarea()
-  }, [input])
-
   return (
-    <div className="container mx-auto -mt-6 flex min-h-[calc(100vh-3rem)] max-w-2xl items-center justify-center p-4">
-      <div className="w-full">
+    <div
+      className={cn(
+        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl items-center justify-center px-4',
+        messages.length > 0 && 'items-start',
+      )}
+    >
+      {/* 消息列表 */}
+      {messages.length > 0 && (
+        <div className="w-full py-4">
+          <MessagesList messages={messages} />
+        </div>
+      )}
+
+      {/* 输入框容器 */}
+      <div
+        className={cn(
+          'my-4 grid w-full gap-6',
+          messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+        )}
+      >
         {/* Logo */}
-        <div className="mb-6 text-center">
-          <h1 className="text-foreground text-4xl">Redgent</h1>
+        {messages.length === 0 && (
+          <div className="text-center">
+            <h1 className="text-foreground text-4xl">Redgent</h1>
+          </div>
+        )}
+        {/* 输入框 */}
+
+        <FormComponent
+          input={input}
+          placeholder="添加一个定时分析任务..."
+          setInput={setInput}
+          handleSubmit={handleSubmit}
+          messages={messages}
+          status={status}
+        />
+      </div>
+
+      {/* 最新分析报告 - 简化显示 */}
+      {/* <div className="space-y-3">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-foreground text-sm font-medium">最新分析报告</h2>
+
+          <Button variant={'ghost'} size={'sm'} className="w-auto">
+            查看全部
+          </Button>
         </div>
 
-        {/* 输入框 */}
-        <div className="relative mb-6">
-          <div className="bg-muted border-border focus-within:border-ring rounded-xl border transition-colors duration-200">
-            <Textarea
-              ref={inputRef}
-              placeholder="添加一个定时分析任务"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSubmit()
-                }
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {latestReports.map(report => (
+            <div
+              key={report.id}
+              className="bg-card hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg border p-4 transition-all duration-150 active:scale-[0.98]"
+              onClick={() => {
+                console.log(`Navigate to report detail: ${report.id}`)
               }}
-              className="dark:bg-input/30 text-foreground scrollbar-hide flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-lg"
-              rows={1}
-            />
-            <div className="flex items-center justify-end p-2">
-              <Button
-                onClick={handleSubmit}
-                size="sm"
-                className="h-7.5 w-7.5 cursor-pointer"
-                disabled={!input.trim()}
-              >
-                <Send className="h-3.5 w-3.5" />
-              </Button>
+            >
+              <div className="mb-3 flex items-start justify-between">
+                <div className="flex min-w-0 flex-1 items-start space-x-2">
+                  <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <h3 className="text-foreground text-sm leading-tight font-medium">
+                    {report.content.title}
+                  </h3>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-2 h-6 w-6 flex-shrink-0"
+                      onClick={e => {
+                        e.stopPropagation()
+                      }}
+                    >
+                      <MoreHorizontal className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={e => {
+                        e.stopPropagation()
+                      }}
+                    >
+                      <Eye className="mr-2 h-3 w-3" />
+                      查看详情
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <p className="text-muted-foreground mb-3 line-clamp-2 text-xs leading-relaxed">
+                {report.content.summary}
+              </p>
+
+              <div className="text-muted-foreground flex items-center justify-between text-xs">
+                <div className="flex items-center">
+                  <Clock className="mr-1 h-3 w-3" />
+                  <span>{formatRelativeTime(report.createdAt)}</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {report.task.name}
+                </Badge>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

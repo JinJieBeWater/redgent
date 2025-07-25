@@ -363,7 +363,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     }
 
     return (
-      <div className="group border-border bg-accent relative my-5 overflow-hidden rounded-md border">
+      <div className="group border-border bg-accent relative my-2 overflow-hidden rounded-md border">
         {/* Header with language and controls */}
         <div className="bg-accent border-border flex items-center justify-between border-b px-4 py-2">
           <div className="flex items-center gap-2">
@@ -760,7 +760,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
       }
 
       return (
-        <p key={generateKey()} className="text-foreground my-5 leading-relaxed">
+        <p key={generateKey()} className="text-foreground my-2 leading-relaxed">
           {children}
         </p>
       )
@@ -823,7 +823,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
       return (
         <ListTag
           key={generateKey()}
-          className={`text-foreground my-5 space-y-2 pl-6 ${ordered ? 'list-decimal' : 'list-disc'}`}
+          className={`text-foreground my-2 space-y-2 pl-6 ${ordered ? 'list-decimal' : 'list-disc'}`}
         >
           {children}
         </ListTag>
