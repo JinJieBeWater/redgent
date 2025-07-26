@@ -11,7 +11,7 @@ import {
   RedditLinkInfoUntrusted,
   TaskProgress,
   TaskProgressStatus,
-} from '@redgent/types'
+} from '@redgent/shared'
 
 import {
   analyzeRedditContentPrompt,

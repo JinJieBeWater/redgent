@@ -4,7 +4,7 @@ import { lastValueFrom, tap, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
 import { PrismaClient } from '@redgent/db'
-import { TaskProgress, TaskProgressStatus } from '@redgent/types'
+import { TaskProgress, TaskProgressStatus } from '@redgent/shared'
 
 import { AppModule } from '../src/app.module'
 import { PrismaService } from '../src/prisma/prisma.service'

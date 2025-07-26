@@ -1,6 +1,6 @@
 import type { UIDataTypes, UIMessage } from 'ai'
 
-import type { APPUITools } from '@redgent/types'
+import type { APPUITools } from '@redgent/shared'
 
 import { cn } from '@/lib/utils'
 

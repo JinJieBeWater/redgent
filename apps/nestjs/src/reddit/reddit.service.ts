@@ -15,7 +15,7 @@ import {
   RedditListingResponse,
   RedditSort,
   SubredditWrapper,
-} from '@redgent/types'
+} from '@redgent/shared'
 
 @Injectable()
 export class RedditService implements OnModuleInit {

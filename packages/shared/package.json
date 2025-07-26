@@ -1,5 +1,5 @@
 {
-  "name": "@redgent/types",
+  "name": "@redgent/shared",
   "version": "0.0.0",
   "private": true,
   "files": [
@@ -13,19 +13,19 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --outDir dist && tsc --emitDeclarationOnly --outDir dist",
+    "build": "tsup",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@redgent/db": "workspace:*",
-    "@redgent/validators": "workspace:*",
     "ai": "5.0.0-beta.25",
     "zod": "^4.0.5"
   },
   "devDependencies": {
     "@redgent/eslint-config": "workspace:*",
     "@redgent/typescript-config": "workspace:*",
+    "@redgent/tsup-config": "workspace:*",
     "eslint": "^9.31.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"

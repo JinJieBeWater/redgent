@@ -14,6 +14,7 @@ import {
   APPUITools,
   CreateTaskInput,
   CreateTaskOutput,
+  createTaskSchema,
   DeleteTaskInput,
   DeleteTaskInputSchema,
   DeleteTaskOutput,
@@ -32,8 +33,7 @@ import {
   ViewTaskDetailInput,
   ViewTaskDetailInputSchema,
   ViewTaskDetailOutput,
-} from '@redgent/types'
-import { createTaskSchema } from '@redgent/validators'
+} from '@redgent/shared'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'

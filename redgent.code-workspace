@@ -10,13 +10,10 @@
 			"path": "apps/web"
 		},
 		{
-			"path": "packages/types"
+			"path": "packages/shared"
 		},
 		{
 			"path": "packages/database"
-		},
-		{
-			"path": "packages/validators"
 		}
 	],
 	"settings": {}

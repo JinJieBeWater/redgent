@@ -5,7 +5,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
 
-import type { APPUITools } from '@redgent/types'
+import type { APPUITools } from '@redgent/shared'
 
 import { FormComponent } from '@/components/form-component'
 import { MessagesList } from '@/components/message-list'

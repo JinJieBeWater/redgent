@@ -8,7 +8,7 @@ import {
   TaskCancelProgress,
   TaskCompleteProgress,
   TaskProgressStatus,
-} from '@redgent/types'
+} from '@redgent/shared'
 
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
