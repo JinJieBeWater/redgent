@@ -55,6 +55,7 @@ export class TaskAgentController {
               // 记录错误日志但不暴露敏感信息
               self.logger.error('任务代理错误 streamText:', error)
             },
+            stopWhen: stepCountIs(5),
           })
           writer.merge(result.toUIMessageStream())
         },

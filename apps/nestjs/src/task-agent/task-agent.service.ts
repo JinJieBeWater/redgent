@@ -6,7 +6,7 @@ import {
   UIMessageStreamWriter,
   UITools,
 } from 'ai'
-import { lastValueFrom, toArray } from 'rxjs'
+import { lastValueFrom, pipe, tap, toArray } from 'rxjs'
 import z from 'zod'
 
 import {
@@ -200,7 +200,17 @@ export class TaskAgentService {
               throw new Error('任务不存在')
             }
             const TaskProgresss = await lastValueFrom(
-              this.taskExecutionService.execute(task).pipe(toArray()),
+              this.taskExecutionService.execute(task).pipe(
+                toArray(),
+                pipe(
+                  tap(progress => {
+                    this.logger.log(
+                      `Task "${task.name}" (ID: ${task.id}) execution progress:`,
+                      JSON.stringify(progress, null, 2),
+                    )
+                  }),
+                ),
+              ),
             )
             const lastProgress = TaskProgresss[TaskProgresss.length - 1]
             if (lastProgress.status !== TaskProgressStatus.TASK_COMPLETE) {

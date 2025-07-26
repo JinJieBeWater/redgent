@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
+import { tap } from 'rxjs'
 import z from 'zod'
 
 import { ScheduleType, Task, TaskStatus } from '@redgent/db'
@@ -139,7 +140,14 @@ export class TaskScheduleService implements OnModuleInit {
    */
   private executeTask(task: Task) {
     this.logger.log(`Executing task: "${task.name}" (ID: ${task.id})`)
-    this.taskExecutionService.execute(task)
+    this.taskExecutionService.execute(task).pipe(
+      tap(progress => {
+        this.logger.log(
+          `Task "${task.name}" (ID: ${task.id}) execution progress:`,
+          JSON.stringify(progress, null, 2),
+        )
+      }),
+    )
   }
 
   /**

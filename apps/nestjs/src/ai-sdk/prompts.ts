@@ -70,13 +70,15 @@ export const selectMostRelevantLinksPrompt = (
       
       给定的帖子内容：${JSON.stringify(links, null, 2)}
 
-      - 期待的输出格式，数组内数据不可重复：
-      [
-        "link-1",
-        "link-2",
-        "link-3",
+      - 期待的输出格式：
+      {
+       relevant_link_ids: [
+        "link-1"，
+        "link-2"，
+        "link-3"
         ...
-      ]
+       ]
+      }
       `
 
 export const analyzeRedditContentPrompt = (
@@ -129,4 +131,8 @@ ${i + 1}. ${comment.body} (点赞: ${comment.ups})
 - 提供客观、有见地的分析
 - 确保每个发现都有明确的证据支持
 - 使用中文生成分析报告
+
+输出格式要求：
+- 以 json 格式输出
+
 `
