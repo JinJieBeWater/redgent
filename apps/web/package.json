@@ -26,6 +26,7 @@
     "@tanstack/react-router-devtools": "^1.121.2",
     "@tanstack/router-plugin": "^1.121.2",
     "@redgent/types": "workspace:*",
+    "@redgent/db": "workspace:*",
     "ai": "5.0.0-beta.25",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

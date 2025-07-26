@@ -24,6 +24,7 @@ function App() {
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
+
     onError: () => {
       toast.error('发生错误，请重试！')
     },
