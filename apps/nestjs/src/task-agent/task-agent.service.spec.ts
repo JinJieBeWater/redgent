@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { PrismaModule } from '../prisma/prisma.module'
@@ -9,7 +10,14 @@ describe('TaskAgentService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [PrismaModule, TaskScheduleModule],
+      imports: [
+        CacheModule.register({
+          ttl: 5000,
+          isGlobal: true,
+        }),
+        PrismaModule,
+        TaskScheduleModule,
+      ],
       providers: [TaskAgentService],
     }).compile()
 

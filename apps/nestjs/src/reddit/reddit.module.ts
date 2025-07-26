@@ -7,6 +7,7 @@ import { RedditService } from './reddit.service'
 
 @Module({
   imports: [
+    ConfigModule,
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {

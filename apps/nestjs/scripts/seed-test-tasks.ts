@@ -11,6 +11,7 @@ const testTasks: Omit<
   | 'lastFailureAt'
   | 'lastErrorMessage'
   | 'results'
+  | 'enableFiltering'
 >[] = [
   {
     name: 'AI技术追踪',
@@ -20,7 +21,6 @@ const testTasks: Omit<
     scheduleType: ScheduleType.cron,
     scheduleExpression: '0 9 * * *', // 每天早上9点
     status: TaskStatus.active,
-    enableFiltering: true,
   },
   {
     name: '加密货币市场监控',
@@ -31,7 +31,6 @@ const testTasks: Omit<
     scheduleType: ScheduleType.interval,
     scheduleExpression: '3600000', // 每小时执行一次
     status: TaskStatus.active,
-    enableFiltering: true,
   },
   {
     name: '游戏行业趋势',
@@ -39,9 +38,8 @@ const testTasks: Omit<
     keywords: ['gaming', 'steam', 'nintendo', 'playstation', 'xbox'],
     subreddits: ['gaming', 'Games', 'GameDeals'],
     scheduleType: ScheduleType.cron,
-    scheduleExpression: '0 */4 * * *', // 每4小时执行一次
+    scheduleExpression: '0 12,18 * * *', // 每天12点和18点
     status: TaskStatus.active,
-    enableFiltering: false,
   },
   {
     name: '技术新闻汇总',
@@ -49,19 +47,17 @@ const testTasks: Omit<
     keywords: ['tech', 'apple', 'google', 'microsoft', 'startup'],
     subreddits: ['technology', 'programming', 'startups'],
     scheduleType: ScheduleType.cron,
-    scheduleExpression: '0 12,18 * * *', // 每天12点和18点
+    scheduleExpression: '0 12,18 * * *',
     status: TaskStatus.active,
-    enableFiltering: true,
   },
   {
-    name: '开发工具测试',
-    prompt: '测试任务 - 用于开发环境调试',
-    keywords: ['test', 'debug'],
-    subreddits: ['test'],
-    scheduleType: ScheduleType.interval,
-    scheduleExpression: '30000', // 30秒执行一次（仅用于测试）
+    name: '娱乐笑话',
+    prompt: '每十分钟提供一些娱乐笑话，为我快速创造时间感，提高情绪和生活质量',
+    keywords: ['funny', 'funny_memes', 'memes', 'jokes', 'humor'],
+    subreddits: ['funny', 'funny_memes'],
+    scheduleType: ScheduleType.cron,
+    scheduleExpression: '0 */10 * * *',
     status: TaskStatus.active,
-    enableFiltering: false,
   },
 ]
 
