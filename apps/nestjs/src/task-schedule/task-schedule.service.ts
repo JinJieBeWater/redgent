@@ -2,10 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
 import { tap } from 'rxjs'
-import z from 'zod'
 
 import { ScheduleType, Task, TaskStatus } from '@redgent/db'
-import { createTaskSchema } from '@redgent/validators'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'
@@ -140,14 +138,25 @@ export class TaskScheduleService implements OnModuleInit {
    */
   private executeTask(task: Task) {
     this.logger.log(`Executing task: "${task.name}" (ID: ${task.id})`)
-    this.taskExecutionService.execute(task).pipe(
-      tap(progress => {
+    this.taskExecutionService.execute(task).subscribe({
+      next: progress => {
         this.logger.log(
           `Task "${task.name}" (ID: ${task.id}) execution progress:`,
           JSON.stringify(progress, null, 2),
         )
-      }),
-    )
+      },
+      error: error => {
+        this.logger.error(
+          `Task "${task.name}" (ID: ${task.id}) execution failed:`,
+          error,
+        )
+      },
+      complete: () => {
+        this.logger.log(
+          `Task "${task.name}" (ID: ${task.id}) execution completed`,
+        )
+      },
+    })
   }
 
   /**

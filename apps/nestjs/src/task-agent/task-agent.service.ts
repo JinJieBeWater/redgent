@@ -91,7 +91,7 @@ export class TaskAgentService {
               message: '任务创建成功',
             }
           } catch (error) {
-            this.logger.error(error)
+            this.logger.error(error instanceof Error ? error.message : error)
             throw error
           }
         },
