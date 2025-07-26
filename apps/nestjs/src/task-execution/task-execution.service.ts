@@ -284,13 +284,13 @@ export class TaskExecutionService {
 
   private async _saveResults(
     taskConfig: Task,
-    analysisResult: TaskReport['content'],
+    analysisResult: PrismaJson.ReportContent,
     startTime: number,
     subscriber: Subscriber<TaskProgress>,
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [, taskInfo] = await Promise.all([
+    const [, taskReport] = await Promise.all([
       this.prismaService.task.update({
         where: { id: taskConfig.id },
         data: {
@@ -311,7 +311,7 @@ export class TaskExecutionService {
     subscriber.next({
       status: TaskProgressStatus.TASK_COMPLETE,
       message: '任务成功执行完毕',
-      data: taskInfo,
+      data: taskReport,
     })
   }
 
@@ -380,7 +380,7 @@ export class TaskExecutionService {
       content: RedditLinkInfoUntrusted
       comment: CommentNode[]
     }[],
-  ): Promise<TaskReport['content']> {
+  ): Promise<PrismaJson.ReportContent> {
     try {
       const { object: analysisResult } = await generateObject({
         model: myProvider.languageModel('analysis-model'),

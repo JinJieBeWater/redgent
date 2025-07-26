@@ -8,7 +8,18 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common'
-import { convertToModelMessages, streamText } from 'ai'
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  pipeTextStreamToResponse,
+  pipeUIMessageStreamToResponse,
+  stepCountIs,
+  streamText,
+  UIDataTypes,
+  UIMessage,
+} from 'ai'
+
+import { APPUITools } from '@redgent/types'
 
 import { redgentAgentSystem as RedgentAgentSystem } from '../ai-sdk/prompts'
 import { myProvider } from '../ai-sdk/provider'
@@ -29,38 +40,46 @@ export class TaskAgentController {
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async chat(@Body() chat: ChatDto, @Res() res: Response) {
     try {
-      this.logger.debug('Task agent request:', JSON.stringify(chat, null, 2))
-      this.logger.debug(
-        'Messages structure:',
-        JSON.stringify(chat.messages, null, 2),
-      )
-      this.logger.debug(
-        'convertToModelMessages:',
-        JSON.stringify(convertToModelMessages(chat.messages), null, 2),
-      )
-      const result = streamText({
-        model: myProvider.languageModel('chat-model'),
-        messages: convertToModelMessages(chat.messages),
-        system: RedgentAgentSystem,
-        tools: this.taskAgentService.tools,
-        onError: error => {
-          // 记录错误日志但不暴露敏感信息
-          this.logger.error('任务代理错误 streamText:', error)
+      const self = this
+
+      const stream = createUIMessageStream<
+        UIMessage<unknown, UIDataTypes, APPUITools>
+      >({
+        execute({ writer }) {
+          const result = streamText({
+            model: myProvider.languageModel('chat-model'),
+            messages: convertToModelMessages(chat.messages),
+            system: RedgentAgentSystem,
+            tools: self.taskAgentService.tools(writer),
+            onError: error => {
+              // 记录错误日志但不暴露敏感信息
+              self.logger.error('任务代理错误 streamText:', error)
+            },
+          })
+          writer.merge(result.toUIMessageStream())
         },
       })
 
-      result.pipeUIMessageStreamToResponse(res, {
+      pipeUIMessageStreamToResponse({
+        response: res,
+        stream,
         headers: {
           'Content-Encoding': 'none',
         },
-        onError: error => {
-          // 记录错误日志但不暴露敏感信息
-          this.logger.error('任务代理错误 result:', error)
-          return error instanceof Error
-            ? error.message
-            : '处理请求时发生未知错误'
-        },
       })
+
+      // result.pipeUIMessageStreamToResponse(res, {
+      //   headers: {
+      //     'Content-Encoding': 'none',
+      //   },
+      //   onError: error => {
+      //     // 记录错误日志但不暴露敏感信息
+      //     this.logger.error('任务代理错误 result:', error)
+      //     return error instanceof Error
+      //       ? error.message
+      //       : '处理请求时发生未知错误'
+      //   },
+      // })
     } catch (error) {
       this.logger.error('任务代理错误 catch:', error)
       res.status(500).json({

@@ -26,9 +26,9 @@ type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
 const getStatusInfo = (status: string) => {
   switch (status) {
     case 'active':
-      return { variant: 'default', icon: Play, label: '活跃中' }
+      return { variant: 'default', icon: Pause, label: '活跃中' }
     case 'paused':
-      return { variant: 'secondary', icon: Pause, label: '暂停' }
+      return { variant: 'secondary', icon: Play, label: '暂停' }
     case 'running':
       return { variant: 'outline', icon: Zap, label: '运行中' }
     default:
