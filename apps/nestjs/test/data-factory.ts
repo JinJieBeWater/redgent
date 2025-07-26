@@ -12,7 +12,7 @@ import type {
   RedditLinkInfoUntrusted,
   RedditLinkWrapper,
   RedditListingResponse,
-} from '@redgent/types'
+} from '@redgent/shared'
 import { Task } from '@redgent/db'
 
 // ============================================================================

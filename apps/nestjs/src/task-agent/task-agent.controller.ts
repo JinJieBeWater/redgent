@@ -19,7 +19,7 @@ import {
   UIMessage,
 } from 'ai'
 
-import { APPUITools } from '@redgent/types'
+import { APPUITools } from '@redgent/shared'
 
 import { redgentAgentSystem as RedgentAgentSystem } from '../ai-sdk/prompts'
 import { myProvider } from '../ai-sdk/provider'

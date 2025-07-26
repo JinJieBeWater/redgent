@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { RedditSort } from '@redgent/types'
+import { RedditSort } from '@redgent/shared'
 
 import { AppModule } from '../src/app.module'
 import { RedditService } from '../src/reddit/reddit.service'

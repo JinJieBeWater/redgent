@@ -2,7 +2,8 @@ import { Tool, UIDataTypes } from 'ai'
 import { z } from 'zod'
 
 import { Task, TaskReport, TaskStatus } from '@redgent/db'
-import { createTaskSchema, updateTaskSchema } from '@redgent/validators'
+
+import { createTaskSchema, updateTaskSchema } from './task'
 
 export type ToolOutPut<T = unknown> = {
   message: string

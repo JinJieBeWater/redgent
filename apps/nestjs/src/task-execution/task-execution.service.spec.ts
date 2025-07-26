@@ -4,7 +4,7 @@ import { ModelMessage } from 'ai'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
 
-import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/types'
+import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/shared'
 
 import {
   createMockLinkWithComments,

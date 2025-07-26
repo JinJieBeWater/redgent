@@ -1,6 +1,7 @@
 import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from 'ai'
 import { memo } from 'react'
 import {
+  Ban,
   Calendar,
   Clock,
   Eye,
@@ -12,7 +13,7 @@ import {
 } from 'lucide-react'
 
 import type { Task } from '@redgent/db'
-import type { APPUITools } from '@redgent/types'
+import type { APPUITools } from '@redgent/shared'
 
 import { formatRelativeTime } from '@/lib/format-relative-time'
 
@@ -23,7 +24,13 @@ import { Badge } from './ui/badge'
 type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
 
 // 根据任务状态确定状态信息
-const getStatusInfo = (status: string) => {
+const getStatusInfo = (
+  status: string,
+): {
+  variant: 'default' | 'secondary' | 'outline' | 'destructive'
+  icon: React.ComponentType<React.SVGAttributes<SVGElement>>
+  label: string
+} => {
   switch (status) {
     case 'active':
       return { variant: 'default', icon: Pause, label: '活跃中' }
@@ -32,7 +39,7 @@ const getStatusInfo = (status: string) => {
     case 'running':
       return { variant: 'outline', icon: Zap, label: '运行中' }
     default:
-      return { variant: 'default', icon: Play, label: '未知' }
+      return { variant: 'destructive', icon: Ban, label: '未知' }
   }
 }
 
@@ -52,7 +59,7 @@ export const TaskCardMini = memo(({ task }: { task: TaskMini }) => {
         </h3>
       </div>
       <Badge
-        variant={statusInfo.variant as any}
+        variant={statusInfo.variant}
         className="ml-6 flex flex-shrink-0 items-center gap-1 text-xs"
       >
         <StatusIcon className="h-3 w-3" />
