@@ -13,13 +13,15 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --outDir dist",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build": "tsup src/index.ts --format esm,cjs --outDir dist && tsc --emitDeclarationOnly --outDir dist",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@redgent/db": "workspace:*"
+    "@redgent/db": "workspace:*",
+    "@redgent/validators": "workspace:*",
+    "ai": "5.0.0-beta.25",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@redgent/eslint-config": "workspace:*",

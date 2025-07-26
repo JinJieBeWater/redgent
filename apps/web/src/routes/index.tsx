@@ -1,8 +1,11 @@
+import type { UIDataTypes, UIMessage } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
+
+import type { APPUITools } from '@redgent/types'
 
 import { FormComponent } from '@/components/form-component'
 import { MessagesList } from '@/components/message-list'
@@ -15,10 +18,13 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat<
+    UIMessage<unknown, UIDataTypes, APPUITools>
+  >({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
+
     onError: () => {
       toast.error('发生错误，请重试！')
     },
@@ -79,13 +85,13 @@ function App() {
     <div
       className={cn(
         'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
-        messages.length > 0 && 'justify-start pb-64 pt-4',
+        messages.length > 0 && 'justify-start pt-4',
       )}
     >
       {/* 消息列表 */}
       {messages.length > 0 && (
         <>
-          <MessagesList messages={messages} />{' '}
+          <MessagesList messages={messages} status={status} />
           <div ref={bottomRef} className="h-64"></div>
         </>
       )}

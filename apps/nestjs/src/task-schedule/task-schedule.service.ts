@@ -7,6 +7,7 @@ import { ScheduleType, Task, TaskStatus } from '@redgent/db'
 import { createTaskSchema } from '@redgent/validators'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { TaskExecutionService } from '../task-execution/task-execution.service'
 
 @Injectable()
 export class TaskScheduleService implements OnModuleInit {
@@ -15,6 +16,7 @@ export class TaskScheduleService implements OnModuleInit {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly taskExecutionService: TaskExecutionService,
   ) {}
 
   /**
@@ -138,8 +140,7 @@ export class TaskScheduleService implements OnModuleInit {
    */
   private executeTask(task: Task) {
     this.logger.log(`Executing task: "${task.name}" (ID: ${task.id})`)
-    // TODO: 在这里实现具体的任务执行逻辑
-    // 例如: 调用 Reddit API, 进行数据分析等
+    this.taskExecutionService.execute(task)
   }
 
   /**

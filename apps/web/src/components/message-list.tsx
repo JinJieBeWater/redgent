@@ -1,38 +1,65 @@
-import type { UIMessage } from 'ai'
+import type { UIDataTypes, UIMessage } from 'ai'
+
+import type { APPUITools } from '@redgent/types'
 
 import { cn } from '@/lib/utils'
 
-import { MarkdownRenderer } from './markdown'
+import { MessageAssistant } from './message-assistant'
 
 interface MessagesListProps {
-  messages: UIMessage[]
+  messages: UIMessage<unknown, UIDataTypes, APPUITools>[]
   className?: string
+  status?: 'submitted' | 'streaming' | 'ready' | 'error'
 }
 
-export function MessagesList({ messages, className }: MessagesListProps) {
+export function MessagesList({
+  messages,
+  status,
+  className,
+}: MessagesListProps) {
   return (
-    <div className={cn('grid w-full grid-cols-1 space-y-4', className)}>
+    <div className={cn('grid w-full grid-cols-1', className)}>
       {messages.map(message => (
         <div
           key={message.id}
           className={cn(
-            'rounded-lg px-4 text-sm',
-            message.role === 'user'
-              ? 'bg-primary-foreground ml-8 justify-self-end outline'
-              : 'mr-8 justify-self-start',
+            'rounded-lg px-4 py-2 text-sm',
+            message.role === 'assistant'
+              ? 'justify-self-start'
+              : 'bg-primary-foreground justify-self-end outline',
           )}
         >
           {message.parts.map((part, index) =>
             part.type === 'text' ? (
               message.role === 'assistant' ? (
-                <MarkdownRenderer key={index} content={part.text} />
+                <MessageAssistant key={index} message={message} />
               ) : (
-                <MarkdownRenderer key={index} content={part.text} />
+                <p>{part.text}</p>
               )
             ) : null,
           )}
         </div>
       ))}
+      <MessageStatus status={status} />
     </div>
   )
+}
+
+export function MessageStatus({
+  status,
+}: {
+  status?: 'submitted' | 'streaming' | 'ready' | 'error'
+}) {
+  switch (status) {
+    case 'ready':
+      return null
+    case 'streaming':
+      return null
+    case 'submitted':
+      // 添加适当的loading 效果
+      return <p className="mr-8 px-4">正在处理请求...</p>
+    case 'error':
+      return <p className="mr-8 px-4">发生错误，请重试！</p>
+  }
+  return null
 }
