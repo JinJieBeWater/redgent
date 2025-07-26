@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { PrismaModule } from '../prisma/prisma.module'
+import { TaskExecutionModule } from '../task-execution/task-execution.module'
 import { TaskScheduleModule } from '../task-schedule/task-schedule.module'
 import { TaskAgentService } from './task-agent.service'
 
@@ -17,6 +18,7 @@ describe('TaskAgentService', () => {
         }),
         PrismaModule,
         TaskScheduleModule,
+        TaskExecutionModule,
       ],
       providers: [TaskAgentService],
     }).compile()

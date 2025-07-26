@@ -1,3 +1,5 @@
+import { TaskReport } from '@redgent/db'
+
 /**
  * 定义所有可能的任务进度状态
  */
@@ -56,16 +58,14 @@ interface BaseProgress {
 // 1. 任务生命周期状态
 export interface TaskStartProgress extends BaseProgress {
   status: typeof TaskProgressStatus.TASK_START
+  data?: {
+    reportId: string
+  }
 }
 
 export interface TaskCompleteProgress extends BaseProgress {
   status: typeof TaskProgressStatus.TASK_COMPLETE
-  data: {
-    id: string
-    createdAt: Date
-    executionDuration: number | null
-    taskId: string
-  }
+  data: TaskReport
 }
 
 export interface TaskCancelProgress extends BaseProgress {

@@ -56,6 +56,7 @@ function App() {
 
   const clearMessages = () => {
     setMessages([])
+    setInput('')
   }
 
   const bottomRef = useRef<HTMLDivElement>(null)

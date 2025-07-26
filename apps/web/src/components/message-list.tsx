@@ -29,14 +29,12 @@ export function MessagesList({
               : 'bg-primary-foreground justify-self-end outline',
           )}
         >
-          {message.parts.map((part, index) =>
-            part.type === 'text' ? (
-              message.role === 'assistant' ? (
-                <MessageAssistant key={index} message={message} />
-              ) : (
-                <p>{part.text}</p>
-              )
-            ) : null,
+          {message.role === 'assistant' ? (
+            <MessageAssistant message={message} />
+          ) : (
+            <p>
+              {message.parts[0].type === 'text' ? message.parts[0].text : ''}
+            </p>
           )}
         </div>
       ))}

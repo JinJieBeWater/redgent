@@ -71,7 +71,7 @@ model TaskReport {
   createdAt DateTime @default(now())
 
   /// [ReportContent]
-  content Json
+  content Json?
 
   executionDuration Int?
 

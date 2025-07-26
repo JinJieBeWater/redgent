@@ -1,10 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
-import z from 'zod'
+import { tap } from 'rxjs'
 
 import { ScheduleType, Task, TaskStatus } from '@redgent/db'
-import { createTaskSchema } from '@redgent/validators'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'
@@ -61,20 +60,19 @@ export class TaskScheduleService implements OnModuleInit {
    * 这是功能的核心，处理不同的调度类型。
    * @param task - The task object from the database.
    */
-  private registerTask(task: Task) {
+  registerTask(task: Task) {
     const { id, name, scheduleType, scheduleExpression } = task
-    const taskName = `${scheduleType.toLowerCase()}:${name}:${id}`
 
     // 确保同一个任务不被重复注册
-    this.removeTask(taskName)
+    this.removeTask(id)
 
     switch (scheduleType) {
       case ScheduleType.cron:
-        this.registerCronTask(taskName, scheduleExpression, task)
+        this.registerCronTask(id, scheduleExpression, task)
         break
 
       case ScheduleType.interval:
-        this.registerIntervalTask(taskName, scheduleExpression, task)
+        this.registerIntervalTask(id, scheduleExpression, task)
         break
 
       default:
@@ -135,19 +133,37 @@ export class TaskScheduleService implements OnModuleInit {
   }
 
   /**
-   * 模拟任务执行
+   * 任务执行
    * @param task - The task to execute.
    */
   private executeTask(task: Task) {
     this.logger.log(`Executing task: "${task.name}" (ID: ${task.id})`)
-    this.taskExecutionService.execute(task)
+    this.taskExecutionService.execute(task).subscribe({
+      next: progress => {
+        this.logger.log(
+          `Task "${task.name}" (ID: ${task.id}) execution progress:`,
+          JSON.stringify(progress, null, 2),
+        )
+      },
+      error: error => {
+        this.logger.error(
+          `Task "${task.name}" (ID: ${task.id}) execution failed:`,
+          error,
+        )
+      },
+      complete: () => {
+        this.logger.log(
+          `Task "${task.name}" (ID: ${task.id}) execution completed`,
+        )
+      },
+    })
   }
 
   /**
    * 从调度器中移除任务（用于更新或删除）
    * @param taskName - The unique name of the task in the registry.
    */
-  private removeTask(taskName: string) {
+  removeTask(taskName: string) {
     try {
       if (this.schedulerRegistry.doesExist('cron', taskName)) {
         this.schedulerRegistry.deleteCronJob(taskName)
@@ -158,32 +174,5 @@ export class TaskScheduleService implements OnModuleInit {
     } catch (e) {
       this.logger.warn(`无法移除任务 ${taskName}，可能不存在或已被删除`, e)
     }
-  }
-
-  async listAll() {
-    const tasks = await this.prismaService.task.findMany()
-    return tasks
-  }
-
-  async createTask(task: z.infer<typeof createTaskSchema>) {
-    const createdTask = await this.prismaService.task.create({
-      data: task,
-    })
-    this.registerTask(createdTask)
-    return createdTask
-  }
-
-  async updateTask(
-    task: Partial<z.infer<typeof createTaskSchema>> & Pick<Task, 'id'>,
-  ) {
-    const updatedTask = await this.prismaService.task.update({
-      where: { id: task.id },
-      data: task,
-    })
-    this.removeTask(`${task.scheduleType}:${task.name}:${task.id}`)
-    if (task.status !== TaskStatus.paused) {
-      this.registerTask(updatedTask)
-    }
-    return updatedTask
   }
 }

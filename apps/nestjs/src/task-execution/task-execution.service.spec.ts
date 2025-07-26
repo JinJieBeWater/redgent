@@ -200,7 +200,7 @@ describe(TaskExecutionService.name, () => {
         lastValueFrom(progressObservable.pipe(toArray())),
       ).rejects.toMatchObject({
         status: TaskProgressStatus.TASK_ERROR,
-        message: `任务 "${mockTaskConfig.name}" 执行失败`,
+        message: `任务 "${mockTaskConfig.name}" 执行失败 测试预期的报错 Reddit API error`,
       })
     })
 
@@ -228,7 +228,9 @@ describe(TaskExecutionService.name, () => {
       }
 
       // 动态生成链接选择响应，使用前10个实际的链接ID
-      const selectedLinkIds = tooManyLinks.slice(0, 10).map(link => link.id)
+      const selectedLinkIds = {
+        relevant_link_ids: tooManyLinks.slice(0, 10).map(link => link.id),
+      }
 
       // 注册基于精确消息匹配的响应处理器
       addCustomResponseHandler(
@@ -310,7 +312,7 @@ describe(TaskExecutionService.name, () => {
         lastValueFrom(progressObservable.pipe(toArray())),
       ).rejects.toMatchObject({
         status: TaskProgressStatus.TASK_ERROR,
-        message: `任务 "${mockTaskConfig.name}" 执行失败`,
+        message: `任务 "${mockTaskConfig.name}" 执行失败 Failed to fetch comments`,
       })
     })
   })

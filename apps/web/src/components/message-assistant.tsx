@@ -43,7 +43,6 @@ export const MessageAssistant = ({
             return (
               <MarkdownRenderer key={index} content="暂不支持 source-url" />
             )
-          case 'tool-validateTaskConfig':
           case 'tool-listAllTasks':
             return <MessageListAllTasks key={index} part={part} />
           case 'tool-createTask':

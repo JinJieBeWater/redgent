@@ -284,13 +284,13 @@ export class TaskExecutionService {
 
   private async _saveResults(
     taskConfig: Task,
-    analysisResult: TaskReport['content'],
+    analysisResult: PrismaJson.ReportContent,
     startTime: number,
     subscriber: Subscriber<TaskProgress>,
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [, taskInfo] = await Promise.all([
+    const [, taskReport] = await Promise.all([
       this.prismaService.task.update({
         where: { id: taskConfig.id },
         data: {
@@ -311,7 +311,7 @@ export class TaskExecutionService {
     subscriber.next({
       status: TaskProgressStatus.TASK_COMPLETE,
       message: '任务成功执行完毕',
-      data: taskInfo,
+      data: taskReport,
     })
   }
 
@@ -332,7 +332,7 @@ export class TaskExecutionService {
 
     subscriber.error({
       status: TaskProgressStatus.TASK_ERROR,
-      message: `任务 "${taskConfig.name}" 执行失败`,
+      message: `任务 "${taskConfig.name}" 执行失败 ${error instanceof Error ? error.message : ''}`,
     })
   }
 
@@ -341,20 +341,22 @@ export class TaskExecutionService {
     links: { id: string; title: string; selftext: string }[],
   ) {
     try {
-      const { object: selectedLinkIds } = await generateObject({
+      const { object } = await generateObject({
         model: myProvider.languageModel('structure-model'),
-        schema: z
-          .array(z.string().describe('帖子id'))
-          .describe(
-            `帖子的id数组，每个元素都是一个不重复的帖子id，控制在${this.MAX_LINKS_PER_TASK}个以内`,
-          ),
+        schema: z.object({
+          relevant_link_ids: z
+            .array(z.string().describe('帖子id'))
+            .describe(
+              `帖子的id数组，每个元素都是一个不重复的帖子id，控制在${this.MAX_LINKS_PER_TASK}个以内`,
+            ),
+        }),
         prompt: selectMostRelevantLinksPrompt(
           taskConfig.prompt,
           links,
           this.MAX_LINKS_PER_TASK,
         ),
       })
-      return selectedLinkIds
+      return object.relevant_link_ids
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         // Handle the API call error
@@ -380,7 +382,7 @@ export class TaskExecutionService {
       content: RedditLinkInfoUntrusted
       comment: CommentNode[]
     }[],
-  ): Promise<TaskReport['content']> {
+  ): Promise<PrismaJson.ReportContent> {
     try {
       const { object: analysisResult } = await generateObject({
         model: myProvider.languageModel('analysis-model'),
