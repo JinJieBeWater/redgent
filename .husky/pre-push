@@ -3,11 +3,9 @@
 
 echo "🚀 Running pre-push checks..."
 
-# Build project to ensure everything compiles
 echo "📦 Building project..."
 pnpm build
 
-# Run all tests including integration and e2e
 echo "🧪 Running all tests..."
 pnpm test
 

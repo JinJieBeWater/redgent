@@ -1,3 +1,6 @@
+echo "📦 Building project..."
+pnpm build
+
 echo "🚀 Running lint-staged..."
 pnpm dlx lint-staged
 
