@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly",
+    "build": "tsup",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },

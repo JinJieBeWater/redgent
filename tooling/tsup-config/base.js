@@ -8,4 +8,9 @@ export const config = {
   format: ['cjs', 'esm'],
   dts: true,
   sourcemap: true,
+  dts: {
+    compilerOptions: {
+      composite: false,
+    },
+  },
 }
