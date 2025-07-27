@@ -12,21 +12,24 @@ import {
   DeleteTaskInput,
   DeleteTaskInputSchema,
   DeleteTaskOutput,
-  GetLatestReportInput,
-  GetLatestReportInputSchema,
-  GetLatestReportOutput,
+  GetAllTasksInput,
+  GetAllTasksInputSchema,
+  GetAllTasksOutput,
+  GetTaskDetailInput,
+  GetTaskDetailInputSchema,
+  GetTaskDetailOutput,
   ImmediatelyExecuteTaskInput,
   ImmediatelyExecuteTaskInputSchema,
   ImmediatelyExecuteTaskOutput,
-  ListAllTasksInput,
-  ListAllTasksInputSchema,
-  ListAllTasksOutput,
+  ShowAllTaskInputSchema,
+  ShowAllTaskUIInput,
+  ShowFeedbackInputSchema,
+  ShowFeedbackUIInput,
+  ShowTaskDetailInputSchema,
+  ShowTaskDetailUIInput,
   TaskProgressStatus,
   UpdateTaskInput,
   UpdateTaskOutput,
-  ViewTaskDetailInput,
-  ViewTaskDetailInputSchema,
-  ViewTaskDetailOutput,
 } from '@redgent/shared'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
@@ -45,9 +48,9 @@ export class TaskAgentService {
     writer: UIMessageStreamWriter<UIMessage<unknown, UIDataTypes, APPUITools>>,
   ) =>
     ({
-      listAllTasks: tool<ListAllTasksInput, ListAllTasksOutput>({
+      GetAllTasks: tool<GetAllTasksInput, GetAllTasksOutput>({
         description: '列出所有Reddit抓取任务',
-        inputSchema: ListAllTasksInputSchema,
+        inputSchema: GetAllTasksInputSchema,
         execute: async ({ status }) => {
           try {
             this.logger.debug('listAllTasks 工具被调用')
@@ -70,7 +73,27 @@ export class TaskAgentService {
         },
       }),
 
-      createTask: tool<CreateTaskInput, CreateTaskOutput>({
+      GetTaskDetail: tool<GetTaskDetailInput, GetTaskDetailOutput>({
+        description: '获取一个任务的详细信息',
+        inputSchema: GetTaskDetailInputSchema,
+        execute: async input => {
+          try {
+            this.logger.debug('getTaskDetail 工具被调用')
+            const task = await this.prismaService.task.findUnique({
+              where: { id: input.taskId },
+            })
+            return {
+              data: task,
+              message: '任务详情获取成功',
+            }
+          } catch (error) {
+            this.logger.error(error)
+            throw error
+          }
+        },
+      }),
+
+      CreateTask: tool<CreateTaskInput, CreateTaskOutput>({
         description: '创建一个Reddit抓取任务',
         inputSchema: createTaskSchema,
         execute: async input => {
@@ -91,7 +114,7 @@ export class TaskAgentService {
         },
       }),
 
-      updateTask: tool<UpdateTaskInput, UpdateTaskOutput>({
+      UpdateTask: tool<UpdateTaskInput, UpdateTaskOutput>({
         description: '修改 Reddit 抓取任务配置',
         inputSchema: z.object({
           taskId: z.uuid().describe('任务id'),
@@ -116,7 +139,7 @@ export class TaskAgentService {
         },
       }),
 
-      deleteTask: tool<DeleteTaskInput, DeleteTaskOutput>({
+      DeleteTask: tool<DeleteTaskInput, DeleteTaskOutput>({
         description: '删除任务',
         inputSchema: DeleteTaskInputSchema,
         execute: async input => {
@@ -135,50 +158,7 @@ export class TaskAgentService {
         },
       }),
 
-      viewTaskDetail: tool<ViewTaskDetailInput, ViewTaskDetailOutput>({
-        description: '查看任务详情',
-        inputSchema: ViewTaskDetailInputSchema,
-        execute: async input => {
-          try {
-            this.logger.debug('viewTaskDetail 工具被调用')
-            const task = await this.prismaService.task.findUnique({
-              where: { id: input.taskId },
-            })
-            return {
-              data: task,
-              message: '任务详情获取成功',
-            }
-          } catch (error) {
-            this.logger.error(error)
-            throw error
-          }
-        },
-      }),
-
-      getLatestReport: tool<GetLatestReportInput, GetLatestReportOutput>({
-        description: '获取最新的分析报告',
-        inputSchema: GetLatestReportInputSchema,
-        execute: async ({ count }) => {
-          try {
-            this.logger.debug('getLatestReport 工具被调用')
-            const reports = await this.prismaService.taskReport.findMany({
-              orderBy: {
-                createdAt: 'desc',
-              },
-              take: count,
-            })
-            return {
-              data: reports,
-              message: '分析报告获取成功',
-            }
-          } catch (error) {
-            this.logger.error(error)
-            throw error
-          }
-        },
-      }),
-
-      immediatelyExecuteTask: tool<
+      ImmediatelyExecuteTask: tool<
         ImmediatelyExecuteTaskInput,
         ImmediatelyExecuteTaskOutput
       >({
@@ -228,6 +208,22 @@ export class TaskAgentService {
             throw error
           }
         },
+      }),
+
+      ShowAllTaskUI: tool<ShowAllTaskUIInput>({
+        description: '在前端显示所有任务列表',
+        inputSchema: ShowAllTaskInputSchema,
+      }),
+
+      ShowTaskDetailUI: tool<ShowTaskDetailUIInput>({
+        description:
+          '在前端显示任务详情，可用于展示完整的任务内容和该任务的所有报告',
+        inputSchema: ShowTaskDetailInputSchema,
+      }),
+
+      ShowFeedbackUI: tool<ShowFeedbackUIInput>({
+        description: '当进行创建/更新/删除任务后，显示操作反馈',
+        inputSchema: ShowFeedbackInputSchema,
       }),
     }) satisfies APPTools
 }

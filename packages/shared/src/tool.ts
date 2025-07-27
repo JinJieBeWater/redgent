@@ -12,8 +12,9 @@ export type ToolOutPut<T = unknown> = {
 
 export const NullInputSchema = z.object({})
 
+/** !! 服务端工具 !! */
 /** 列出所有任务 */
-export const ListAllTasksInputSchema = z.object({
+export const GetAllTasksInputSchema = z.object({
   status: z
     .enum({
       ...TaskStatus,
@@ -22,10 +23,17 @@ export const ListAllTasksInputSchema = z.object({
     .default(TaskStatus.active)
     .describe('任务状态'),
 })
-export type ListAllTasksInput = z.infer<typeof ListAllTasksInputSchema>
-export type ListAllTasksOutput = ToolOutPut<
+export type GetAllTasksInput = z.infer<typeof GetAllTasksInputSchema>
+export type GetAllTasksOutput = ToolOutPut<
   Pick<Task, 'id' | 'name' | 'status'>[]
 >
+
+/** 查看任务详情 */
+export const GetTaskDetailInputSchema = z.object({
+  taskId: z.uuid().describe('任务id'),
+})
+export type GetTaskDetailInput = z.infer<typeof GetTaskDetailInputSchema>
+export type GetTaskDetailOutput = ToolOutPut<Task | null>
 
 /** 创建任务 */
 export type CreateTaskInput = z.infer<typeof createTaskSchema>
@@ -55,24 +63,41 @@ export type ImmediatelyExecuteTaskInput = z.infer<
 >
 export type ImmediatelyExecuteTaskOutput = ToolOutPut<TaskReport>
 
-/** 查看任务详情 */
-export const ViewTaskDetailInputSchema = z.object({
+/** !! 客户端工具 !! */
+/** 展示所有任务 */
+export const ShowAllTaskInputSchema = z.object({
+  status: z
+    .enum({
+      ...TaskStatus,
+      all: 'all',
+    })
+    .default(TaskStatus.active)
+    .describe('任务状态'),
+})
+export type ShowAllTaskUIInput = z.infer<typeof ShowAllTaskInputSchema>
+
+/** 展示单个任务详情 */
+export const ShowTaskDetailInputSchema = z.object({
   taskId: z.uuid().describe('任务id'),
 })
-export type ViewTaskDetailInput = z.infer<typeof ViewTaskDetailInputSchema>
-export type ViewTaskDetailOutput = ToolOutPut<Task | null>
+export type ShowTaskDetailUIInput = z.infer<typeof ShowTaskDetailInputSchema>
 
-/** 获取最新的分析报告 */
-export const GetLatestReportInputSchema = z.object({
-  count: z.number().min(1).max(20).default(10).describe('获取报告数量'),
+/** 展示操作反馈  */
+export const ShowFeedbackInputSchema = z.object({
+  status: z
+    .enum({
+      success: 'success',
+      error: 'error',
+    })
+    .describe('操作结果'),
+  message: z.string().describe('操作结果的文本提示'),
 })
-export type GetLatestReportInput = z.infer<typeof GetLatestReportInputSchema>
-export type GetLatestReportOutput = ToolOutPut<TaskReport[]>
+export type ShowFeedbackUIInput = z.infer<typeof ShowFeedbackInputSchema>
 
 export type APPUITools = {
   listAllTasks: {
-    input: ListAllTasksInput
-    output: ListAllTasksOutput
+    input: GetAllTasksInput
+    output: GetAllTasksOutput
   }
   createTask: {
     input: CreateTaskInput
@@ -91,28 +116,27 @@ export type APPUITools = {
     output: ImmediatelyExecuteTaskOutput
   }
   viewTaskDetail: {
-    input: ViewTaskDetailInput
-    output: ViewTaskDetailOutput
-  }
-  getLatestReport: {
-    input: GetLatestReportInput
-    output: GetLatestReportOutput
+    input: GetTaskDetailInput
+    output: GetTaskDetailOutput
   }
 }
 
 export type APPUIToolType = keyof APPUITools
 
 export type APPTools = {
-  listAllTasks: Tool<ListAllTasksInput, ListAllTasksOutput>
-  createTask: Tool<CreateTaskInput, CreateTaskOutput>
-  updateTask: Tool<UpdateTaskInput, UpdateTaskOutput>
-  deleteTask: Tool<DeleteTaskInput, DeleteTaskOutput>
-  viewTaskDetail: Tool<ViewTaskDetailInput, ViewTaskDetailOutput>
-  immediatelyExecuteTask: Tool<
+  GetAllTasks: Tool<GetAllTasksInput, GetAllTasksOutput>
+  GetTaskDetail: Tool<GetTaskDetailInput, GetTaskDetailOutput>
+  CreateTask: Tool<CreateTaskInput, CreateTaskOutput>
+  UpdateTask: Tool<UpdateTaskInput, UpdateTaskOutput>
+  DeleteTask: Tool<DeleteTaskInput, DeleteTaskOutput>
+  ImmediatelyExecuteTask: Tool<
     ImmediatelyExecuteTaskInput,
     ImmediatelyExecuteTaskOutput
   >
-  getLatestReport: Tool<GetLatestReportInput, GetLatestReportOutput>
+
+  ShowAllTaskUI: Tool<ShowAllTaskUIInput>
+  ShowTaskDetailUI: Tool<ShowTaskDetailUIInput>
+  ShowFeedbackUI: Tool<ShowFeedbackUIInput>
 }
 
 export type APPUIDataTypes = UIDataTypes & {}
