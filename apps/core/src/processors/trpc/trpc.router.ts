@@ -30,5 +30,3 @@ export class TrpcRouter {
     )
   }
 }
-
-export type AppRouter = TrpcRouter[`appTrpcRouter`]

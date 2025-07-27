@@ -1,4 +1,4 @@
-import type { UIDataTypes, UIMessage } from 'ai'
+import type { ChatMessage } from '@core/shared'
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -10,8 +10,6 @@ import { cn } from '@web/lib/utils'
 import { trpc } from '@web/router'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
-
-import type { APPUITools } from '@redgent/shared'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { trpc, queryClient } }) => {
@@ -30,9 +28,7 @@ function App() {
   }, [report])
 
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat<
-    UIMessage<unknown, UIDataTypes, APPUITools>
-  >({
+  const { messages, sendMessage, status, setMessages } = useChat<ChatMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),

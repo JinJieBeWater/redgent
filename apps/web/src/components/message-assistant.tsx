@@ -1,19 +1,13 @@
-import type { UIDataTypes, UIMessage } from 'ai'
-
-import type { APPUITools } from '@redgent/shared'
+import type { ChatMessage } from '@core/shared'
 
 import { MarkdownRenderer } from './markdown'
 import {
   MessageCreateTask,
-  MessageListAllTasks,
+  MessageShowAllTasks,
   MessageUpdateTask,
 } from './message-tool'
 
-export const MessageAssistant = ({
-  message,
-}: {
-  message: UIMessage<unknown, UIDataTypes, APPUITools>
-}) => {
+export const MessageAssistant = ({ message }: { message: ChatMessage }) => {
   if (message.role !== 'assistant') {
     return null
   }
@@ -43,11 +37,11 @@ export const MessageAssistant = ({
             return (
               <MarkdownRenderer key={index} content="暂不支持 source-url" />
             )
-          case 'tool-listAllTasks':
-            return <MessageListAllTasks key={index} part={part} />
-          case 'tool-createTask':
+          case 'tool-ShowAllTaskUI':
+            return <MessageShowAllTasks key={index} part={part} />
+          case 'tool-CreateTask':
             return <MessageCreateTask key={index} part={part} />
-          case 'tool-updateTask':
+          case 'tool-UpdateTask':
             return <MessageUpdateTask key={index} part={part} />
           default:
             return (

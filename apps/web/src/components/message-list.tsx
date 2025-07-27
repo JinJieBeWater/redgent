@@ -1,12 +1,10 @@
-import type { UIDataTypes, UIMessage } from 'ai'
+import type { ChatMessage } from '@core/shared'
 import { cn } from '@web/lib/utils'
-
-import type { APPUITools } from '@redgent/shared'
 
 import { MessageAssistant } from './message-assistant'
 
 interface MessagesListProps {
-  messages: UIMessage<unknown, UIDataTypes, APPUITools>[]
+  messages: ChatMessage[]
   className?: string
   status?: 'submitted' | 'streaming' | 'ready' | 'error'
 }

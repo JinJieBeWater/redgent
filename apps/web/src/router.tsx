@@ -1,4 +1,4 @@
-import type { AppRouter } from '@core/processors/trpc/trpc.router'
+import type { AppRouter } from '@core/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { createTRPCClient, httpLink } from '@trpc/client'

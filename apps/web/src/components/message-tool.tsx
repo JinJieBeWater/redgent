@@ -1,3 +1,4 @@
+import type { ChatToolUI } from '@core/shared'
 import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from 'ai'
 import { memo } from 'react'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
@@ -14,7 +15,6 @@ import {
 } from 'lucide-react'
 
 import type { Task } from '@redgent/db'
-import type { APPUITools } from '@redgent/shared'
 
 import { MarkdownRenderer } from './markdown'
 import { Badge } from './ui/badge'
@@ -101,7 +101,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <Eye className="text-muted-foreground mt-1 h-5 w-5 flex-shrink-0" />
         <div className="min-w-0 flex-1">
           <h3
-            className="text-foreground mb-1 line-clamp-1 text-base leading-tight font-semibold"
+            className="text-foreground mb-1 line-clamp-1 text-base font-semibold leading-tight"
             title={task.name}
           >
             {task.name || '未命名任务'}
@@ -120,7 +120,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <div className="flex items-center space-x-4">
           <div className="flex align-middle">
             <Calendar className="mr-1.5 h-4 w-4" />
-            <span className="leading-4 capitalize">{task.scheduleType}</span>
+            <span className="capitalize leading-4">{task.scheduleType}</span>
           </div>
           <div className="flex align-middle">
             <Clock className="mr-1.5 h-4 w-4" />
@@ -166,13 +166,13 @@ export const TaskCardList = ({ tasks }: { tasks: Task[] }) => {
   )
 }
 
-export const MessageListAllTasks = ({
+export const MessageShowAllTasks = ({
   part,
 }: {
-  part: ToolUIPart<APPUITools>
+  part: ToolUIPart<ChatToolUI>
 }) => {
   const { output, type, state } = part
-  if (type !== 'tool-listAllTasks') return null
+  if (type !== 'tool-ShowAllTaskUI') return null
 
   switch (state) {
     case 'input-streaming':
