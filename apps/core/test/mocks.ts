@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended'
-import { DeepMockProxy } from 'jest-mock-extended/lib/Mock'
+import { Mocked } from 'vitest'
+import { mockDeep } from 'vitest-mock-extended'
 
 import { PrismaClient } from '@redgent/db'
 
@@ -8,7 +8,7 @@ export type Context = {
 }
 
 export type MockContext = {
-  prisma: DeepMockProxy<PrismaClient>
+  prisma: Mocked<PrismaClient>
 }
 
 export const createMockContext = (): MockContext => {

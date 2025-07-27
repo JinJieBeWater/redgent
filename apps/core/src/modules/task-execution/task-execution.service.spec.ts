@@ -3,6 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { ModelMessage } from 'ai'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
+import { createMockContext } from 'test/mocks'
+import { Mocked } from 'vitest'
 
 import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/shared'
 
@@ -18,10 +20,8 @@ import {
   clearCustomHandlers,
   compareMessages,
 } from '../../ai-sdk/utils'
-import { createMockContext } from '../../processors/prisma/context'
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
-import { ReportService } from '../report/report.service'
 import { TaskExecutionService } from './task-execution.service'
 
 // 使用数据工厂创建测试数据
@@ -33,8 +33,8 @@ const mockCompleteLinkData = mockRedditLinks.map(link =>
 
 describe(TaskExecutionService.name, () => {
   let service: TaskExecutionService
-  let redditService: jest.Mocked<RedditService>
-  let cacheManager: jest.Mocked<Cache>
+  let redditService: Mocked<RedditService>
+  let cacheManager: Mocked<Cache>
 
   beforeEach(async () => {
     // 清理之前的自定义处理器
@@ -43,7 +43,6 @@ describe(TaskExecutionService.name, () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TaskExecutionService,
-        ReportService,
         {
           provide: PrismaService,
           useValue: createMockContext().prisma,
@@ -51,10 +50,10 @@ describe(TaskExecutionService.name, () => {
         {
           provide: RedditService,
           useValue: {
-            getHotLinksByQueriesAndSubreddits: jest
+            getHotLinksByQueriesAndSubreddits: vi
               .fn()
               .mockResolvedValue(mockRedditLinks),
-            getCommentsByLinkIds: jest
+            getCommentsByLinkIds: vi
               .fn()
               .mockResolvedValue(mockCompleteLinkData),
           },
@@ -62,10 +61,10 @@ describe(TaskExecutionService.name, () => {
         {
           provide: CACHE_MANAGER,
           useValue: {
-            get: jest.fn().mockResolvedValue(undefined),
-            set: jest.fn().mockResolvedValue(undefined),
-            mget: jest.fn().mockResolvedValue([]),
-            mset: jest.fn().mockResolvedValue(undefined),
+            get: vi.fn().mockResolvedValue(undefined),
+            set: vi.fn().mockResolvedValue(undefined),
+            mget: vi.fn().mockResolvedValue([]),
+            mset: vi.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -238,7 +237,7 @@ describe(TaskExecutionService.name, () => {
         () => JSON.stringify(selectedLinkIds),
       )
 
-      jest.spyOn(service, 'selectMostRelevantLinks')
+      vi.spyOn(service, 'selectMostRelevantLinks')
 
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue(
         tooManyLinks,
@@ -278,7 +277,7 @@ describe(TaskExecutionService.name, () => {
         fewLinks,
       )
       cacheManager.mget.mockResolvedValue([undefined, undefined])
-      jest.spyOn(service, 'selectMostRelevantLinks')
+      vi.spyOn(service, 'selectMostRelevantLinks')
 
       const progressObservable = service.execute(mockTaskConfig)
       const progressEvents = await lastValueFrom(
@@ -302,9 +301,9 @@ describe(TaskExecutionService.name, () => {
     })
 
     it('应该正确处理获取完整内容时的错误', async () => {
-      jest
-        .spyOn(redditService, 'getCommentsByLinkIds')
-        .mockRejectedValueOnce(new Error('Failed to fetch comments'))
+      redditService.getCommentsByLinkIds.mockRejectedValueOnce(
+        new Error('测试预期的报错 Failed to fetch comments'),
+      )
 
       const progressObservable = service.execute(mockTaskConfig)
 
@@ -312,7 +311,7 @@ describe(TaskExecutionService.name, () => {
         lastValueFrom(progressObservable.pipe(toArray())),
       ).rejects.toMatchObject({
         status: TaskProgressStatus.TASK_ERROR,
-        message: `任务 "${mockTaskConfig.name}" 执行失败 Failed to fetch comments`,
+        message: `任务 "${mockTaskConfig.name}" 执行失败 测试预期的报错 Failed to fetch comments`,
       })
     })
   })

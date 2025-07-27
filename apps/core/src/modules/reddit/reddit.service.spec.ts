@@ -14,15 +14,15 @@ describe('RedditService', () => {
         {
           provide: HttpService,
           useValue: {
-            post: jest.fn(),
-            get: jest.fn(),
+            post: vi.fn(),
+            get: vi.fn(),
             axiosRef: { defaults: { headers: { common: {} } } },
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
+            get: vi.fn((key: string) => {
               if (key === 'REDDIT_CLIENT_ID') return 'test_client_id'
               if (key === 'REDDIT_SECRET') return 'test_secret'
               return null

@@ -6,6 +6,7 @@ import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
+import { createMockContext } from 'test/mocks'
 
 import {
   TaskCancelProgress,
@@ -13,7 +14,6 @@ import {
   TaskProgressStatus,
 } from '@redgent/shared'
 
-import { createMockContext } from '../src/processors/prisma/context'
 import { PrismaService } from '../src/processors/prisma/prisma.service'
 import {
   createMockLinks,
@@ -38,10 +38,10 @@ describe(TaskExecutionService.name, () => {
     const mockRedditServiceProvider = {
       provide: RedditService,
       useValue: {
-        getHotLinksByQueriesAndSubreddits: jest
+        getHotLinksByQueriesAndSubreddits: vi
           .fn()
           .mockResolvedValue(mockRedditLinks),
-        getCommentsByLinkIds: jest.fn().mockImplementation((ids: string[]) => {
+        getCommentsByLinkIds: vi.fn().mockImplementation((ids: string[]) => {
           return Promise.resolve(
             mockCompleteLinkData.filter(data => ids.includes(data.content.id)),
           )
@@ -83,7 +83,7 @@ describe(TaskExecutionService.name, () => {
   })
 
   it('应该获取链接，不过滤（全部为新链接），并缓存它们', async () => {
-    const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
+    const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
@@ -121,7 +121,7 @@ describe(TaskExecutionService.name, () => {
     // 预先缓存第一个链接
     await cacheManager.set(`redgent:link:${mockRedditLinks[0].id}`, 1)
 
-    const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
+    const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
@@ -165,7 +165,7 @@ describe(TaskExecutionService.name, () => {
       { key: `redgent:link:${mockRedditLinks[2].id}`, value: 1 },
     ])
 
-    const cacheMsetSpy = jest.spyOn(cacheManager, 'mset')
+    const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
