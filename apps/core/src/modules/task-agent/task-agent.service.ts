@@ -1,11 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import {
-  tool,
-  UIDataTypes,
-  UIMessage,
-  UIMessageStreamWriter,
-  UITools,
-} from 'ai'
+import { tool, UIDataTypes, UIMessage, UIMessageStreamWriter } from 'ai'
 import { lastValueFrom, pipe, tap, toArray } from 'rxjs'
 import z from 'zod'
 

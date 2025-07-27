@@ -1,7 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
-import { tap } from 'rxjs'
 
 import { ScheduleType, Task, TaskStatus } from '@redgent/db'
 

@@ -13,7 +13,6 @@ import {
 import {
   convertToModelMessages,
   createUIMessageStream,
-  pipeTextStreamToResponse,
   pipeUIMessageStreamToResponse,
   stepCountIs,
   streamText,
