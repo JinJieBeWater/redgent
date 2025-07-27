@@ -1,3 +1,6 @@
+import { RedditService } from '@core/modules/reddit/reddit.service'
+import { ReportService } from '@core/modules/report/report.service'
+import { TaskExecutionService } from '@core/modules/task-execution/task-execution.service'
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -9,10 +12,6 @@ import {
   TaskCompleteProgress,
   TaskProgressStatus,
 } from '@redgent/shared'
-
-import { RedditService } from '@/modules/reddit/reddit.service'
-import { ReportService } from '@/modules/report/report.service'
-import { TaskExecutionService } from '@/modules/task-execution/task-execution.service'
 
 import { createMockContext } from '../src/processors/prisma/context'
 import { PrismaService } from '../src/processors/prisma/prisma.service'

@@ -1,4 +1,9 @@
 import type { Cache } from 'cache-manager'
+import {
+  analyzeRedditContentPrompt,
+  selectMostRelevantLinksPrompt,
+} from '@core/ai-sdk/prompts'
+import { myProvider } from '@core/ai-sdk/provider'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { APICallError, generateObject } from 'ai'
@@ -12,12 +17,6 @@ import {
   TaskProgress,
   TaskProgressStatus,
 } from '@redgent/shared'
-
-import {
-  analyzeRedditContentPrompt,
-  selectMostRelevantLinksPrompt,
-} from '@/ai-sdk/prompts'
-import { myProvider } from '@/ai-sdk/provider'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'

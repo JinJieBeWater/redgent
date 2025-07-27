@@ -1,4 +1,6 @@
 import type { Response } from 'express'
+import { redgentAgentSystem } from '@core/ai-sdk/prompts'
+import { myProvider } from '@core/ai-sdk/provider'
 import {
   Body,
   Controller,
@@ -20,9 +22,6 @@ import {
 } from 'ai'
 
 import { APPUITools } from '@redgent/shared'
-
-import { redgentAgentSystem } from '@/ai-sdk/prompts'
-import { myProvider } from '@/ai-sdk/provider'
 
 import { ChatDto } from './dto/chat.dto'
 import { TaskAgentService } from './task-agent.service'

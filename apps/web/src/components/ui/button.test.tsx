@@ -1,6 +1,5 @@
+import { render, screen } from '@web/lib/test-utils'
 import { describe, expect, it } from 'vitest'
-
-import { render, screen } from '@/lib/test-utils'
 
 import { Button } from './button'
 

@@ -1,9 +1,8 @@
+import { RedditService } from '@core/modules/reddit/reddit.service'
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { RedditSort } from '@redgent/shared'
-
-import { RedditService } from '@/modules/reddit/reddit.service'
 
 import { AppModule } from '../src/app.module'
 import { createMockLinks, createMockResponse } from '../test/data-factory'

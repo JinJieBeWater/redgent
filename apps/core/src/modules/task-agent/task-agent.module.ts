@@ -1,6 +1,5 @@
+import { PrismaModule } from '@core/processors/prisma/prisma.module'
 import { Module } from '@nestjs/common'
-
-import { PrismaModule } from '@/processors/prisma/prisma.module'
 
 import { TaskExecutionModule } from '../task-execution/task-execution.module'
 import { TaskScheduleModule } from '../task-schedule/task-schedule.module'

@@ -1,9 +1,8 @@
+import { TaskExecutionService } from '@core/modules/task-execution/task-execution.service'
 import { NestFactory } from '@nestjs/core'
 import { lastValueFrom, tap } from 'rxjs'
 
 import { Task } from '@redgent/db'
-
-import { TaskExecutionService } from '@/modules/task-execution/task-execution.service'
 
 import { createMockTaskConfig } from '../../../test/data-factory'
 import { AppModule } from '../../app.module'

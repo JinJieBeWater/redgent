@@ -1,8 +1,7 @@
 import type { UIDataTypes, UIMessage } from 'ai'
+import { cn } from '@web/lib/utils'
 
 import type { APPUITools } from '@redgent/shared'
-
-import { cn } from '@/lib/utils'
 
 import { MessageAssistant } from './message-assistant'
 

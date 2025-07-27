@@ -1,5 +1,5 @@
 {
-  "name": "nestjs",
+  "name": "core",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -100,7 +100,7 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1"
+      "^@core/(.*)$": "<rootDir>/$1"
     }
   },
   "prettier": "@redgent/prettier-config"

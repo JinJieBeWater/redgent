@@ -1,4 +1,4 @@
-import { t, tRpcRouterType } from '@/processors/trpc/trpc.instance'
+import { t, tRpcRouterType } from '@core/processors/trpc/trpc.instance'
 
 type ObjWithKey<T extends string, Value> = { [K in T]: Value }
 
