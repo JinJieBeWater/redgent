@@ -21,8 +21,9 @@ import {
 
 import { APPUITools } from '@redgent/shared'
 
-import { redgentAgentSystem as RedgentAgentSystem } from '../ai-sdk/prompts'
-import { myProvider } from '../ai-sdk/provider'
+import { redgentAgentSystem } from '@/ai-sdk/prompts'
+import { myProvider } from '@/ai-sdk/provider'
+
 import { ChatDto } from './dto/chat.dto'
 import { TaskAgentService } from './task-agent.service'
 
@@ -49,7 +50,7 @@ export class TaskAgentController {
           const result = streamText({
             model: myProvider.languageModel('chat-model'),
             messages: convertToModelMessages(chat.messages),
-            system: RedgentAgentSystem,
+            system: redgentAgentSystem,
             tools: self.taskAgentService.tools(writer),
             onError: error => {
               // 记录错误日志但不暴露敏感信息

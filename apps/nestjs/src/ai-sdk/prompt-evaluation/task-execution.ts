@@ -3,10 +3,11 @@ import { lastValueFrom, tap } from 'rxjs'
 
 import { Task } from '@redgent/db'
 
+import { TaskExecutionService } from '@/modules/task-execution/task-execution.service'
+
 import { createMockTaskConfig } from '../../../test/data-factory'
 import { AppModule } from '../../app.module'
 import { PrismaService } from '../../prisma/prisma.service'
-import { TaskExecutionService } from '../../task-execution/task-execution.service'
 
 /**
  * 该脚本用于在真实环境中评估和调试 `selectMostRelevantLinks` 方法的 AI 提示词。

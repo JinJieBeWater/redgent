@@ -26,8 +26,6 @@
     "task-execution": "ts-node src/ai-sdk/prompt-evaluation/task-execution.ts"
   },
   "dependencies": {
-    "@redgent/db": "workspace:*",
-    "@redgent/shared": "workspace:*",
     "@ai-sdk/deepseek": "1.0.0-beta.8",
     "@ai-sdk/provider": "^2.0.0-beta.1",
     "@nestjs/axios": "^4.0.1",
@@ -39,6 +37,9 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.0.0",
     "@openrouter/ai-sdk-provider": "1.0.0-beta.5",
+    "@redgent/db": "workspace:*",
+    "@redgent/shared": "workspace:*",
+    "@trpc/server": "^11.4.3",
     "ai": "5.0.0-beta.25",
     "axios": "^1.10.0",
     "cache-manager": "^7.0.1",
@@ -97,7 +98,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   },
   "prettier": "@redgent/prettier-config"
 }

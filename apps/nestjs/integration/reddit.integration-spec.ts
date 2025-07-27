@@ -3,8 +3,9 @@ import { Test, TestingModule } from '@nestjs/testing'
 
 import { RedditSort } from '@redgent/shared'
 
+import { RedditService } from '@/modules/reddit/reddit.service'
+
 import { AppModule } from '../src/app.module'
-import { RedditService } from '../src/reddit/reddit.service'
 import { createMockLinks, createMockResponse } from '../test/data-factory'
 
 describe(RedditService.name, () => {

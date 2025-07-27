@@ -10,11 +10,12 @@ import {
   TaskProgressStatus,
 } from '@redgent/shared'
 
+import { RedditService } from '@/modules/reddit/reddit.service'
+import { ReportService } from '@/modules/report/report.service'
+import { TaskExecutionService } from '@/modules/task-execution/task-execution.service'
+
 import { createMockContext } from '../src/prisma/context'
 import { PrismaService } from '../src/prisma/prisma.service'
-import { RedditService } from '../src/reddit/reddit.service'
-import { ReportService } from '../src/report/report.service'
-import { TaskExecutionService } from '../src/task-execution/task-execution.service'
 import {
   createMockLinks,
   createMockLinkWithComments,

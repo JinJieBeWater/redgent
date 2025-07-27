@@ -5,7 +5,7 @@ import { tap } from 'rxjs'
 
 import { ScheduleType, Task, TaskStatus } from '@redgent/db'
 
-import { PrismaService } from '../prisma/prisma.service'
+import { PrismaService } from '../../prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'
 
 @Injectable()

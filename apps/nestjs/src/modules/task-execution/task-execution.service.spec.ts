@@ -11,15 +11,15 @@ import {
   createMockTaskConfig,
   createTooManyLinks,
   TEST_DATA_PRESETS,
-} from '../../test/data-factory'
-import { selectMostRelevantLinksPrompt } from '../ai-sdk/prompts'
+} from '../../../test/data-factory'
+import { selectMostRelevantLinksPrompt } from '../../ai-sdk/prompts'
 import {
   addCustomResponseHandler,
   clearCustomHandlers,
   compareMessages,
-} from '../ai-sdk/utils'
-import { createMockContext } from '../prisma/context'
-import { PrismaService } from '../prisma/prisma.service'
+} from '../../ai-sdk/utils'
+import { createMockContext } from '../../prisma/context'
+import { PrismaService } from '../../prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { ReportService } from '../report/report.service'
 import { TaskExecutionService } from './task-execution.service'

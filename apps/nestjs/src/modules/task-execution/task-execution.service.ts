@@ -5,7 +5,7 @@ import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber } from 'rxjs'
 import z from 'zod'
 
-import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
+import { Task, TaskStatus as TaskStatusModel } from '@redgent/db'
 import {
   CommentNode,
   RedditLinkInfoUntrusted,
@@ -16,9 +16,10 @@ import {
 import {
   analyzeRedditContentPrompt,
   selectMostRelevantLinksPrompt,
-} from '../ai-sdk/prompts'
-import { myProvider } from '../ai-sdk/provider'
-import { PrismaService } from '../prisma/prisma.service'
+} from '@/ai-sdk/prompts'
+import { myProvider } from '@/ai-sdk/provider'
+
+import { PrismaService } from '../../prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 
 @Injectable()
