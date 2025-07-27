@@ -2,15 +2,14 @@ import type { UIDataTypes, UIMessage } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
+import { FormComponent } from '@web/components/form-component'
+import { MessagesList } from '@web/components/message-list'
+import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
+import { cn } from '@web/lib/utils'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
 
 import type { APPUITools } from '@redgent/shared'
-
-import { FormComponent } from '@/components/form-component'
-import { MessagesList } from '@/components/message-list'
-import { useOptimizedScroll } from '@/hooks/use-optimized-scroll'
-import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   component: App,

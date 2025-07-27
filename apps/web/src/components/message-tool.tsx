@@ -1,5 +1,6 @@
 import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from 'ai'
 import { memo } from 'react'
+import { formatRelativeTime } from '@web/lib/format-relative-time'
 import {
   Ban,
   Calendar,
@@ -14,8 +15,6 @@ import {
 
 import type { Task } from '@redgent/db'
 import type { APPUITools } from '@redgent/shared'
-
-import { formatRelativeTime } from '@/lib/format-relative-time'
 
 import { MarkdownRenderer } from './markdown'
 import { Badge } from './ui/badge'

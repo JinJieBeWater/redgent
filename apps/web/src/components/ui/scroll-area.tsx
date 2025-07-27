@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
-
-import { cn } from '@/lib/utils'
+import { cn } from '@web/lib/utils'
 
 function ScrollArea({
   className,
@@ -16,7 +15,7 @@ function ScrollArea({
     >
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
+        className="focus-visible:ring-ring/50 size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px]"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
@@ -36,7 +35,7 @@ function ScrollBar({
       data-slot="scroll-area-scrollbar"
       orientation={orientation}
       className={cn(
-        'flex touch-none p-px transition-colors select-none',
+        'flex touch-none select-none p-px transition-colors',
         orientation === 'vertical' &&
           'h-full w-2.5 border-l border-l-transparent',
         orientation === 'horizontal' &&

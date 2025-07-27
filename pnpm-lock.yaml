@@ -30,7 +30,7 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  apps/nestjs:
+  apps/core:
     dependencies:
       '@ai-sdk/deepseek':
         specifier: 1.0.0-beta.8
@@ -4438,6 +4438,7 @@ packages:
 
   js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
+    hasBin: true
 
   jsdom@26.1.0:
     resolution: {integrity: sha512-Cvc9WUhxSMEo4McES3P7oK3QaXldCfNWp7pl2NNeiIFlCoLr3kfq9kb1fxftiwk1FLV7CvpvDfonxtzUDeSOPg==}
