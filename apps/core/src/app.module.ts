@@ -5,14 +5,12 @@ import * as Joi from 'joi'
 
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { AppTrpcRouter } from './app.trpc'
 import { RedditModule } from './modules/reddit/reddit.module'
 import { ReportModule } from './modules/report/report'
 import { TaskAgentModule } from './modules/task-agent/task-agent.module'
 import { TaskExecutionModule } from './modules/task-execution/task-execution.module'
 import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module'
 import { PrismaModule } from './processors/prisma/prisma.module'
-import { TrpcModule } from './processors/trpc/trpc.module'
 
 @Module({
   imports: [
@@ -38,7 +36,6 @@ import { TrpcModule } from './processors/trpc/trpc.module'
         abortEarly: true,
       },
     }),
-    TrpcModule,
     RedditModule,
     TaskExecutionModule,
     PrismaModule,
@@ -47,6 +44,6 @@ import { TrpcModule } from './processors/trpc/trpc.module'
     TaskAgentModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppTrpcRouter],
+  providers: [AppService],
 })
 export class AppModule {}
