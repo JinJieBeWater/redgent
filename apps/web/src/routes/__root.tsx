@@ -1,11 +1,24 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router'
+import type { AppRouter } from '@core/processors/trpc/trpc.router'
+import type { QueryClient } from '@tanstack/react-query'
+import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import Header from '@web/components/app-header'
 import { ThemeProvider } from '@web/components/theme-provider'
 import { Toaster } from '@web/components/ui/sonner'
 
-export const Route = createRootRoute({
-  component: () => (
+export interface RouterAppContext {
+  // @ts-ignore
+  trpc: TRPCOptionsProxy<AppRouter>
+  queryClient: QueryClient
+}
+
+export const Route = createRootRouteWithContext<RouterAppContext>()({
+  component: RootComponent,
+})
+
+function RootComponent() {
+  return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <div className="flex min-h-screen flex-col">
@@ -23,5 +36,5 @@ export const Route = createRootRoute({
         <TanStackRouterDevtools />
       </ThemeProvider>
     </>
-  ),
-})
+  )
+}
