@@ -189,7 +189,7 @@ export class TaskAgentService {
     }),
 
     ShowAllTaskUI: tool({
-      description: '在前端显示所有任务列表',
+      description: '当用户要求展示所有任务时，调用该工具',
       inputSchema: z.object({
         status: z
           .enum({
@@ -203,14 +203,14 @@ export class TaskAgentService {
 
     ShowTaskDetailUI: tool({
       description:
-        '在前端显示任务详情，可用于展示完整的任务内容和该任务的所有报告',
+        '当用户要求展示任务详情时，调用该工具，展示完整的任务内容和该任务的所属报告',
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
       }),
     }),
 
     ShowFeedbackUI: tool({
-      description: '当进行创建/更新/删除任务后，显示操作反馈',
+      description: '当进行创建/更新/删除任务完成后，调用该工具，显示操作反馈',
       inputSchema: z.object({
         status: z
           .enum({
