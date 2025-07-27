@@ -18,8 +18,8 @@ import {
   clearCustomHandlers,
   compareMessages,
 } from '../../ai-sdk/utils'
-import { createMockContext } from '../../prisma/context'
-import { PrismaService } from '../../prisma/prisma.service'
+import { createMockContext } from '../../processors/prisma/context'
+import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { ReportService } from '../report/report.service'
 import { TaskExecutionService } from './task-execution.service'

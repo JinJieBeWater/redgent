@@ -8,7 +8,7 @@ import { TaskProgress, TaskProgressStatus } from '@redgent/shared'
 
 import { AppModule } from '../src/app.module'
 import { TaskExecutionService } from '../src/modules/task-execution/task-execution.service'
-import { PrismaService } from '../src/prisma/prisma.service'
+import { PrismaService } from '../src/processors/prisma/prisma.service'
 import { createMockTaskConfig } from './data-factory'
 
 const mockTaskConfig = createMockTaskConfig({

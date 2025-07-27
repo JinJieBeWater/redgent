@@ -19,7 +19,7 @@ import {
 } from '@/ai-sdk/prompts'
 import { myProvider } from '@/ai-sdk/provider'
 
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 
 @Injectable()

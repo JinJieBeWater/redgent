@@ -35,7 +35,7 @@ import {
   ViewTaskDetailOutput,
 } from '@redgent/shared'
 
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '../../processors/prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'
 import { TaskScheduleService } from '../task-schedule/task-schedule.service'
 

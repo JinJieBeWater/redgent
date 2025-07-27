@@ -14,8 +14,8 @@ import { RedditService } from '@/modules/reddit/reddit.service'
 import { ReportService } from '@/modules/report/report.service'
 import { TaskExecutionService } from '@/modules/task-execution/task-execution.service'
 
-import { createMockContext } from '../src/prisma/context'
-import { PrismaService } from '../src/prisma/prisma.service'
+import { createMockContext } from '../src/processors/prisma/context'
+import { PrismaService } from '../src/processors/prisma/prisma.service'
 import {
   createMockLinks,
   createMockLinkWithComments,

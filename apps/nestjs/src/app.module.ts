@@ -11,7 +11,7 @@ import { ReportModule } from './modules/report/report'
 import { TaskAgentModule } from './modules/task-agent/task-agent.module'
 import { TaskExecutionModule } from './modules/task-execution/task-execution.module'
 import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module'
-import { PrismaModule } from './prisma/prisma.module'
+import { PrismaModule } from './processors/prisma/prisma.module'
 import { TrpcModule } from './processors/trpc/trpc.module'
 
 @Module({

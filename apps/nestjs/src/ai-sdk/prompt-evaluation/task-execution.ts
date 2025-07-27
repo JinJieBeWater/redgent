@@ -7,7 +7,7 @@ import { TaskExecutionService } from '@/modules/task-execution/task-execution.se
 
 import { createMockTaskConfig } from '../../../test/data-factory'
 import { AppModule } from '../../app.module'
-import { PrismaService } from '../../prisma/prisma.service'
+import { PrismaService } from '../../processors/prisma/prisma.service'
 
 /**
  * 该脚本用于在真实环境中评估和调试 `selectMostRelevantLinks` 方法的 AI 提示词。

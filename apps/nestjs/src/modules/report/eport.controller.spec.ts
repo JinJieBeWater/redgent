@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { createMockContext } from '../../prisma/context'
-import { PrismaService } from '../../prisma/prisma.service'
+import { createMockContext } from '../../processors/prisma/context'
+import { PrismaService } from '../../processors/prisma/prisma.service'
 import { ReportController } from './report.controller'
 import { ReportService } from './report.service'
 
