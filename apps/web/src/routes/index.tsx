@@ -1,21 +1,34 @@
 import type { UIDataTypes, UIMessage } from 'ai'
 import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
 import { MessagesList } from '@web/components/message-list'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
+import { trpc } from '@web/router'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
 
 import type { APPUITools } from '@redgent/shared'
 
 export const Route = createFileRoute('/')({
+  loader: async ({ context: { trpc, queryClient } }) => {
+    await queryClient.ensureQueryData(trpc.report.hello.queryOptions())
+    return
+  },
   component: App,
 })
 
 function App() {
+  const reportQuery = useQuery(trpc.report.hello.queryOptions())
+  const report = reportQuery.data || ''
+
+  useEffect(() => {
+    console.log('来自 trpc + react-query 的数据：', report)
+  }, [report])
+
   const [input, setInput] = useState('')
   const { messages, sendMessage, status, setMessages } = useChat<
     UIMessage<unknown, UIDataTypes, APPUITools>

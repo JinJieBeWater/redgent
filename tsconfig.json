@@ -1,0 +1,17 @@
+{
+  "files": [], // 空文件，全量校验使用
+  "references": [
+    {
+      "path": "./apps/core"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./packages/database"
+    },
+    {
+      "path": "./packages/shared"
+    }
+  ]
+}

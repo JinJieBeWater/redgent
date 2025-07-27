@@ -6,12 +6,16 @@ import { createContext, TrpcService } from './trpc.service'
 
 @Injectable()
 export class TrpcRouter {
-  appTrpcRouter: ReturnType<TrpcService['t']['router']>
+  appTrpcRouter: ReturnType<typeof this.register>
   constructor(
     private readonly trpcService: TrpcService,
     private readonly reportRouter: ReportRouter,
   ) {
-    this.appTrpcRouter = this.trpcService.t.router({
+    this.appTrpcRouter = this.register()
+  }
+
+  register() {
+    return this.trpcService.t.router({
       ...this.reportRouter.apply(),
     })
   }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { initTRPC } from '@trpc/server'
 import * as trpcExpress from '@trpc/server/adapters/express'
+import superjson from 'superjson'
 
 export async function createContext({
   req,
@@ -20,7 +21,9 @@ export class TrpcService {
   }
 
   init() {
-    return initTRPC.context<Context>().create()
+    return initTRPC.context<Context>().create({
+      transformer: superjson,
+    })
   }
 
   // these routes are publicly accessible to everyone

@@ -41,3 +41,6 @@ yarn-error.log*
 
 # prisma
 generated
+
+# typescript
+tsconfig.tsbuildinfo

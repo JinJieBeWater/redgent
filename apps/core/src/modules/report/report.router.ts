@@ -5,7 +5,7 @@ import { TrpcService } from '../../processors/trpc/trpc.service'
 
 export class ReportRouter implements TrpcRouter {
   @Inject()
-  private readonly trpcService: TrpcService
+  private readonly trpcService!: TrpcService
 
   apply() {
     return {

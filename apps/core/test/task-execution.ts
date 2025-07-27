@@ -1,12 +1,12 @@
-import { TaskExecutionService } from '@core/modules/task-execution/task-execution.service'
 import { NestFactory } from '@nestjs/core'
 import { lastValueFrom, tap } from 'rxjs'
 
 import { Task } from '@redgent/db'
 
-import { createMockTaskConfig } from '../../../test/data-factory'
-import { AppModule } from '../../app.module'
-import { PrismaService } from '../../processors/prisma/prisma.service'
+import { AppModule } from '../src/app.module'
+import { TaskExecutionService } from '../src/modules/task-execution/task-execution.service'
+import { PrismaService } from '../src/processors/prisma/prisma.service'
+import { createMockTaskConfig } from './data-factory'
 
 /**
  * 该脚本用于在真实环境中评估和调试 `selectMostRelevantLinks` 方法的 AI 提示词。

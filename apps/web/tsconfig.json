@@ -5,7 +5,14 @@
     "types": ["vite/client", "@testing-library/jest-dom"],
     "baseUrl": ".",
     "paths": {
-      "@web/*": ["./src/*"]
+      "@web/*": ["./src/*"],
+      "@core/*": ["../core/src/*"]
     }
-  }
+  },
+  "references": [
+    {
+      "path": "../core"
+    }
+  ],
+  "exclude": ["node_modules"]
 }
