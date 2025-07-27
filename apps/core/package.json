@@ -39,6 +39,7 @@
     "@openrouter/ai-sdk-provider": "1.0.0-beta.5",
     "@redgent/db": "workspace:*",
     "@redgent/shared": "workspace:*",
+    "@trpc/server": "^11.4.3",
     "ai": "5.0.0-beta.25",
     "axios": "^1.10.0",
     "cache-manager": "^7.0.1",

@@ -101,7 +101,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <Eye className="text-muted-foreground mt-1 h-5 w-5 flex-shrink-0" />
         <div className="min-w-0 flex-1">
           <h3
-            className="text-foreground mb-1 line-clamp-1 text-base font-semibold leading-tight"
+            className="text-foreground mb-1 line-clamp-1 text-base leading-tight font-semibold"
             title={task.name}
           >
             {task.name || '未命名任务'}
@@ -120,7 +120,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <div className="flex items-center space-x-4">
           <div className="flex align-middle">
             <Calendar className="mr-1.5 h-4 w-4" />
-            <span className="capitalize leading-4">{task.scheduleType}</span>
+            <span className="leading-4 capitalize">{task.scheduleType}</span>
           </div>
           <div className="flex align-middle">
             <Clock className="mr-1.5 h-4 w-4" />
@@ -136,7 +136,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
           </div>
         </div>
         <Badge
-          variant={statusInfo.variant as any}
+          variant={statusInfo.variant}
           className="flex items-center gap-1 text-xs"
         >
           <StatusIcon className="h-3 w-3" />

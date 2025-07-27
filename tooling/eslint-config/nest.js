@@ -42,6 +42,7 @@ export const nestJsConfig = [
         'error',
         { argsIgnorePattern: '^_' },
       ],
+      '@typescript-eslint/no-this-alias': 'off',
     },
   },
 ]

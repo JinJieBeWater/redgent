@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { lastValueFrom, tap, toArray } from 'rxjs'
+import { lastValueFrom, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
 import { PrismaClient } from '@redgent/db'
@@ -69,7 +69,7 @@ describe('analysis-task (e2e)', () => {
         analysisTaskExecutionService.execute(mockTaskConfig)
 
       const progressEvents = await lastValueFrom<TaskProgress[]>(
-        progressObservable.pipe(tap(console.log), toArray()),
+        progressObservable.pipe(toArray()),
       )
 
       const finalEvent = progressEvents[progressEvents.length - 1]
