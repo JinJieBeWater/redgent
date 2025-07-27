@@ -1,24 +1,66 @@
 import { Injectable } from '@nestjs/common'
+import z from 'zod'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
+import { paginateByTaskIdSchema, paginateSchema } from './report.dto'
 
 @Injectable()
 export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * 根据任务ID查找所有相关的分析结果
-   * @param taskId 任务的ID
-   * @returns 分析结果列表
-   */
-  findAllByTaskId(taskId: string) {
-    return this.prisma.taskReport.findMany({
-      where: {
-        taskId,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+  async paginate({ take, skip }: z.infer<typeof paginateSchema>) {
+    const [data, total] = await Promise.all([
+      this.prisma.taskReport.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take,
+        skip,
+        include: {
+          task: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
+      this.prisma.taskReport.count(),
+    ])
+
+    return {
+      data,
+      total,
+      hasMore: skip + take < total,
+    }
+  }
+
+  async paginateByTaskId({
+    taskId,
+    take,
+    skip,
+  }: z.infer<typeof paginateByTaskIdSchema>) {
+    const [data, total] = await Promise.all([
+      this.prisma.taskReport.findMany({
+        where: {
+          taskId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take,
+        skip,
+      }),
+      this.prisma.taskReport.count({
+        where: {
+          taskId,
+        },
+      }),
+    ])
+
+    return {
+      data,
+      total,
+      hasMore: skip + take < total,
+    }
   }
 }

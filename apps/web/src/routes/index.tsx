@@ -13,14 +13,25 @@ import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { trpc, queryClient } }) => {
-    await queryClient.ensureQueryData(trpc.report.hello.queryOptions())
+    await queryClient.ensureQueryData(
+      trpc.report.paginate.queryOptions({
+        take: 10,
+        skip: 0,
+      }),
+    )
     return
   },
   component: App,
 })
 
 function App() {
-  const reportQuery = useQuery(trpc.report.hello.queryOptions())
+  const reportQuery = useQuery(
+    trpc.report.paginate.queryOptions({
+      take: 10,
+      skip: 0,
+    }),
+  )
+
   const report = reportQuery.data || ''
 
   useEffect(() => {
