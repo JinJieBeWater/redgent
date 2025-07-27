@@ -8,7 +8,7 @@ export default defineConfig({
 
     globals: true,
     root: './',
-    include: ['**/*.spec.ts'],
+    include: ['**/*.e2e-spec.ts'],
     alias: {
       '@core': path.resolve(__dirname, './src'),
       '@redgent/db': path.resolve(__dirname, '../../packages/database/src'),
