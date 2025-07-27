@@ -5,5 +5,8 @@
   "testRegex": ".*/integration/.*\\.integration-spec\\.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@core/(.*)$": "<rootDir>/../src/$1"
   }
 }
