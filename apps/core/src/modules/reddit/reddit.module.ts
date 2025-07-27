@@ -11,7 +11,7 @@ import { RedditService } from './reddit.service'
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const proxy = configService.get<string>('PROXY')!
+        const proxy = configService.get<string>('PROXY') ?? '7980'
         const proxyAgent = new HttpsProxyAgent('http://127.0.0.1:' + proxy)
         return {
           headers: {

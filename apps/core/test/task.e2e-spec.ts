@@ -59,11 +59,12 @@ describe('analysis-task (e2e)', () => {
   describe('execute', () => {
     it('应该正常完成 Reddit 抓取到 AI 分析的整个流程', async () => {
       // 由于 Reddit 的数据是动态的，当前无法实现 AI-SDK 模拟 只能 mock
-      jest
-        .spyOn(analysisTaskExecutionService, 'selectMostRelevantLinks')
-        .mockImplementation(async (_, links) => {
-          return links.slice(0, 10).map(link => link.id)
-        })
+      vi.spyOn(
+        analysisTaskExecutionService,
+        'selectMostRelevantLinks',
+      ).mockImplementation(async (_, links) => {
+        return links.slice(0, 10).map(link => link.id)
+      })
 
       const progressObservable =
         analysisTaskExecutionService.execute(mockTaskConfig)

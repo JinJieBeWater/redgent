@@ -60,13 +60,12 @@ describe(RedditService.name, () => {
       const mockLinks = createMockLinks(1, 'nestjs', 'link')
       const nestjsResponse = createMockResponse(mockLinks)
 
-      const loggerErrorSpy = jest
+      const loggerErrorSpy = vi
         .spyOn(redditService['logger'], 'error')
         .mockImplementation(() => {})
 
-      jest
-        .spyOn(redditService, 'getHotLinksBySubreddit')
-        .mockImplementation(async subreddit => {
+      vi.spyOn(redditService, 'getHotLinksBySubreddit').mockImplementation(
+        async subreddit => {
           if (subreddit === 'nestjs') {
             return nestjsResponse.data
           }
@@ -74,7 +73,8 @@ describe(RedditService.name, () => {
             throw new Error('API Error: Subreddit not found')
           }
           return createMockResponse([]).data
-        })
+        },
+      )
 
       const result = await redditService.getHotLinksBySubreddits([
         'nestjs',
