@@ -1,4 +1,3 @@
-import type { ChatMessage } from '@core/shared'
 import { Injectable, Logger } from '@nestjs/common'
 import { tool, UIDataTypes, UIMessage, UIMessageStreamWriter } from 'ai'
 import { lastValueFrom, pipe, tap, toArray } from 'rxjs'

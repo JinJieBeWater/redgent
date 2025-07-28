@@ -1,5 +1,5 @@
 import type { ChatToolUI } from '@core/shared'
-import type { ToolUIPart, UIDataTypes, UIMessagePart, UITools } from 'ai'
+import type { ToolUIPart } from 'ai'
 import { memo } from 'react'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import {
@@ -16,8 +16,8 @@ import {
 
 import type { Task } from '@redgent/db'
 
-import { MarkdownRenderer } from './markdown'
-import { Badge } from './ui/badge'
+import { MarkdownRenderer } from '../markdown'
+import { Badge } from '../ui/badge'
 
 // Mini 组件只需要的字段
 type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
@@ -202,20 +202,4 @@ export const MessageShowAllTasks = ({
     default:
       return null
   }
-}
-
-export const MessageCreateTask = ({
-  part,
-}: {
-  part: UIMessagePart<UIDataTypes, UITools>
-}) => {
-  return <div>CreateTaskMessage: {JSON.stringify(part)}</div>
-}
-
-export const MessageUpdateTask = ({
-  part,
-}: {
-  part: UIMessagePart<UIDataTypes, UITools>
-}) => {
-  return <div>UpdateTaskMessage: {JSON.stringify(part)}</div>
 }
