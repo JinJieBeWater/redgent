@@ -1,5 +1,5 @@
+import type { InferUITool, UIMessage } from 'ai'
 import { TaskAgentService } from '@core/modules/task-agent/task-agent.service'
-import { InferUITool, UIMessage } from 'ai'
 import z from 'zod'
 
 export const AppMetadataSchema = z.object({

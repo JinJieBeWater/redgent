@@ -9,7 +9,7 @@ export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
   async paginate({ take, skip }: z.infer<typeof PaginateSchema>) {
-    const [data, total] = await Promise.all([
+    const [reports, total] = await Promise.all([
       this.prisma.taskReport.findMany({
         orderBy: {
           createdAt: 'desc',
@@ -28,7 +28,7 @@ export class ReportService {
     ])
 
     return {
-      data,
+      reports,
       total,
       hasMore: skip + take < total,
     }
@@ -39,7 +39,7 @@ export class ReportService {
     take,
     skip,
   }: z.infer<typeof PaginateByTaskIdSchema>) {
-    const [data, total] = await Promise.all([
+    const [reports, total] = await Promise.all([
       this.prisma.taskReport.findMany({
         where: {
           taskId,
@@ -58,7 +58,7 @@ export class ReportService {
     ])
 
     return {
-      data,
+      reports,
       total,
       hasMore: skip + take < total,
     }

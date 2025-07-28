@@ -1,7 +1,7 @@
 import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
-import { MessageShowAllTasks } from './message-tool'
+import { MessageShowAllTaskUI } from './message-tool'
 
 export const MessageAssistant = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
@@ -47,7 +47,7 @@ export const MessageAssistant = ({ message }: { message: AppMessage }) => {
               />
             )
           case 'tool-ShowAllTaskUI':
-            return <MessageShowAllTasks key={index} part={part} />
+            return <MessageShowAllTaskUI key={index} part={part} />
           case 'tool-ShowTaskDetailUI':
             return (
               <MarkdownRenderer

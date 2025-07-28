@@ -191,12 +191,9 @@ export class TaskAgentService {
       description: '当用户要求展示所有任务时，调用该工具',
       inputSchema: z.object({
         status: z
-          .enum({
-            ...TaskStatus,
-            all: 'all',
-          })
-          .default(TaskStatus.active)
-          .describe('任务状态'),
+          .enum(TaskStatus)
+          .optional()
+          .describe('任务状态，默认为所有状态'),
       }),
     }),
 

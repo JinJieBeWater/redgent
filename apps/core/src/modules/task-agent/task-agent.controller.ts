@@ -17,8 +17,6 @@ import {
   pipeUIMessageStreamToResponse,
   stepCountIs,
   streamText,
-  UIDataTypes,
-  UIMessage,
 } from 'ai'
 
 import { ChatDto } from './dto/chat.dto'

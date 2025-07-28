@@ -11,7 +11,7 @@ export class TaskService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async paginate({ take, skip, status }: z.infer<typeof PaginateSchema>) {
-    const [data, total] = await Promise.all([
+    const [tasks, total] = await Promise.all([
       this.prismaService.task.findMany({
         take,
         skip,
@@ -35,7 +35,7 @@ export class TaskService {
     ])
 
     return {
-      data,
+      tasks,
       total,
       hasMore: skip + take < total,
     }

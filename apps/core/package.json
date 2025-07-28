@@ -7,9 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build && pnpm run build:types",
-    "start": "nest start -b swc && pnpm run build:types",
-    "start:dev": "nest start -b swc -w && pnpm run build:types",
-    "start:debug": "nest start --debug --watch -b swc && pnpm run build:types",
+    "start": "nest start&& pnpm run build:types",
+    "start:dev": "nest start -w && pnpm run build:types",
+    "start:debug": "nest start --debug --watch&& pnpm run build:types",
     "start:prod": "node dist/main",
     "dev": "pnpm run start:dev",
     "build:types": "tsc -p tsconfig.declaration.json",
