@@ -4,13 +4,13 @@ import z from 'zod'
 
 import { TaskStatus } from '@redgent/db'
 
-import { detailSchema, paginateSchema } from './task.dto'
+import { DetailSchema, PaginateSchema } from './task.dto'
 
 @Injectable()
 export class TaskService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async paginate({ take, skip, status }: z.infer<typeof paginateSchema>) {
+  async paginate({ take, skip, status }: z.infer<typeof PaginateSchema>) {
     const [data, total] = await Promise.all([
       this.prismaService.task.findMany({
         take,
@@ -41,7 +41,7 @@ export class TaskService {
     }
   }
 
-  async detail({ id }: z.infer<typeof detailSchema>) {
+  async detail({ id }: z.infer<typeof DetailSchema>) {
     return await this.prismaService.task.findUnique({
       where: {
         id,

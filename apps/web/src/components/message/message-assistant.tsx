@@ -1,9 +1,9 @@
-import type { ChatMessage } from '@core/shared'
+import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
 import { MessageShowAllTasks } from './message-tool'
 
-export const MessageAssistant = ({ message }: { message: ChatMessage }) => {
+export const MessageAssistant = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
     return null
   }

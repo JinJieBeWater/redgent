@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common'
 import z from 'zod'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
-import { paginateByTaskIdSchema, paginateSchema } from './report.dto'
+import { PaginateByTaskIdSchema, PaginateSchema } from './report.dto'
 
 @Injectable()
 export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async paginate({ take, skip }: z.infer<typeof paginateSchema>) {
+  async paginate({ take, skip }: z.infer<typeof PaginateSchema>) {
     const [data, total] = await Promise.all([
       this.prisma.taskReport.findMany({
         orderBy: {
@@ -38,7 +38,7 @@ export class ReportService {
     taskId,
     take,
     skip,
-  }: z.infer<typeof paginateByTaskIdSchema>) {
+  }: z.infer<typeof PaginateByTaskIdSchema>) {
     const [data, total] = await Promise.all([
       this.prisma.taskReport.findMany({
         where: {

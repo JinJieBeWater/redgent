@@ -1,10 +1,10 @@
-import type { ChatMessage } from '@core/shared'
+import type { AppMessage } from '@core/shared'
 import { cn } from '@web/lib/utils'
 
 import { MessageAssistant } from './message-assistant'
 
 interface MessagesListProps {
-  messages: ChatMessage[]
+  messages: AppMessage[]
   className?: string
   status?: 'submitted' | 'streaming' | 'ready' | 'error'
 }

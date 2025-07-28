@@ -1,7 +1,7 @@
 import type { Response } from 'express'
 import { redgentAgentSystem } from '@core/ai-sdk/prompts'
 import { myProvider } from '@core/ai-sdk/provider'
-import { ChatMessage } from '@core/shared'
+import { AppMessage } from '@core/shared'
 import {
   Body,
   Controller,
@@ -40,7 +40,7 @@ export class TaskAgentController {
     try {
       const self = this
 
-      const stream = createUIMessageStream<ChatMessage>({
+      const stream = createUIMessageStream<AppMessage>({
         execute({ writer }) {
           const result = streamText({
             model: myProvider.languageModel('chat-model'),

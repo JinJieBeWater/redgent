@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@core/shared'
+import type { AppMessage } from '@core/shared'
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -39,7 +39,7 @@ function App() {
   }, [report])
 
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat<ChatMessage>({
+  const { messages, sendMessage, status, setMessages } = useChat<AppMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),

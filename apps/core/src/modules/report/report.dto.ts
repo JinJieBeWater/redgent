@@ -1,11 +1,11 @@
 import z from 'zod'
 
-export const paginateSchema = z.object({
+export const PaginateSchema = z.object({
   take: z.number(),
   skip: z.number(),
 })
 
-export const paginateByTaskIdSchema = z.object({
+export const PaginateByTaskIdSchema = z.object({
   taskId: z.string(),
   take: z.number(),
   skip: z.number(),

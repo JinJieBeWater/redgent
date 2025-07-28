@@ -2,7 +2,7 @@ import { TrpcRouter } from '@core/processors/trpc/trpc.interface'
 import { TrpcService } from '@core/processors/trpc/trpc.service'
 import { Injectable } from '@nestjs/common'
 
-import { paginateByTaskIdSchema, paginateSchema } from './report.dto'
+import { PaginateByTaskIdSchema, PaginateSchema } from './report.dto'
 import { ReportService } from './report.service'
 
 @Injectable()
@@ -16,11 +16,11 @@ export class ReportRouter implements TrpcRouter {
     const t = this.trpcService.t
     return {
       report: t.router({
-        paginate: t.procedure.input(paginateSchema).query(async ({ input }) => {
+        paginate: t.procedure.input(PaginateSchema).query(async ({ input }) => {
           return await this.reportService.paginate(input)
         }),
         paginateByTaskId: t.procedure
-          .input(paginateByTaskIdSchema)
+          .input(PaginateByTaskIdSchema)
           .query(async ({ input }) => {
             return await this.reportService.paginateByTaskId(input)
           }),
