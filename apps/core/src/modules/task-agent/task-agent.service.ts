@@ -204,18 +204,5 @@ export class TaskAgentService {
         taskId: z.uuid().describe('任务id'),
       }),
     }),
-
-    ShowFeedbackUI: tool({
-      description: '当进行创建/更新/删除任务完成后，调用该工具，显示操作反馈',
-      inputSchema: z.object({
-        status: z
-          .enum({
-            success: 'success',
-            error: 'error',
-          })
-          .describe('操作结果'),
-        message: z.string().describe('操作结果的文本提示'),
-      }),
-    }),
   })
 }

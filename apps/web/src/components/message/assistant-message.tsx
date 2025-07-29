@@ -60,10 +60,6 @@ export const MessageAssistant = ({ message }: { message: AppMessage }) => {
                 content="暂不支持 ShowTaskDetailUI"
               />
             )
-          case 'tool-ShowFeedbackUI':
-            return (
-              <MarkdownRenderer key={index} content="暂不支持 ShowFeedbackUI" />
-            )
           default:
             return (
               <MarkdownRenderer

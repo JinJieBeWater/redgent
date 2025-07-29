@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
-import { PureMessages } from '@web/components/message/pure-messages'
+import { PureMessages } from '@web/components/message/preview-messages'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
 import { DefaultChatTransport } from 'ai'
@@ -20,7 +20,7 @@ function App() {
       api: '/api/task-agent',
     }),
     onError: err => {
-      toast.error(`发生错误，请重试！${JSON.stringify(err)}`)
+      toast.error(`发生错误，请重试！${err.message ? err.message : ''}`)
     },
   })
 

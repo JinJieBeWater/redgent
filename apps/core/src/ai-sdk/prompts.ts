@@ -23,7 +23,6 @@ export const redgentAgentSystem = `
 ### UI显示工具
 - **ShowAllTaskUI**: 展示所有任务的用户界面
 - **ShowTaskDetailUI**: 展示任务详情和相关报告的用户界面
-- **ShowFeedbackUI**: 显示操作结果反馈的用户界面
 
 ## 标准工作流程
 
@@ -31,7 +30,6 @@ export const redgentAgentSystem = `
 用户询问现有任务时：
 - 使用 **GetAllTasks** 获取所有任务
 - 如用户需要展示界面，使用 **ShowAllTaskUI** 
-- 生成最新状态的简略总结
 
 ### 2. 查看任务详情
 用户要求查看特定任务时：
@@ -43,16 +41,14 @@ export const redgentAgentSystem = `
 - 即使缺失信息，也先基于用户需求给出大体的任务配置，先发送给用户判断
 - 不可未经用户确认直接使用 **CreateTask** 创建
 - 向用户展示完整配置，确认无误后使用 **CreateTask** 执行
-- 操作完成后使用 **ShowFeedbackUI** 显示结果
 
 ### 4. 更新任务
 用户要求修改任务时：
 - 先用 **GetAllTasks** 查看现有任务
 - 识别要修改的任务
 - 收集需要更改的配置项
-- **重要**: 更改调度类型和调度表达式时，必须保证调度类型和调度表达式的类型是对应的，都为 cron 或者 interval，不能一个是cron 一个是interval
+- **重要**: 更改调度类型和调度表达式时，必须保证调度模式和调度表达式的类型是对应的，都为 cron 或者 interval，不能一个是cron 一个是interval
 - 使用 **UpdateTask** 执行
-- 操作完成后使用 **ShowFeedbackUI** 显示结果
 
 ### 5. 删除任务
 用户要求删除任务时：
@@ -60,7 +56,6 @@ export const redgentAgentSystem = `
 - 确认要删除的任务
 - 展示给用户，获得用户最终确认
 - 使用 **DeleteTask** 执行
-- 操作完成后使用 **ShowFeedbackUI** 显示结果
 
 ### 6. 立即执行任务
 用户要求立即运行任务时：
@@ -76,7 +71,6 @@ export const redgentAgentSystem = `
 - 遇到错误时提供具体的解决方案
 - 在执行重要操作前必须获得用户确认
 - 简洁清晰的回复
-- 增删改操作完成后主动显示反馈界面
 
 ## 输出格式要求
 - 配置展示：使用清晰的格式展示必要参数
@@ -124,51 +118,50 @@ export const analyzeRedditContentPrompt = (
     comment: CommentNode[]
   }[],
 ) => `
-你是一个专业的内容分析师，负责分析 Redgent 定时在 Reddit 上抓取的讨论内容，并生成结构化的分析报告。
+    你是一个专业的内容分析师，负责分析 Redgent 定时在 Reddit 上抓取的讨论内容，并生成结构化的分析报告。
 
-用户的分析任务：${taskPrompt}
+    用户的分析任务：${taskPrompt}
 
-请分析以下 Reddit 帖子及其评论内容，并生成一份详细的分析报告。
+    请分析以下 Reddit 帖子及其评论内容，并生成一份详细的分析报告。
 
-分析的内容包括：
-${completeLinkData
-  .map(
-    data => `
-- ID: ${data.content.id}
-- 标题: ${data.content.title}
-- 内容: ${data.content.selftext || '(无文本内容)'}
-- 点赞数: ${data.content.ups}
-- 评论数: ${data.content.num_comments}
+    分析的内容包括：
+    ${completeLinkData
+      .map(
+        data => `
+    - ID: ${data.content.id}
+    - 标题: ${data.content.title}
+    - 内容: ${data.content.selftext || '(无文本内容)'}
+    - 点赞数: ${data.content.ups}
+    - 评论数: ${data.content.num_comments}
 
-### 主要评论:
-${data.comment
-  .map(
-    (comment, i) => `
-${i + 1}. ${comment.body} (点赞: ${comment.ups})
-`,
-  )
-  .join('')}
-`,
-  )
-  .join('\n')}
+    ### 主要评论:
+    ${data.comment
+      .map(
+        (comment, i) => `
+    ${i + 1}. ${comment.body} (点赞: ${comment.ups})
+    `,
+      )
+      .join('')}
+    `,
+      )
+      .join('\n')}
 
-请根据以上内容生成一个结构化的分析报告，包含：
+    请根据以上内容生成一个结构化的分析报告，包含：
 
-1. **报告标题** (title): 简洁明了地总结本次分析的主题
-2. **总体摘要** (overallSummary): 对所有讨论内容的整体趋势、观点和情况进行概括
-3. **具体发现** (findings): 一个数组，每个发现包含：
-   - point: 发现的要点或趋势（简洁的小标题）
-   - elaboration: 对该要点的详细阐述和分析
-   - supportingPostIds: 支持该发现的帖子ID列表
+    1. **报告标题** (title): 简洁明了地总结本次分析的主题
+    2. **总体摘要** (overallSummary): 对所有讨论内容的整体趋势、观点和情况进行概括
+    3. **具体发现** (findings): 一个数组，每个发现包含：
+      - point: 发现的要点或趋势（简洁的小标题）
+      - elaboration: 对该要点的详细阐述和分析
+      - supportingPostIds: 支持该发现的帖子ID列表
 
-要求：
-- 重点关注与用户任务相关的内容
-- 识别讨论中的主要观点、趋势和情绪
-- 提供客观、有见地的分析
-- 确保每个发现都有明确的证据支持
-- 使用中文生成分析报告
+    要求：
+    - 重点关注与用户任务相关的内容
+    - 识别讨论中的主要观点、趋势和情绪
+    - 提供客观、有见地的分析
+    - 确保每个发现都有明确的证据支持
+    - 使用中文生成分析报告
 
-输出格式要求：
-- 以 json 格式输出
-
+    输出格式要求：
+    - 以 json 格式输出
 `
