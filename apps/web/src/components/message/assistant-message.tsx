@@ -2,9 +2,10 @@ import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
 import {
+  AllTaskUI,
+  LatestReportUI,
   RequestUserConsentUI,
   TaskDetailUI,
-  TaskListToolUI,
 } from './tool-message'
 
 export const AssistantMessage = ({ message }: { message: AppMessage }) => {
@@ -52,17 +53,34 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
                 content="暂不支持 ImmediatelyExecuteTask"
               />
             )
-          case 'tool-ShowAllTaskUI': {
+          case 'tool-ShowLatestReportUI': {
             const { state } = part
             if (state === 'input-available') {
-              return <TaskListToolUI key={index} part={part} />
+              return <LatestReportUI key={index} part={part} />
             }
             return null
           }
-          case 'tool-ShowTaskDetailUI':
-            return <TaskDetailUI key={index} part={part} />
-          case 'tool-RequestUserConsent':
-            return <RequestUserConsentUI key={index} part={part} />
+          case 'tool-ShowAllTaskUI': {
+            const { state } = part
+            if (state === 'input-available') {
+              return <AllTaskUI key={index} part={part} />
+            }
+            return null
+          }
+          case 'tool-ShowTaskDetailUI': {
+            const { state } = part
+            if (state === 'input-available') {
+              return <TaskDetailUI key={index} part={part} />
+            }
+            return null
+          }
+          case 'tool-RequestUserConsent': {
+            const { state } = part
+            if (state === 'input-available') {
+              return <RequestUserConsentUI key={index} part={part} />
+            }
+            return null
+          }
           default:
             return (
               <MarkdownRenderer

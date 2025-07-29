@@ -186,6 +186,11 @@ export class TaskAgentService {
       },
     }),
 
+    ShowLatestReportUI: tool({
+      description: '当用户要求展示最新任务报告时，调用该工具',
+      inputSchema: z.object({}),
+    }),
+
     ShowAllTaskUI: tool({
       description: '当用户要求展示所有任务时，调用该工具',
       inputSchema: z.object({
