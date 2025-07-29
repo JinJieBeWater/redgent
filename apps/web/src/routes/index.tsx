@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
 import { PureMessages } from '@web/components/message/preview-messages'
+import { Button } from '@web/components/ui/button'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
 import { DefaultChatTransport } from 'ai'
@@ -94,7 +95,7 @@ function App() {
       {/* 输入框容器 */}
       <div
         className={cn(
-          'my-4 grid w-full gap-6',
+          'my-4 grid w-full',
           messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
         )}
       >
@@ -104,9 +105,10 @@ function App() {
             <h1 className="text-foreground text-4xl">Redgent</h1>
           </div>
         )}
-        {/* 输入框 */}
 
+        {/* 输入框 */}
         <FormComponent
+          className="mt-6"
           input={input}
           placeholder="添加一个定时分析任务..."
           setInput={setInput}
@@ -115,6 +117,26 @@ function App() {
           status={status}
           clearMessages={clearMessages}
         />
+
+        {/* 建议输入 */}
+        <div className="mt-4 flex items-center gap-4">
+          {[['查看报告'], ['查看任务'], ['创建任务']].map(([prompt], index) => {
+            return (
+              <Button
+                key={index}
+                variant={'outline'}
+                size={'lg'}
+                onClick={() =>
+                  sendMessage({
+                    text: prompt.trim(),
+                  })
+                }
+              >
+                {prompt}
+              </Button>
+            )
+          })}
+        </div>
       </div>
 
       {/* 最新分析报告 - 简化显示 */}
