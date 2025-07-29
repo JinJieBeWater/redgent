@@ -1,5 +1,6 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import type { ComponentProps } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
@@ -22,6 +23,21 @@ import { getStatusInfo, TaskMini } from '../task/task-list'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardTitle } from '../ui/card'
+
+// 错误显示组件
+const ErrorMessage = ({
+  error,
+  ...props
+}: ComponentProps<'div'> & {
+  error?: {
+    message?: string
+  } | null
+}) => (
+  <div className="mt-2.5 flex items-center gap-2" {...props}>
+    <AlertCircle className="h-4 w-4" />
+    <p>加载失败: {error?.message}</p>
+  </div>
+)
 
 export const LatestReportUI = ({
   part,
@@ -55,12 +71,7 @@ export const LatestReportUI = ({
   }
 
   if (isError) {
-    return (
-      <div className="flex items-center gap-2">
-        <AlertCircle className="text-destructive" />
-        <p>报告列表加载失败: {error.message}</p>
-      </div>
-    )
+    return <ErrorMessage error={error} />
   }
 
   // 合并所有页面的报告数据
@@ -178,12 +189,7 @@ export const AllTaskUI = ({
   }
 
   if (isError) {
-    return (
-      <div className="flex items-center gap-2">
-        <AlertCircle className="text-destructive" />
-        <p>任务列表加载失败: {error.message}</p>
-      </div>
-    )
+    return <ErrorMessage error={error} />
   }
 
   // 合并所有页面的任务数据
@@ -305,6 +311,7 @@ export const TaskDetailUI = ({
     isFetchingNextPage,
     isPending: reportsPending,
     isError: reportsError,
+    error: reportsErrorMessage,
   } = useInfiniteQuery(
     trpc.report.paginateByTaskId.infiniteQueryOptions(
       {
@@ -326,12 +333,7 @@ export const TaskDetailUI = ({
   }
 
   if (taskError) {
-    return (
-      <div className="flex items-center gap-2">
-        <AlertCircle className="text-destructive h-4 w-4" />
-        <p className="text-sm">任务详情加载失败: {taskErrorMessage?.message}</p>
-      </div>
-    )
+    return <ErrorMessage error={taskErrorMessage} />
   }
 
   if (!task) {
@@ -355,7 +357,7 @@ export const TaskDetailUI = ({
           <div className="flex items-center justify-between pb-2">
             <div className="flex flex-1 items-center space-x-2">
               <Eye className="h-4 w-4 flex-shrink-0" />
-              <CardTitle className="text-nowrap text-base font-semibold">
+              <CardTitle className="text-base font-semibold text-nowrap">
                 {task.name || '未命名任务'}
               </CardTitle>
             </div>
@@ -419,9 +421,8 @@ export const TaskDetailUI = ({
           </div>
 
           {reportsError ? (
-            <div className="flex items-center gap-2 py-2">
-              <AlertCircle className="text-destructive h-3 w-3" />
-              <p className="text-xs">报告加载失败</p>
+            <div className="flex items-center justify-center">
+              <ErrorMessage error={reportsErrorMessage} />
             </div>
           ) : allReports.length > 0 ? (
             <div>

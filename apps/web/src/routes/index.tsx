@@ -8,7 +8,7 @@ import { Button } from '@web/components/ui/button'
 import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
-import { DefaultChatTransport } from 'ai'
+import { DefaultChatTransport, generateId } from 'ai'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
@@ -232,96 +232,68 @@ function App() {
           {/* 建议输入 */}
           {messages.length <= 0 && (
             <div className="mt-4 flex items-center gap-4">
-              {[['最新报告'], ['查看任务'], ['创建任务']].map(
-                ([prompt], index) => {
-                  return (
-                    <Button
-                      key={index}
-                      variant={'outline'}
-                      onClick={() =>
-                        sendMessage({
-                          text: prompt.trim(),
-                        })
-                      }
-                    >
-                      {prompt}
-                    </Button>
-                  )
-                },
-              )}
+              <Button
+                variant={'outline'}
+                onClick={() =>
+                  setMessages([
+                    ...messages,
+                    {
+                      role: 'assistant',
+                      id: generateId(),
+                      parts: [
+                        {
+                          type: 'tool-ShowLatestReportUI',
+                          state: 'input-available',
+                          toolCallId: generateId(),
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }
+              >
+                最新报告
+              </Button>
+              <Button
+                variant={'outline'}
+                onClick={() =>
+                  setMessages([
+                    ...messages,
+                    {
+                      role: 'assistant',
+                      id: generateId(),
+                      parts: [
+                        {
+                          type: 'tool-ShowAllTaskUI',
+                          state: 'input-available',
+                          toolCallId: generateId(),
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }
+              >
+                查看任务
+              </Button>
+              {[['创建任务']].map(([prompt], index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant={'outline'}
+                    onClick={() =>
+                      sendMessage({
+                        text: prompt.trim(),
+                      })
+                    }
+                  >
+                    {prompt}
+                  </Button>
+                )
+              })}
             </div>
           )}
         </div>
-
-        {/* 最新分析报告 - 简化显示 */}
-        {/* <div className="space-y-3">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-foreground text-sm font-medium">最新分析报告</h2>
-
-          <Button variant={'ghost'} size={'sm'} className="w-auto">
-            查看全部
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {latestReports.map(report => (
-            <div
-              key={report.id}
-              className="bg-card hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg border p-4 transition-all duration-150 active:scale-[0.98]"
-              onClick={() => {
-                console.log(`Navigate to report detail: ${report.id}`)
-              }}
-            >
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex min-w-0 flex-1 items-start space-x-2">
-                  <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <h3 className="text-foreground text-sm leading-tight font-medium">
-                    {report.content.title}
-                  </h3>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-2 h-6 w-6 flex-shrink-0"
-                      onClick={e => {
-                        e.stopPropagation()
-                      }}
-                    >
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={e => {
-                        e.stopPropagation()
-                      }}
-                    >
-                      <Eye className="mr-2 h-3 w-3" />
-                      查看详情
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <p className="text-muted-foreground mb-3 line-clamp-2 text-xs leading-relaxed">
-                {report.content.summary}
-              </p>
-
-              <div className="text-muted-foreground flex items-center justify-between text-xs">
-                <div className="flex items-center">
-                  <Clock className="mr-1 h-3 w-3" />
-                  <span>{formatRelativeTime(report.createdAt)}</span>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                  {report.task.name}
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div> */}
       </div>
     </ChatContextProvider>
   )
