@@ -27,35 +27,29 @@ function App() {
   })
   const { messages, sendMessage, status, setMessages } = context
 
-  useEffect(() => {
-    if (status === 'error') {
-      // 取出最后一条消息 如果是用户的输入 则重新赋值到 input 中 然后弹出这条消息
-      const lastMessage = messages[messages.length - 1]
-      if (
-        lastMessage?.role === 'user' &&
-        lastMessage?.parts[0]?.type === 'text'
-      ) {
-        setInput(lastMessage?.parts[0]?.text || '')
-        // 清理掉导致错误的上一条消息
-        setMessages(messages.slice(0, -1))
-      }
-    }
-  }, [status, messages, setMessages])
-
-  const refreshSubmit = () => {
+  /** 出现错误时重新提交 */
+  const handleErrorSubmit = () => {
     const lastMessage = messages[messages.length - 1]
     if (
       lastMessage?.role === 'user' &&
       lastMessage?.parts[0]?.type === 'text'
     ) {
-      // 清理掉导致错误的上一条消息
-      setMessages(messages.slice(0, -1))
-      sendMessage({
-        text: lastMessage?.parts[0]?.text.trim(),
-      })
+      // 如果用户有新的输入 则使用新的输入
+      if (input.trim()) {
+        sendMessage({
+          text: input.trim(),
+        })
+      } else {
+        // 使用上一条消息的输入 重新发送
+        setMessages(messages.slice(0, -1))
+        sendMessage({
+          text: lastMessage?.parts[0]?.text.trim(),
+        })
+      }
     }
   }
 
+  /** 处理提交按钮点击事件 */
   const handleSubmit = () => {
     if (input.trim() && (status == 'ready' || status == 'error')) {
       sendMessage({
@@ -65,11 +59,13 @@ function App() {
     }
   }
 
+  /** 清空消息列表 */
   const clearMessages = () => {
     setMessages([])
     setInput('')
   }
 
+  /** 处理消息列表滚动 */
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { isAtBottom, scrollToElement, hasManuallyScrolled } =
@@ -99,6 +95,12 @@ function App() {
     hasManuallyScrolled,
     scrollToElement,
   ])
+
+  /** 最后一条消息 */
+  const lastMessage = messages[messages.length - 1]
+  /** 最后一Part */
+  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
+
   return (
     <ChatContextProvider value={context}>
       <div
@@ -137,7 +139,7 @@ function App() {
             setInput={setInput}
             handleSubmit={() => {
               if (status === 'error') {
-                refreshSubmit()
+                handleErrorSubmit()
               } else {
                 handleSubmit()
               }
@@ -146,6 +148,79 @@ function App() {
             status={status}
             clearMessages={clearMessages}
           />
+
+          {/* 请求用户同意 */}
+          {lastMessage?.role === 'assistant' &&
+            lastPart?.type === 'tool-RequestUserConsent' &&
+            lastPart.state === 'input-available' && (
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    if (
+                      lastPart?.type !== 'tool-RequestUserConsent' ||
+                      !lastPart?.input?.message
+                    )
+                      return
+                    setMessages([
+                      ...messages.slice(0, -1),
+                      {
+                        ...lastMessage,
+                        parts: [
+                          ...lastMessage.parts,
+                          {
+                            type: 'tool-RequestUserConsent',
+                            toolCallId: lastPart.toolCallId,
+                            state: 'output-available',
+                            input: {
+                              message: lastPart.input.message,
+                            },
+                            output: {
+                              consent: 'accept',
+                            },
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                >
+                  接受
+                </Button>
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  onClick={() => {
+                    if (
+                      lastPart?.type !== 'tool-RequestUserConsent' ||
+                      !lastPart?.input?.message
+                    )
+                      return
+                    setMessages([
+                      ...messages.slice(0, -1),
+                      {
+                        ...lastMessage,
+                        parts: [
+                          ...lastMessage.parts,
+                          {
+                            type: 'tool-RequestUserConsent',
+                            toolCallId: lastPart.toolCallId,
+                            state: 'output-available',
+                            input: {
+                              message: lastPart.input.message,
+                            },
+                            output: {
+                              consent: 'reject',
+                            },
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                >
+                  拒绝
+                </Button>
+              </div>
+            )}
 
           {/* 建议输入 */}
           {messages.length <= 0 && (

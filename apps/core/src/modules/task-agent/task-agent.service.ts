@@ -27,9 +27,8 @@ export class TaskAgentService {
         status: z
           .enum({
             ...TaskStatus,
-            all: 'all',
           })
-          .default(TaskStatus.active)
+          .optional()
           .describe('任务状态'),
       }),
       execute: async ({ status }) => {
@@ -41,7 +40,7 @@ export class TaskAgentService {
               name: true,
               status: true,
             },
-            where: status === 'all' ? undefined : { status },
+            where: status ? { status } : undefined,
           })
           return {
             data: tasks,
@@ -202,6 +201,16 @@ export class TaskAgentService {
         '当用户要求展示任务详情时，调用该工具，展示完整的任务内容和该任务的所属报告',
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
+      }),
+    }),
+
+    RequestUserConsent: tool({
+      description: '请求用户同意或拒绝某个操作',
+      inputSchema: z.object({
+        message: z.string().describe('操作描述'),
+      }),
+      outputSchema: z.object({
+        consent: z.enum(['accept', 'reject']).describe('用户同意或拒绝'),
       }),
     }),
   })

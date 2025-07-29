@@ -1,7 +1,11 @@
 import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
-import { TaskDetailUI, TaskListToolUI } from './tool-message'
+import {
+  RequestUserConsentUI,
+  TaskDetailUI,
+  TaskListToolUI,
+} from './tool-message'
 
 export const AssistantMessage = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
@@ -57,6 +61,8 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
           }
           case 'tool-ShowTaskDetailUI':
             return <TaskDetailUI key={index} part={part} />
+          case 'tool-RequestUserConsent':
+            return <RequestUserConsentUI key={index} part={part} />
           default:
             return (
               <MarkdownRenderer
