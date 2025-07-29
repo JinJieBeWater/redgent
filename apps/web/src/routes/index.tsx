@@ -65,6 +65,11 @@ function App() {
     setInput('')
   }
 
+  /** 最后一条消息 */
+  const lastMessage = messages[messages.length - 1]
+  /** 最后一Part */
+  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
+
   /** 处理消息列表滚动 */
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -76,16 +81,11 @@ function App() {
       debounceMs: 100,
     })
 
+  /** 处理消息列表滚动 */
   useEffect(() => {
     if (status === 'streaming' && (isAtBottom || !hasManuallyScrolled)) {
       scrollToElement()
     } else if (messages.length > 0 && (isAtBottom || !hasManuallyScrolled)) {
-      scrollToElement()
-    } else if (
-      messages.length > 0 &&
-      hasManuallyScrolled &&
-      messages.at(-1)?.parts.some(part => part.type === 'tool-ShowAllTaskUI')
-    ) {
       scrollToElement()
     }
   }, [
@@ -96,10 +96,17 @@ function App() {
     scrollToElement,
   ])
 
-  /** 最后一条消息 */
-  const lastMessage = messages[messages.length - 1]
-  /** 最后一Part */
-  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
+  /** 处理客户端工具滚动 */
+  useEffect(() => {
+    if (!lastPart) return
+    if (
+      lastPart.type === 'tool-ShowAllTaskUI' ||
+      lastPart.type === 'tool-ShowTaskDetailUI' ||
+      lastPart.type === 'tool-RequestUserConsent'
+    ) {
+      scrollToElement()
+    }
+  }, [scrollToElement, lastPart])
 
   return (
     <ChatContextProvider value={context}>
