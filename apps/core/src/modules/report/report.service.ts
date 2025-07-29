@@ -9,28 +9,32 @@ export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
   async paginate({ limit, cursor }: z.infer<typeof PaginateSchema>) {
-    const reports = await this.prisma.taskReport.findMany({
-      take: limit,
-      skip: cursor ? 1 : 0,
-      cursor: cursor
-        ? {
-            id: cursor,
-          }
-        : undefined,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        task: {
-          select: {
-            name: true,
+    const [reports, total] = await Promise.all([
+      this.prisma.taskReport.findMany({
+        take: limit,
+        skip: cursor ? 1 : 0,
+        cursor: cursor
+          ? {
+              id: cursor,
+            }
+          : undefined,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          task: {
+            select: {
+              name: true,
+            },
           },
         },
-      },
-    })
+      }),
+      this.prisma.taskReport.count(),
+    ])
 
     return {
       reports,
+      total,
       nextCursor: reports.length === limit ? reports[limit - 1].id : undefined,
     }
   }
@@ -40,24 +44,32 @@ export class ReportService {
     limit,
     cursor,
   }: z.infer<typeof PaginateByTaskIdSchema>) {
-    const reports = await this.prisma.taskReport.findMany({
-      take: limit,
-      skip: cursor ? 1 : 0,
-      cursor: cursor
-        ? {
-            id: cursor,
-          }
-        : undefined,
-      where: {
-        taskId,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const [reports, total] = await Promise.all([
+      this.prisma.taskReport.findMany({
+        take: limit,
+        skip: cursor ? 1 : 0,
+        cursor: cursor
+          ? {
+              id: cursor,
+            }
+          : undefined,
+        where: {
+          taskId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.taskReport.count({
+        where: {
+          taskId,
+        },
+      }),
+    ])
 
     return {
       reports,
+      total,
       nextCursor: reports.length === limit ? reports[limit - 1].id : undefined,
     }
   }

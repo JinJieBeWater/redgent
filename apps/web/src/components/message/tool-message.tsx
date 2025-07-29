@@ -2,20 +2,26 @@ import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useChatContext } from '@web/contexts/chat-context'
+import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import {
   AlertCircle,
-  CheckCircle2,
+  Calendar,
   ChevronDown,
+  Clock,
+  Eye,
+  FileText,
   Hash,
   List,
+  Settings,
 } from 'lucide-react'
 
 import { Spinner } from '../spinner'
-import { TaskMini } from '../task/task-list'
+import { getStatusInfo, TaskMini } from '../task/task-list'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
+import { Card, CardContent, CardTitle } from '../ui/card'
 
 export const TaskListToolUI = ({
   part,
@@ -36,7 +42,6 @@ export const TaskListToolUI = ({
     trpc.task.paginate.infiniteQueryOptions(
       {
         status: input?.status,
-        limit: 2,
       },
       {
         getNextPageParam: lastPage => lastPage.nextCursor,
@@ -44,30 +49,25 @@ export const TaskListToolUI = ({
     ),
   )
 
-  const { data: taskCount, isPending: taskCountPending } = useQuery(
-    trpc.task.count.queryOptions(),
-  )
-
   const { messages, setMessages } = useChatContext()
 
-  const isPending = taskListPending || taskCountPending
+  const isPending = taskListPending
   if (isPending) {
     return <Spinner />
   }
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-3 py-8">
-        <div className="flex items-center gap-2">
-          <AlertCircle className="text-destructive" />
-          <p>任务列表加载失败: {error.message}</p>
-        </div>
+      <div className="flex items-center gap-2">
+        <AlertCircle className="text-destructive" />
+        <p>任务列表加载失败: {error.message}</p>
       </div>
     )
   }
 
   // 合并所有页面的任务数据
   const allTasks = data?.pages.flatMap(page => page.tasks) ?? []
+  const totalCount = data?.pages[data.pages.length - 1]?.total ?? 0
 
   /** 处理任务点击事件 */
   const handleTaskClick = (task: (typeof allTasks)[number]) => {
@@ -99,22 +99,22 @@ export const TaskListToolUI = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* 任务列表标题 */}
-      <div className="flex items-center gap-2 pb-2">
+      <div className="flex items-center gap-2">
         <List className="text-muted-foreground h-4 w-4" />
         <span className="text-foreground text-sm font-medium">任务列表</span>
         {allTasks.length > 0 && (
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <Hash className="h-3 w-3" />
-            {taskCount}
+            {totalCount}
           </Badge>
         )}
       </div>
 
       {/* 任务列表 */}
       {allTasks.length > 0 ? (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {allTasks.map(task => (
             <TaskMini
               key={task.id}
@@ -155,19 +155,201 @@ export const TaskListToolUI = ({
           </Button>
         </div>
       )}
+    </div>
+  )
+}
 
-      {/* 加载完成提示 */}
-      {!hasNextPage && allTasks.length > 0 && (
-        <div className="border-border/50 flex justify-center border-t pt-2">
-          <Badge
-            variant="secondary"
-            className="flex items-center gap-1 text-xs"
-          >
-            <CheckCircle2 className="h-3 w-3" />
-            已全部加载
-          </Badge>
-        </div>
-      )}
+export const TaskDetailUI = ({
+  part,
+}: {
+  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+}) => {
+  if (part.type !== 'tool-ShowTaskDetailUI') return null
+  const { input } = part
+  if (!input?.taskId) return null
+
+  // 获取任务详情
+  const {
+    data: task,
+    isPending: taskPending,
+    isError: taskError,
+    error: taskErrorMessage,
+  } = useQuery(trpc.task.detail.queryOptions({ id: input.taskId }))
+
+  // 获取任务的报告列表
+  const {
+    data: reportsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending: reportsPending,
+    isError: reportsError,
+  } = useInfiniteQuery(
+    trpc.report.paginateByTaskId.infiniteQueryOptions(
+      {
+        taskId: input.taskId,
+        limit: 4,
+      },
+      {
+        getNextPageParam: lastPage => lastPage.nextCursor,
+      },
+    ),
+  )
+
+  const allReports = reportsData?.pages.flatMap(page => page.reports) ?? []
+  const totalCount =
+    reportsData?.pages[reportsData.pages.length - 1]?.total ?? 0
+
+  if (taskPending || reportsPending) {
+    return <Spinner />
+  }
+
+  if (taskError) {
+    return (
+      <div className="flex items-center gap-2">
+        <AlertCircle className="text-destructive h-4 w-4" />
+        <p className="text-sm">任务详情加载失败: {taskErrorMessage?.message}</p>
+      </div>
+    )
+  }
+
+  if (!task) {
+    return (
+      <div className="flex items-center gap-2">
+        <AlertCircle className="text-destructive h-4 w-4" />
+        <p className="text-sm">任务不存在</p>
+      </div>
+    )
+  }
+
+  const statusInfo = getStatusInfo(task.status || 'active')
+  const StatusIcon = statusInfo.icon
+
+  return (
+    <div className="mt-1 space-y-3">
+      {/* 任务信息卡片 - 使用 Card 组件 */}
+      <Card className="gap-2 px-3 py-3">
+        <CardContent className="space-y-2 px-1">
+          {/* 任务名称 */}
+          <div className="flex items-center justify-between pb-2">
+            <div className="flex flex-1 items-center space-x-2">
+              <Eye className="h-4 w-4 flex-shrink-0" />
+              <CardTitle className="text-nowrap text-base font-semibold">
+                {task.name || '未命名任务'}
+              </CardTitle>
+            </div>
+            <Badge
+              variant={statusInfo.variant}
+              className="ml-2 flex items-center gap-1 text-xs"
+            >
+              <StatusIcon className="h-4 w-4" />
+              {statusInfo.label}
+            </Badge>
+          </div>
+
+          {/* 调度信息 - 优化布局 */}
+          <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+            <div className="flex items-center">
+              <Calendar className="mr-1 h-3 w-3" />
+              <span className="capitalize">{task.scheduleType}</span>
+            </div>
+            <div className="flex items-center">
+              <Clock className="mr-1 h-3 w-3" />
+              <span>
+                {task.lastExecutedAt
+                  ? formatRelativeTime(task.lastExecutedAt)
+                  : formatRelativeTime(task.createdAt)}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <Settings className="mr-1 h-3 w-3" />
+              <span className="font-mono">{task.scheduleExpression}</span>
+            </div>
+            {task.subreddits && task.subreddits.length > 0 && (
+              <div className="flex items-center">
+                <Hash className="mr-1 h-3 w-3" />
+                <span>
+                  {task.subreddits.map((sub, index) => (
+                    <span key={sub}>
+                      r/{sub}
+                      {index < task.subreddits.length - 1 && ', '}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* 执行报告部分 */}
+          <div className="flex items-center gap-2">
+            <FileText className="text-muted-foreground h-3 w-3" />
+            <span className="text-foreground text-xs font-medium">
+              最新报告
+            </span>
+            {allReports.length > 0 && (
+              <Badge
+                variant="outline"
+                className="flex items-center gap-1 text-xs"
+              >
+                <Hash className="h-2 w-2" />
+                {totalCount}
+              </Badge>
+            )}
+          </div>
+
+          {reportsError ? (
+            <div className="flex items-center gap-2 py-2">
+              <AlertCircle className="text-destructive h-3 w-3" />
+              <p className="text-xs">报告加载失败</p>
+            </div>
+          ) : allReports.length > 0 ? (
+            <div>
+              <div className="grid grid-cols-1 gap-2 gap-x-3 md:grid-cols-2">
+                {allReports.map((report, index) => (
+                  <Button
+                    variant={'outline'}
+                    key={report.id}
+                    size={'sm'}
+                    className="text-foreground justify-start px-2 text-xs"
+                  >
+                    <span>#{index}</span>
+                    <span className="truncate">{report.content?.title}</span>
+                  </Button>
+                ))}
+              </div>
+
+              {/* 加载更多按钮 */}
+              {hasNextPage && (
+                <div className="flex justify-center pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="flex h-6 items-center gap-1 text-xs"
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <Spinner />
+                        加载中
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-3 w-3" />
+                        更多
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-2 text-center">
+              <p className="text-muted-foreground text-xs">暂无报告</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

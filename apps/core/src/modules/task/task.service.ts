@@ -8,33 +8,38 @@ import { DetailSchema, PaginateSchema } from './task.dto'
 export class TaskService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async count() {
-    return await this.prismaService.task.count()
-  }
-
   async paginate({ limit, cursor, status }: z.infer<typeof PaginateSchema>) {
-    const tasks = await this.prismaService.task.findMany({
-      take: limit,
-      skip: cursor ? 1 : 0,
-      where: {
-        status,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      cursor: cursor
-        ? {
-            id: cursor,
-          }
-        : undefined,
-      select: {
-        id: true,
-        name: true,
-        status: true,
-      },
-    })
+    const [tasks, total] = await Promise.all([
+      this.prismaService.task.findMany({
+        take: limit,
+        skip: cursor ? 1 : 0,
+        where: {
+          status,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        cursor: cursor
+          ? {
+              id: cursor,
+            }
+          : undefined,
+        select: {
+          id: true,
+          name: true,
+          status: true,
+        },
+      }),
+      this.prismaService.task.count({
+        where: {
+          status,
+        },
+      }),
+    ])
+
     return {
       tasks,
+      total,
       nextCursor: tasks.length === limit ? tasks[limit - 1].id : undefined,
     }
   }

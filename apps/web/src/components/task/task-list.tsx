@@ -16,6 +16,7 @@ import type { Task } from '@redgent/db'
 
 import { MarkdownRenderer } from '../markdown'
 import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
 
 // Mini 组件只需要的字段
 type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
@@ -30,7 +31,7 @@ export const getStatusInfo = (
 } => {
   switch (status) {
     case 'active':
-      return { variant: 'default', icon: Pause, label: '活跃中' }
+      return { variant: 'default', icon: Pause, label: '活跃' }
     case 'paused':
       return { variant: 'secondary', icon: Play, label: '暂停' }
     case 'running':
@@ -41,16 +42,17 @@ export const getStatusInfo = (
 }
 
 export const TaskMini = memo(
-  ({ task, ...props }: ComponentProps<'div'> & { task: TaskMini }) => {
+  ({ task, ...props }: ComponentProps<'button'> & { task: TaskMini }) => {
     const statusInfo = getStatusInfo(task.status || 'active')
     const StatusIcon = statusInfo.icon
 
     return (
-      <div
-        className="bg-card hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center justify-between rounded-lg border p-2 transition-all duration-150 active:scale-[0.98]"
+      <Button
+        variant={'outline'}
+        className="w-full items-center px-2 transition-all duration-150 active:scale-[0.98]"
         {...props}
       >
-        <div className="flex min-w-0 flex-1 items-center space-x-3">
+        <div className="flex min-w-0 flex-1 items-center space-x-2">
           <Eye className="text-muted-foreground h-4 w-4 flex-shrink-0" />
           <h3
             className="text-foreground line-clamp-1 text-sm font-medium"
@@ -61,12 +63,12 @@ export const TaskMini = memo(
         </div>
         <Badge
           variant={statusInfo.variant}
-          className="ml-6 flex flex-shrink-0 items-center gap-1 text-xs"
+          className="ml-2 flex flex-shrink-0 items-center gap-1 text-xs"
         >
           <StatusIcon className="h-3 w-3" />
           {statusInfo.label}
         </Badge>
-      </div>
+      </Button>
     )
   },
 )
@@ -85,7 +87,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <Eye className="text-muted-foreground mt-1 h-5 w-5 flex-shrink-0" />
         <div className="min-w-0 flex-1">
           <h3
-            className="text-foreground mb-1 line-clamp-1 text-base leading-tight font-semibold"
+            className="text-foreground mb-1 line-clamp-1 text-base font-semibold leading-tight"
             title={task.name}
           >
             {task.name || '未命名任务'}
@@ -104,7 +106,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <div className="flex items-center space-x-4">
           <div className="flex align-middle">
             <Calendar className="mr-1.5 h-4 w-4" />
-            <span className="leading-4 capitalize">{task.scheduleType}</span>
+            <span className="capitalize leading-4">{task.scheduleType}</span>
           </div>
           <div className="flex align-middle">
             <Clock className="mr-1.5 h-4 w-4" />

@@ -1,9 +1,9 @@
 import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
-import { TaskListToolUI } from './tool-message'
+import { TaskDetailUI, TaskListToolUI } from './tool-message'
 
-export const MessageAssistant = ({ message }: { message: AppMessage }) => {
+export const AssistantMessage = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
     return null
   }
@@ -17,7 +17,9 @@ export const MessageAssistant = ({ message }: { message: AppMessage }) => {
           case 'step-start':
             return null
           case 'text':
-            return <MarkdownRenderer key={index} content={part.text} />
+            return (
+              part.text && <MarkdownRenderer key={index} content={part.text} />
+            )
           case 'file':
             return <MarkdownRenderer key={index} content="暂不支持 file" />
           case 'reasoning':
@@ -54,12 +56,7 @@ export const MessageAssistant = ({ message }: { message: AppMessage }) => {
             return null
           }
           case 'tool-ShowTaskDetailUI':
-            return (
-              <MarkdownRenderer
-                key={index}
-                content="暂不支持 ShowTaskDetailUI"
-              />
-            )
+            return <TaskDetailUI key={index} part={part} />
           default:
             return (
               <MarkdownRenderer

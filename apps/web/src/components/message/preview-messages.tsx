@@ -2,7 +2,7 @@ import type { AppMessage } from '@core/shared'
 import { cn } from '@web/lib/utils'
 import { AlertCircle, Loader2, Sparkles } from 'lucide-react'
 
-import { MessageAssistant } from './assistant-message'
+import { AssistantMessage } from './assistant-message'
 
 interface PreviewMessagesProps {
   messages: AppMessage[]
@@ -16,7 +16,7 @@ export function PreviewMessages({
   className,
 }: PreviewMessagesProps) {
   return (
-    <div className={cn('grid w-full grid-cols-1', className)}>
+    <div className={cn('grid w-full grid-cols-1 gap-4', className)}>
       {messages.map((message, index) => (
         <PreviewMessage
           key={message.id}
@@ -44,8 +44,8 @@ export const PreviewMessage = ({
       className={cn(
         'flex gap-4 rounded-lg px-4 py-2 text-sm',
         message.role === 'assistant'
-          ? 'justify-self-start'
-          : 'bg-primary-foreground justify-self-end outline',
+          ? 'mr-4 justify-self-start'
+          : 'bg-primary-foreground ml-4 justify-self-end outline',
       )}
     >
       {message.role === 'assistant' && (
@@ -70,7 +70,7 @@ export const PreviewMessage = ({
 
       <div>
         {message.role === 'assistant' ? (
-          <MessageAssistant message={message} />
+          <AssistantMessage message={message} />
         ) : (
           <p>{message.parts[0].type === 'text' ? message.parts[0].text : ''}</p>
         )}
