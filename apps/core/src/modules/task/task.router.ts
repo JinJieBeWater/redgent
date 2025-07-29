@@ -16,6 +16,9 @@ export class TaskRouter implements TrpcRouter {
     const t = this.trpcService.t
     return {
       task: t.router({
+        count: this.trpcService.t.procedure.query(async () => {
+          return await this.taskService.count()
+        }),
         paginate: this.trpcService.t.procedure
           .input(PaginateSchema)
           .query(async ({ input }) => {

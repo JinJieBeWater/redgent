@@ -1,7 +1,7 @@
 import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
-import { MessageShowAllTaskUI } from './message-tool'
+import { TaskListToolUI } from './tool-message'
 
 export const MessageAssistant = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
@@ -46,8 +46,13 @@ export const MessageAssistant = ({ message }: { message: AppMessage }) => {
                 content="暂不支持 ImmediatelyExecuteTask"
               />
             )
-          case 'tool-ShowAllTaskUI':
-            return <MessageShowAllTaskUI key={index} part={part} />
+          case 'tool-ShowAllTaskUI': {
+            const { state } = part
+            if (state === 'input-available') {
+              return <TaskListToolUI key={index} input={part.input} />
+            }
+            return null
+          }
           case 'tool-ShowTaskDetailUI':
             return (
               <MarkdownRenderer

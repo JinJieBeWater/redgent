@@ -1,7 +1,8 @@
 import type { UIMessage } from 'ai'
 import { useCallback, useEffect, useRef } from 'react'
-import { Loader2, RotateCcw, Send, X } from 'lucide-react'
+import { RotateCcw, Send, X } from 'lucide-react'
 
+import { Spinner } from './spinner'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
 
@@ -71,11 +72,10 @@ export const FormComponent: React.FC<FormComponentProps> = ({
           <Button
             onClick={clearMessages}
             size="sm"
-            className="h-7.5"
             disabled={clearButtonDisabled}
           >
-            <X className="h-3.5 w-3.5" />
-            <span>clean messages</span>
+            <X />
+            <span>clean</span>
           </Button>
         )}
         <Button
@@ -92,20 +92,18 @@ export const FormComponent: React.FC<FormComponentProps> = ({
           )}
           {status === 'ready' && (
             <>
-              <Send className="h-3.5 w-3.5" />
-              <span className="ml-1">发送</span>
+              <Send />
+              <span className="ml-1">Send</span>
             </>
           )}
           {status === 'submitted' && (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span className="ml-1">提交中...</span>
+              <Spinner />
             </>
           )}
           {status === 'streaming' && (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span className="ml-1">生成中...</span>
+              <Spinner />
             </>
           )}
         </Button>

@@ -42,7 +42,9 @@ export class TaskAgentController {
         execute({ writer }) {
           const result = streamText({
             model: myProvider.languageModel('chat-model'),
-            messages: convertToModelMessages(chat.messages),
+            messages: convertToModelMessages(chat.messages, {
+              ignoreIncompleteToolCalls: true,
+            }),
             system: redgentAgentSystem,
             tools: self.taskAgentService.tools(writer),
             onError: error => {

@@ -20,7 +20,7 @@ import { Badge } from '../ui/badge'
 type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
 
 // 根据任务状态确定状态信息
-const getStatusInfo = (
+export const getStatusInfo = (
   status: string,
 ): {
   variant: 'default' | 'secondary' | 'outline' | 'destructive'
@@ -68,10 +68,9 @@ export const TaskMini = memo(({ task }: { task: TaskMini }) => {
 export const TaskMiniList = ({ tasks }: { tasks: TaskMini[] }) => {
   if (!tasks || tasks.length === 0) {
     return (
-      <>
-        <FileText className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
-        <MarkdownRenderer content="暂无任务，请创建任务后再查看" />
-      </>
+      <div className="flex items-center justify-center gap-2">
+        <p>暂无任务</p>
+      </div>
     )
   }
 

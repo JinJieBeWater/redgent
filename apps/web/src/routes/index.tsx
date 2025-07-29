@@ -1,51 +1,26 @@
 import type { AppMessage } from '@core/shared'
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
-import { MessagesList } from '@web/components/message/message-list'
+import { PureMessages } from '@web/components/message/pure-messages'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
-import { trpc } from '@web/router'
 import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
-  loader: async ({ context: { trpc, queryClient } }) => {
-    await queryClient.ensureQueryData(
-      trpc.report.paginate.queryOptions({
-        take: 10,
-        skip: 0,
-      }),
-    )
-    return
-  },
   component: App,
 })
 
 function App() {
-  const reportQuery = useQuery(
-    trpc.report.paginate.queryOptions({
-      take: 10,
-      skip: 0,
-    }),
-  )
-
-  const report = reportQuery.data || ''
-
-  useEffect(() => {
-    console.log('来自 trpc + react-query 的数据：', report)
-  }, [report])
-
   const [input, setInput] = useState('')
   const { messages, sendMessage, status, setMessages } = useChat<AppMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
-
-    onError: () => {
-      toast.error('发生错误，请重试！')
+    onError: err => {
+      toast.error(`发生错误，请重试！${JSON.stringify(err)}`)
     },
   })
 
@@ -111,7 +86,7 @@ function App() {
       {/* 消息列表 */}
       {messages.length > 0 && (
         <>
-          <MessagesList messages={messages} status={status} />
+          <PureMessages messages={messages} status={status} />
           <div ref={bottomRef} className="h-64"></div>
         </>
       )}

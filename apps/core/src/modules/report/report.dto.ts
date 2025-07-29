@@ -1,12 +1,12 @@
 import z from 'zod'
 
 export const PaginateSchema = z.object({
-  take: z.number(),
-  skip: z.number(),
+  limit: z.number().min(1).max(100).default(10),
+  cursor: z.string().nullish(),
 })
 
 export const PaginateByTaskIdSchema = z.object({
   taskId: z.string(),
-  take: z.number(),
-  skip: z.number(),
+  limit: z.number().min(1).max(100).default(10),
+  cursor: z.string().nullish(),
 })

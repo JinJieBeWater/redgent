@@ -899,7 +899,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   }
 
   return (
-    <div className="markdown-body prose prose-neutral dark:prose-invert text-foreground mt-3 max-w-none font-sans">
+    <div className="markdown-body prose prose-neutral dark:prose-invert text-foreground mb-3 max-w-none font-sans">
       <Marked renderer={renderer}>{processedContent}</Marked>
     </div>
   )

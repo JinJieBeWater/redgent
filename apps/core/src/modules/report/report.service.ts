@@ -8,59 +8,57 @@ import { PaginateByTaskIdSchema, PaginateSchema } from './report.dto'
 export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async paginate({ take, skip }: z.infer<typeof PaginateSchema>) {
-    const [reports, total] = await Promise.all([
-      this.prisma.taskReport.findMany({
-        orderBy: {
-          createdAt: 'desc',
-        },
-        take,
-        skip,
-        include: {
-          task: {
-            select: {
-              name: true,
-            },
+  async paginate({ limit, cursor }: z.infer<typeof PaginateSchema>) {
+    const reports = await this.prisma.taskReport.findMany({
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor
+        ? {
+            id: cursor,
+          }
+        : undefined,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        task: {
+          select: {
+            name: true,
           },
         },
-      }),
-      this.prisma.taskReport.count(),
-    ])
+      },
+    })
 
     return {
       reports,
-      total,
-      hasMore: skip + take < total,
+      nextCursor: reports.length === limit ? reports[limit - 1].id : undefined,
     }
   }
 
   async paginateByTaskId({
     taskId,
-    take,
-    skip,
+    limit,
+    cursor,
   }: z.infer<typeof PaginateByTaskIdSchema>) {
-    const [reports, total] = await Promise.all([
-      this.prisma.taskReport.findMany({
-        where: {
-          taskId,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        take,
-        skip,
-      }),
-      this.prisma.taskReport.count({
-        where: {
-          taskId,
-        },
-      }),
-    ])
+    const reports = await this.prisma.taskReport.findMany({
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor
+        ? {
+            id: cursor,
+          }
+        : undefined,
+      where: {
+        taskId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
 
     return {
       reports,
-      total,
-      hasMore: skip + take < total,
+      nextCursor: reports.length === limit ? reports[limit - 1].id : undefined,
     }
   }
 }
