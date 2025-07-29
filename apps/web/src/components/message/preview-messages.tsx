@@ -1,6 +1,6 @@
 import type { AppMessage } from '@core/shared'
 import { cn } from '@web/lib/utils'
-import { Sparkles } from 'lucide-react'
+import { AlertCircle, Loader2, Sparkles } from 'lucide-react'
 
 import { MessageAssistant } from './assistant-message'
 
@@ -31,6 +31,8 @@ export function PreviewMessages({
 
 export const PreviewMessage = ({
   message,
+  isLoading,
+  isError,
 }: {
   message: AppMessage
   isLoading: boolean
@@ -47,9 +49,21 @@ export const PreviewMessage = ({
       )}
     >
       {message.role === 'assistant' && (
-        <div className="ring-border bg-background my-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
+        <div
+          className={cn(
+            'ring-border bg-background my-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1 transition-all duration-300',
+            isLoading && 'ring-primary/50 bg-primary/10 animate-pulse',
+            isError && 'ring-destructive/50 bg-destructive/10',
+          )}
+        >
           <div className="translate-y-px">
-            <Sparkles className="text-foreground h-4 w-4" />
+            {isLoading ? (
+              <Loader2 className="text-primary h-4 w-4 animate-spin" />
+            ) : isError ? (
+              <AlertCircle className="text-destructive h-4 w-4" />
+            ) : (
+              <Sparkles className="text-foreground h-4 w-4" />
+            )}
           </div>
         </div>
       )}

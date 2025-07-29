@@ -69,6 +69,35 @@ export const TaskListToolUI = ({
   // 合并所有页面的任务数据
   const allTasks = data?.pages.flatMap(page => page.tasks) ?? []
 
+  /** 处理任务点击事件 */
+  const handleTaskClick = (task: (typeof allTasks)[number]) => {
+    // 避免重复添加任务
+    const latestMessage = messages[messages.length - 1]
+    if (
+      latestMessage?.parts[0].type === 'tool-ShowTaskDetailUI' &&
+      latestMessage.parts[0].input?.taskId === task.id
+    ) {
+      return
+    }
+    setMessages([
+      ...messages,
+      {
+        role: 'assistant',
+        id: generateId(),
+        parts: [
+          {
+            type: 'tool-ShowTaskDetailUI',
+            state: 'input-available',
+            toolCallId: generateId(),
+            input: {
+              taskId: task.id,
+            },
+          },
+        ],
+      },
+    ])
+  }
+
   return (
     <div className="space-y-3">
       {/* 任务列表标题 */}
@@ -91,23 +120,7 @@ export const TaskListToolUI = ({
               key={task.id}
               task={task}
               onClick={() => {
-                setMessages([
-                  ...messages,
-                  {
-                    role: 'assistant',
-                    id: generateId(),
-                    parts: [
-                      {
-                        type: 'tool-ShowTaskDetailUI',
-                        state: 'input-available',
-                        toolCallId: generateId(),
-                        input: {
-                          taskId: task.id,
-                        },
-                      },
-                    ],
-                  },
-                ])
+                handleTaskClick(task)
               }}
             />
           ))}

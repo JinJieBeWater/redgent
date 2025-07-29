@@ -85,6 +85,12 @@ function App() {
       scrollToElement()
     } else if (messages.length > 0 && (isAtBottom || !hasManuallyScrolled)) {
       scrollToElement()
+    } else if (
+      messages.length > 0 &&
+      hasManuallyScrolled &&
+      messages.at(-1)?.parts.some(part => part.type === 'tool-ShowAllTaskUI')
+    ) {
+      scrollToElement()
     }
   }, [
     messages.length,
