@@ -1,7 +1,9 @@
-import type { AppTools } from '@core/shared'
-import type { InferToolInput } from 'ai'
+import type { AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { UIMessagePart } from 'ai'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useChatContext } from '@web/contexts/chat-context'
 import { trpc } from '@web/router'
+import { generateId } from 'ai'
 import {
   AlertCircle,
   CheckCircle2,
@@ -11,15 +13,17 @@ import {
 } from 'lucide-react'
 
 import { Spinner } from '../spinner'
-import { TaskMiniList } from '../task/task-list'
+import { TaskMini } from '../task/task-list'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 
 export const TaskListToolUI = ({
-  input,
+  part,
 }: {
-  input: InferToolInput<AppTools['ShowAllTaskUI']>
+  part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
+  if (part.type !== 'tool-ShowAllTaskUI') return null
+  const { input } = part
   const {
     data,
     fetchNextPage,
@@ -31,7 +35,7 @@ export const TaskListToolUI = ({
   } = useInfiniteQuery(
     trpc.task.paginate.infiniteQueryOptions(
       {
-        status: input.status,
+        status: input?.status,
         limit: 2,
       },
       {
@@ -43,6 +47,8 @@ export const TaskListToolUI = ({
   const { data: taskCount, isPending: taskCountPending } = useQuery(
     trpc.task.count.queryOptions(),
   )
+
+  const { messages, setMessages } = useChatContext()
 
   const isPending = taskListPending || taskCountPending
   if (isPending) {
@@ -78,7 +84,39 @@ export const TaskListToolUI = ({
       </div>
 
       {/* 任务列表 */}
-      <TaskMiniList tasks={allTasks} />
+      {allTasks.length > 0 ? (
+        <div className="space-y-2">
+          {allTasks.map(task => (
+            <TaskMini
+              key={task.id}
+              task={task}
+              onClick={() => {
+                setMessages([
+                  ...messages,
+                  {
+                    role: 'assistant',
+                    id: generateId(),
+                    parts: [
+                      {
+                        type: 'tool-ShowTaskDetailUI',
+                        state: 'input-available',
+                        toolCallId: generateId(),
+                        input: {
+                          taskId: task.id,
+                        },
+                      },
+                    ],
+                  },
+                ])
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          <p>暂无任务</p>
+        </div>
+      )}
 
       {/* 加载更多按钮 */}
       {hasNextPage && (

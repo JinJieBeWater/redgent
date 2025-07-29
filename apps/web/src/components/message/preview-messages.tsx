@@ -1,21 +1,20 @@
 import type { AppMessage } from '@core/shared'
 import { cn } from '@web/lib/utils'
-import { AlertCircle, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
-import { Spinner } from '../spinner'
 import { MessageAssistant } from './assistant-message'
 
-interface PureMessagesProps {
+interface PreviewMessagesProps {
   messages: AppMessage[]
   className?: string
   status?: 'submitted' | 'streaming' | 'ready' | 'error'
 }
 
-export function PureMessages({
+export function PreviewMessages({
   messages,
   status,
   className,
-}: PureMessagesProps) {
+}: PreviewMessagesProps) {
   return (
     <div className={cn('grid w-full grid-cols-1', className)}>
       {messages.map((message, index) => (
@@ -64,38 +63,4 @@ export const PreviewMessage = ({
       </div>
     </div>
   )
-}
-
-export function MessageStatus({
-  status,
-}: {
-  status?: 'submitted' | 'streaming' | 'ready' | 'error'
-}) {
-  switch (status) {
-    case 'ready':
-      return null
-    case 'submitted':
-      // 添加适当的loading 效果
-      return (
-        <div className="flex items-center gap-2">
-          <Spinner />
-          <p>已提交，开始处理...</p>
-        </div>
-      )
-    case 'streaming':
-      return (
-        <div className="flex items-center gap-2">
-          <Spinner />
-          <p>处理中...</p>
-        </div>
-      )
-    case 'error':
-      return (
-        <div className="flex items-center gap-2">
-          <AlertCircle className="text-destructive h-4 w-4" />
-          <p>处理请求时发生错误，请重试</p>
-        </div>
-      )
-  }
-  return null
 }

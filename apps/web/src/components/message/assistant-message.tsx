@@ -49,7 +49,7 @@ export const MessageAssistant = ({ message }: { message: AppMessage }) => {
           case 'tool-ShowAllTaskUI': {
             const { state } = part
             if (state === 'input-available') {
-              return <TaskListToolUI key={index} input={part.input} />
+              return <TaskListToolUI key={index} part={part} />
             }
             return null
           }

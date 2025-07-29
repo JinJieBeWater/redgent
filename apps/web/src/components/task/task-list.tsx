@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import { memo } from 'react'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import {
@@ -39,49 +40,36 @@ export const getStatusInfo = (
   }
 }
 
-export const TaskMini = memo(({ task }: { task: TaskMini }) => {
-  const statusInfo = getStatusInfo(task.status || 'active')
-  const StatusIcon = statusInfo.icon
+export const TaskMini = memo(
+  ({ task, ...props }: ComponentProps<'div'> & { task: TaskMini }) => {
+    const statusInfo = getStatusInfo(task.status || 'active')
+    const StatusIcon = statusInfo.icon
 
-  return (
-    <div className="bg-card hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center justify-between rounded-lg border p-2 transition-all duration-150 active:scale-[0.98]">
-      <div className="flex min-w-0 flex-1 items-center space-x-3">
-        <Eye className="text-muted-foreground h-4 w-4 flex-shrink-0" />
-        <h3
-          className="text-foreground line-clamp-1 text-sm font-medium"
-          title={task.name}
-        >
-          {task.name || '未命名任务'}
-        </h3>
-      </div>
-      <Badge
-        variant={statusInfo.variant}
-        className="ml-6 flex flex-shrink-0 items-center gap-1 text-xs"
-      >
-        <StatusIcon className="h-3 w-3" />
-        {statusInfo.label}
-      </Badge>
-    </div>
-  )
-})
-
-export const TaskMiniList = ({ tasks }: { tasks: TaskMini[] }) => {
-  if (!tasks || tasks.length === 0) {
     return (
-      <div className="flex items-center justify-center gap-2">
-        <p>暂无任务</p>
+      <div
+        className="bg-card hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center justify-between rounded-lg border p-2 transition-all duration-150 active:scale-[0.98]"
+        {...props}
+      >
+        <div className="flex min-w-0 flex-1 items-center space-x-3">
+          <Eye className="text-muted-foreground h-4 w-4 flex-shrink-0" />
+          <h3
+            className="text-foreground line-clamp-1 text-sm font-medium"
+            title={task.name}
+          >
+            {task.name || '未命名任务'}
+          </h3>
+        </div>
+        <Badge
+          variant={statusInfo.variant}
+          className="ml-6 flex flex-shrink-0 items-center gap-1 text-xs"
+        >
+          <StatusIcon className="h-3 w-3" />
+          {statusInfo.label}
+        </Badge>
       </div>
     )
-  }
-
-  return (
-    <div className="space-y-2">
-      {tasks.map(task => (
-        <TaskMini key={task.id} task={task} />
-      ))}
-    </div>
-  )
-}
+  },
+)
 
 export const TaskCard = memo(({ task }: { task: Task }) => {
   const statusInfo = getStatusInfo(task.status || 'active')
@@ -97,7 +85,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <Eye className="text-muted-foreground mt-1 h-5 w-5 flex-shrink-0" />
         <div className="min-w-0 flex-1">
           <h3
-            className="text-foreground mb-1 line-clamp-1 text-base font-semibold leading-tight"
+            className="text-foreground mb-1 line-clamp-1 text-base leading-tight font-semibold"
             title={task.name}
           >
             {task.name || '未命名任务'}
@@ -116,7 +104,7 @@ export const TaskCard = memo(({ task }: { task: Task }) => {
         <div className="flex items-center space-x-4">
           <div className="flex align-middle">
             <Calendar className="mr-1.5 h-4 w-4" />
-            <span className="capitalize leading-4">{task.scheduleType}</span>
+            <span className="leading-4 capitalize">{task.scheduleType}</span>
           </div>
           <div className="flex align-middle">
             <Clock className="mr-1.5 h-4 w-4" />

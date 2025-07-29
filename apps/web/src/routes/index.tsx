@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
-import { PureMessages } from '@web/components/message/preview-messages'
+import { PreviewMessages } from '@web/components/message/preview-messages'
 import { Button } from '@web/components/ui/button'
+import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
 import { DefaultChatTransport } from 'ai'
@@ -16,7 +17,7 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat<AppMessage>({
+  const context = useChat<AppMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
@@ -24,6 +25,7 @@ function App() {
       toast.error(`发生错误，请重试！${err.message ? err.message : ''}`)
     },
   })
+  const { messages, sendMessage, status, setMessages } = context
 
   useEffect(() => {
     if (status === 'error') {
@@ -92,79 +94,79 @@ function App() {
     scrollToElement,
   ])
   return (
-    <div
-      className={cn(
-        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
-        messages.length > 0 && 'justify-start pt-4',
-      )}
-    >
-      {/* 消息列表 */}
-      {messages.length > 0 && (
-        <>
-          <PureMessages messages={messages} status={status} />
-          <div ref={bottomRef} className="h-64"></div>
-        </>
-      )}
-
-      {/* 输入框容器 */}
+    <ChatContextProvider value={context}>
       <div
         className={cn(
-          'my-4 grid w-full',
-          messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+          'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
+          messages.length > 0 && 'justify-start pt-4',
         )}
       >
-        {/* Logo */}
-        {messages.length === 0 && (
-          <div className="text-center">
-            <h1 className="text-foreground text-4xl">Redgent</h1>
-          </div>
+        {/* 消息列表 */}
+        {messages.length > 0 && (
+          <>
+            <PreviewMessages messages={messages} status={status} />
+            <div ref={bottomRef} className="h-64"></div>
+          </>
         )}
 
-        {/* 输入框 */}
-        <FormComponent
-          className="mt-6"
-          input={input}
-          placeholder="添加一个定时分析任务..."
-          setInput={setInput}
-          handleSubmit={() => {
-            if (status === 'error') {
-              refreshSubmit()
-            } else {
-              handleSubmit()
-            }
-          }}
-          messages={messages}
-          status={status}
-          clearMessages={clearMessages}
-        />
+        {/* 输入框容器 */}
+        <div
+          className={cn(
+            'my-4 grid w-full',
+            messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+          )}
+        >
+          {/* Logo */}
+          {messages.length === 0 && (
+            <div className="text-center">
+              <h1 className="text-foreground text-4xl">Redgent</h1>
+            </div>
+          )}
 
-        {/* 建议输入 */}
-        {messages.length <= 0 && (
-          <div className="mt-4 flex items-center gap-4">
-            {[['最新报告'], ['查看任务'], ['创建任务']].map(
-              ([prompt], index) => {
-                return (
-                  <Button
-                    key={index}
-                    variant={'outline'}
-                    size={'lg'}
-                    onClick={() =>
-                      sendMessage({
-                        text: prompt.trim(),
-                      })
-                    }
-                  >
-                    {prompt}
-                  </Button>
-                )
-              },
-            )}
-          </div>
-        )}
-      </div>
+          {/* 输入框 */}
+          <FormComponent
+            className="mt-6"
+            input={input}
+            placeholder="添加一个定时分析任务..."
+            setInput={setInput}
+            handleSubmit={() => {
+              if (status === 'error') {
+                refreshSubmit()
+              } else {
+                handleSubmit()
+              }
+            }}
+            messages={messages}
+            status={status}
+            clearMessages={clearMessages}
+          />
 
-      {/* 最新分析报告 - 简化显示 */}
-      {/* <div className="space-y-3">
+          {/* 建议输入 */}
+          {messages.length <= 0 && (
+            <div className="mt-4 flex items-center gap-4">
+              {[['最新报告'], ['查看任务'], ['创建任务']].map(
+                ([prompt], index) => {
+                  return (
+                    <Button
+                      key={index}
+                      variant={'outline'}
+                      onClick={() =>
+                        sendMessage({
+                          text: prompt.trim(),
+                        })
+                      }
+                    >
+                      {prompt}
+                    </Button>
+                  )
+                },
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 最新分析报告 - 简化显示 */}
+        {/* <div className="space-y-3">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-foreground text-sm font-medium">最新分析报告</h2>
 
@@ -232,6 +234,7 @@ function App() {
           ))}
         </div>
       </div> */}
-    </div>
+      </div>
+    </ChatContextProvider>
   )
 }
