@@ -193,7 +193,7 @@ export class TaskAgentService {
         status: z
           .enum(TaskStatus)
           .optional()
-          .describe('任务状态，默认为所有状态'),
+          .describe('任务状态，默认不输入，即状态为所有状态'),
       }),
     }),
 

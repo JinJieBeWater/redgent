@@ -40,6 +40,20 @@ function App() {
     }
   }, [status, messages, setMessages])
 
+  const refreshSubmit = () => {
+    const lastMessage = messages[messages.length - 1]
+    if (
+      lastMessage?.role === 'user' &&
+      lastMessage?.parts[0]?.type === 'text'
+    ) {
+      // 清理掉导致错误的上一条消息
+      setMessages(messages.slice(0, -1))
+      sendMessage({
+        text: lastMessage?.parts[0]?.text.trim(),
+      })
+    }
+  }
+
   const handleSubmit = () => {
     if (input.trim() && (status == 'ready' || status == 'error')) {
       sendMessage({
@@ -112,31 +126,41 @@ function App() {
           input={input}
           placeholder="添加一个定时分析任务..."
           setInput={setInput}
-          handleSubmit={handleSubmit}
+          handleSubmit={() => {
+            if (status === 'error') {
+              refreshSubmit()
+            } else {
+              handleSubmit()
+            }
+          }}
           messages={messages}
           status={status}
           clearMessages={clearMessages}
         />
 
         {/* 建议输入 */}
-        <div className="mt-4 flex items-center gap-4">
-          {[['查看报告'], ['查看任务'], ['创建任务']].map(([prompt], index) => {
-            return (
-              <Button
-                key={index}
-                variant={'outline'}
-                size={'lg'}
-                onClick={() =>
-                  sendMessage({
-                    text: prompt.trim(),
-                  })
-                }
-              >
-                {prompt}
-              </Button>
-            )
-          })}
-        </div>
+        {messages.length <= 0 && (
+          <div className="mt-4 flex items-center gap-4">
+            {[['最新报告'], ['查看任务'], ['创建任务']].map(
+              ([prompt], index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant={'outline'}
+                    size={'lg'}
+                    onClick={() =>
+                      sendMessage({
+                        text: prompt.trim(),
+                      })
+                    }
+                  >
+                    {prompt}
+                  </Button>
+                )
+              },
+            )}
+          </div>
+        )}
       </div>
 
       {/* 最新分析报告 - 简化显示 */}
