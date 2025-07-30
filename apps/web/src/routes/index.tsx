@@ -1,62 +1,55 @@
-import type { UIDataTypes, UIMessage } from 'ai'
+import type { AppMessage } from '@core/shared'
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
-import { MessagesList } from '@web/components/message-list'
+import { PreviewMessages } from '@web/components/message/preview-messages'
+import { Button } from '@web/components/ui/button'
+import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
-import { trpc } from '@web/router'
-import { DefaultChatTransport } from 'ai'
+import { DefaultChatTransport, generateId } from 'ai'
 import { toast } from 'sonner'
 
-import type { APPUITools } from '@redgent/shared'
-
 export const Route = createFileRoute('/')({
-  loader: async ({ context: { trpc, queryClient } }) => {
-    await queryClient.ensureQueryData(trpc.report.hello.queryOptions())
-    return
-  },
   component: App,
 })
 
 function App() {
-  const reportQuery = useQuery(trpc.report.hello.queryOptions())
-  const report = reportQuery.data || ''
-
-  useEffect(() => {
-    console.log('来自 trpc + react-query 的数据：', report)
-  }, [report])
-
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat<
-    UIMessage<unknown, UIDataTypes, APPUITools>
-  >({
+  const context = useChat<AppMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
-
-    onError: () => {
-      toast.error('发生错误，请重试！')
+    onError: err => {
+      toast.error(`发生错误，请重试！${err.message ? err.message : ''}`)
     },
   })
+  const { messages, sendMessage, status, setMessages } = context
 
-  useEffect(() => {
-    if (status === 'error') {
-      // 取出最后一条消息 如果是用户的输入 则重新赋值到 input 中 然后弹出这条消息
-      const lastMessage = messages[messages.length - 1]
-      if (
-        lastMessage?.role === 'user' &&
-        lastMessage?.parts[0]?.type === 'text'
-      ) {
-        setInput(lastMessage?.parts[0]?.text || '')
-        // 清理掉导致错误的上一条消息
+  /** 出现错误时重新提交 */
+  const handleErrorSubmit = () => {
+    const lastMessage = messages[messages.length - 1]
+    if (
+      lastMessage?.role === 'user' &&
+      lastMessage?.parts[0]?.type === 'text'
+    ) {
+      // 如果用户有新的输入 则使用新的输入
+      if (input.trim()) {
+        sendMessage({
+          text: input.trim(),
+        })
+      } else {
+        // 使用上一条消息的输入 重新发送
         setMessages(messages.slice(0, -1))
+        sendMessage({
+          text: lastMessage?.parts[0]?.text.trim(),
+        })
       }
     }
-  }, [status, messages, setMessages])
+  }
 
+  /** 处理提交按钮点击事件 */
   const handleSubmit = () => {
     if (input.trim() && (status == 'ready' || status == 'error')) {
       sendMessage({
@@ -66,11 +59,18 @@ function App() {
     }
   }
 
+  /** 清空消息列表 */
   const clearMessages = () => {
     setMessages([])
     setInput('')
   }
 
+  /** 最后一条消息 */
+  const lastMessage = messages[messages.length - 1]
+  /** 最后一Part */
+  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
+
+  /** 处理消息列表滚动 */
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { isAtBottom, scrollToElement, hasManuallyScrolled } =
@@ -81,6 +81,7 @@ function App() {
       debounceMs: 100,
     })
 
+  /** 处理消息列表滚动 */
   useEffect(() => {
     if (status === 'streaming' && (isAtBottom || !hasManuallyScrolled)) {
       scrollToElement()
@@ -94,116 +95,206 @@ function App() {
     hasManuallyScrolled,
     scrollToElement,
   ])
-  return (
-    <div
-      className={cn(
-        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
-        messages.length > 0 && 'justify-start pt-4',
-      )}
-    >
-      {/* 消息列表 */}
-      {messages.length > 0 && (
-        <>
-          <MessagesList messages={messages} status={status} />
-          <div ref={bottomRef} className="h-64"></div>
-        </>
-      )}
 
-      {/* 输入框容器 */}
+  /** 处理客户端工具滚动 */
+  useEffect(() => {
+    if (!lastPart) return
+    if (
+      lastPart.type === 'tool-ShowAllTaskUI' ||
+      lastPart.type === 'tool-ShowTaskDetailUI' ||
+      lastPart.type === 'tool-RequestUserConsent'
+    ) {
+      scrollToElement()
+    }
+  }, [scrollToElement, lastPart])
+
+  return (
+    <ChatContextProvider value={context}>
       <div
         className={cn(
-          'my-4 grid w-full gap-6',
-          messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+          'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
+          messages.length > 0 && 'justify-start pt-4',
         )}
       >
-        {/* Logo */}
-        {messages.length === 0 && (
-          <div className="text-center">
-            <h1 className="text-foreground text-4xl">Redgent</h1>
-          </div>
+        {/* 消息列表 */}
+        {messages.length > 0 && (
+          <>
+            <PreviewMessages messages={messages} status={status} />
+            <div ref={bottomRef} className="h-64"></div>
+          </>
         )}
-        {/* 输入框 */}
 
-        <FormComponent
-          input={input}
-          placeholder="添加一个定时分析任务..."
-          setInput={setInput}
-          handleSubmit={handleSubmit}
-          messages={messages}
-          status={status}
-          clearMessages={clearMessages}
-        />
-      </div>
-
-      {/* 最新分析报告 - 简化显示 */}
-      {/* <div className="space-y-3">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-foreground text-sm font-medium">最新分析报告</h2>
-
-          <Button variant={'ghost'} size={'sm'} className="w-auto">
-            查看全部
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {latestReports.map(report => (
-            <div
-              key={report.id}
-              className="bg-card hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-lg border p-4 transition-all duration-150 active:scale-[0.98]"
-              onClick={() => {
-                console.log(`Navigate to report detail: ${report.id}`)
-              }}
-            >
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex min-w-0 flex-1 items-start space-x-2">
-                  <FileText className="text-muted-foreground mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <h3 className="text-foreground text-sm leading-tight font-medium">
-                    {report.content.title}
-                  </h3>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-2 h-6 w-6 flex-shrink-0"
-                      onClick={e => {
-                        e.stopPropagation()
-                      }}
-                    >
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={e => {
-                        e.stopPropagation()
-                      }}
-                    >
-                      <Eye className="mr-2 h-3 w-3" />
-                      查看详情
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <p className="text-muted-foreground mb-3 line-clamp-2 text-xs leading-relaxed">
-                {report.content.summary}
-              </p>
-
-              <div className="text-muted-foreground flex items-center justify-between text-xs">
-                <div className="flex items-center">
-                  <Clock className="mr-1 h-3 w-3" />
-                  <span>{formatRelativeTime(report.createdAt)}</span>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                  {report.task.name}
-                </Badge>
-              </div>
+        {/* 输入框容器 */}
+        <div
+          className={cn(
+            'my-4 grid w-full',
+            messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+          )}
+        >
+          {/* Logo */}
+          {messages.length === 0 && (
+            <div className="text-center">
+              <h1 className="text-foreground text-4xl">Redgent</h1>
             </div>
-          ))}
+          )}
+
+          {/* 输入框 */}
+          <FormComponent
+            className="mt-6"
+            input={input}
+            placeholder="添加一个定时分析任务..."
+            setInput={setInput}
+            handleSubmit={() => {
+              if (status === 'error') {
+                handleErrorSubmit()
+              } else {
+                handleSubmit()
+              }
+            }}
+            messages={messages}
+            status={status}
+            clearMessages={clearMessages}
+          />
+
+          {/* 请求用户同意 */}
+          {lastMessage?.role === 'assistant' &&
+            lastPart?.type === 'tool-RequestUserConsent' &&
+            lastPart.state === 'input-available' && (
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    if (
+                      lastPart?.type !== 'tool-RequestUserConsent' ||
+                      !lastPart?.input?.message
+                    )
+                      return
+                    setMessages([
+                      ...messages.slice(0, -1),
+                      {
+                        ...lastMessage,
+                        parts: [
+                          ...lastMessage.parts,
+                          {
+                            type: 'tool-RequestUserConsent',
+                            toolCallId: lastPart.toolCallId,
+                            state: 'output-available',
+                            input: {
+                              message: lastPart.input.message,
+                            },
+                            output: {
+                              consent: 'accept',
+                            },
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                >
+                  接受
+                </Button>
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  onClick={() => {
+                    if (
+                      lastPart?.type !== 'tool-RequestUserConsent' ||
+                      !lastPart?.input?.message
+                    )
+                      return
+                    setMessages([
+                      ...messages.slice(0, -1),
+                      {
+                        ...lastMessage,
+                        parts: [
+                          ...lastMessage.parts,
+                          {
+                            type: 'tool-RequestUserConsent',
+                            toolCallId: lastPart.toolCallId,
+                            state: 'output-available',
+                            input: {
+                              message: lastPart.input.message,
+                            },
+                            output: {
+                              consent: 'reject',
+                            },
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                >
+                  拒绝
+                </Button>
+              </div>
+            )}
+
+          {/* 建议输入 */}
+          {messages.length <= 0 && (
+            <div className="mt-4 flex items-center gap-4">
+              <Button
+                variant={'outline'}
+                onClick={() =>
+                  setMessages([
+                    ...messages,
+                    {
+                      role: 'assistant',
+                      id: generateId(),
+                      parts: [
+                        {
+                          type: 'tool-ShowLatestReportUI',
+                          state: 'input-available',
+                          toolCallId: generateId(),
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }
+              >
+                最新报告
+              </Button>
+              <Button
+                variant={'outline'}
+                onClick={() =>
+                  setMessages([
+                    ...messages,
+                    {
+                      role: 'assistant',
+                      id: generateId(),
+                      parts: [
+                        {
+                          type: 'tool-ShowAllTaskUI',
+                          state: 'input-available',
+                          toolCallId: generateId(),
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }
+              >
+                查看任务
+              </Button>
+              {[['创建任务']].map(([prompt], index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant={'outline'}
+                    onClick={() =>
+                      sendMessage({
+                        text: prompt.trim(),
+                      })
+                    }
+                  >
+                    {prompt}
+                  </Button>
+                )
+              })}
+            </div>
+          )}
         </div>
-      </div> */}
-    </div>
+      </div>
+    </ChatContextProvider>
   )
 }

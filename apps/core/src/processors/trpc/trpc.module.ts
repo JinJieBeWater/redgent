@@ -1,11 +1,12 @@
 import { ReportModule } from '@core/modules/report/report.module'
+import { TaskModule } from '@core/modules/task/task.module'
 import { Global, Module } from '@nestjs/common'
 
 import { TrpcRouter } from './trpc.router'
 import { TrpcService } from './trpc.service'
 
 @Module({
-  imports: [ReportModule],
+  imports: [TaskModule, ReportModule],
   providers: [TrpcService, TrpcRouter],
   exports: [TrpcService],
 })

@@ -1,7 +1,9 @@
 import type { UIMessage } from 'ai'
 import { useCallback, useEffect, useRef } from 'react'
-import { Loader2, RotateCcw, Send, X } from 'lucide-react'
+import { cn } from '@web/lib/utils'
+import { RotateCcw, Send, X } from 'lucide-react'
 
+import { Spinner } from './spinner'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
 
@@ -13,6 +15,7 @@ interface FormComponentProps {
   messages?: Array<UIMessage>
   status?: 'submitted' | 'streaming' | 'ready' | 'error'
   clearMessages?: () => void
+  className?: string
 }
 
 export const FormComponent: React.FC<FormComponentProps> = ({
@@ -23,6 +26,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
   placeholder,
   clearMessages,
   messages,
+  className,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -56,14 +60,19 @@ export const FormComponent: React.FC<FormComponentProps> = ({
   const showClearButton = clearMessages && messages?.length !== 0
   const clearButtonDisabled = status !== 'ready' && status !== 'error'
   return (
-    <div className="bg-muted border-border focus-within:border-primary rounded-xl border transition-colors duration-200">
+    <div
+      className={cn(
+        'bg-muted border-border focus-within:border-primary rounded-xl border transition-colors duration-200',
+        className,
+      )}
+    >
       <Textarea
         ref={inputRef}
         placeholder={placeholder}
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-xl rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none outline-none transition-[color,box-shadow] focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none outline-none transition-[color,box-shadow] focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
         rows={1}
       />
       <div className="flex items-center justify-end gap-2 p-2">
@@ -71,41 +80,38 @@ export const FormComponent: React.FC<FormComponentProps> = ({
           <Button
             onClick={clearMessages}
             size="sm"
-            className="h-7.5"
             disabled={clearButtonDisabled}
           >
-            <X className="h-3.5 w-3.5" />
-            <span>clean messages</span>
+            <X />
+            <span>clean</span>
           </Button>
         )}
         <Button
           onClick={handleSubmit}
           size="sm"
           className="h-7.5 w-auto"
-          disabled={!input.trim() || (status !== 'ready' && status !== 'error')}
+          disabled={(!input.trim() && status === 'ready') || status === 'error'}
         >
           {status === 'error' && (
-            <>
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span className="ml-1">重试</span>
-            </>
+            <div className="flex items-center gap-2">
+              <RotateCcw />
+              <span>重试</span>
+            </div>
           )}
           {status === 'ready' && (
-            <>
-              <Send className="h-3.5 w-3.5" />
-              <span className="ml-1">发送</span>
-            </>
+            <div className="flex items-center gap-2">
+              <Send />
+              <span>Send</span>
+            </div>
           )}
           {status === 'submitted' && (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span className="ml-1">提交中...</span>
+              <Spinner />
             </>
           )}
           {status === 'streaming' && (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span className="ml-1">生成中...</span>
+              <Spinner />
             </>
           )}
         </Button>

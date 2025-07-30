@@ -1,6 +1,7 @@
 import type { Response } from 'express'
 import { redgentAgentSystem } from '@core/ai-sdk/prompts'
 import { myProvider } from '@core/ai-sdk/provider'
+import { AppMessage } from '@core/shared'
 import {
   Body,
   Controller,
@@ -16,11 +17,7 @@ import {
   pipeUIMessageStreamToResponse,
   stepCountIs,
   streamText,
-  UIDataTypes,
-  UIMessage,
 } from 'ai'
-
-import { APPUITools } from '@redgent/shared'
 
 import { ChatDto } from './dto/chat.dto'
 import { TaskAgentService } from './task-agent.service'
@@ -41,13 +38,13 @@ export class TaskAgentController {
     try {
       const self = this
 
-      const stream = createUIMessageStream<
-        UIMessage<unknown, UIDataTypes, APPUITools>
-      >({
+      const stream = createUIMessageStream<AppMessage>({
         execute({ writer }) {
           const result = streamText({
             model: myProvider.languageModel('chat-model'),
-            messages: convertToModelMessages(chat.messages),
+            messages: convertToModelMessages(chat.messages, {
+              ignoreIncompleteToolCalls: true,
+            }),
             system: redgentAgentSystem,
             tools: self.taskAgentService.tools(writer),
             onError: error => {

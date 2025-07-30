@@ -1,4 +1,4 @@
-import type { AppRouter } from '@core/processors/trpc/trpc.router'
+import type { AppRouter } from '@core/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { createTRPCClient, httpLink } from '@trpc/client'
@@ -6,6 +6,7 @@ import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import superjson from 'superjson'
 
 import { Spinner } from './components/spinner'
+import { ThemeProvider } from './components/theme-provider'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
@@ -40,9 +41,11 @@ export function createRouter() {
     ),
     Wrap: function WrapComponent({ children }) {
       return (
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </ThemeProvider>
       )
     },
   })
