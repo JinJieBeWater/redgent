@@ -3,19 +3,19 @@ import type { UIMessagePart } from 'ai'
 import type { ComponentProps } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useChatContext } from '@web/contexts/chat-context'
+import { formatIntervalTime } from '@web/lib/format-interval-time'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
+import cronstrue from 'cronstrue'
 import {
   AlertCircle,
-  Calendar,
   ChevronDown,
   Clock,
-  Eye,
   FileText,
   Hash,
   List,
-  Settings,
+  Play,
 } from 'lucide-react'
 
 import { Spinner } from '../spinner'
@@ -239,7 +239,7 @@ export const AllTaskUI = ({
 
       {/* 任务列表 */}
       {allTasks.length > 0 ? (
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2">
           {allTasks.map(task => (
             <TaskMini
               key={task.id}
@@ -293,6 +293,8 @@ export const TaskDetailUI = ({
   const { input } = part
   if (!input?.taskId) return null
 
+  const { sendMessage } = useChatContext()
+
   // 获取任务详情
   const {
     data: task,
@@ -343,19 +345,18 @@ export const TaskDetailUI = ({
     )
   }
 
-  const statusInfo = getStatusInfo(task.status || 'active')
+  const statusInfo = getStatusInfo(task.status)
   const StatusIcon = statusInfo.icon
 
   return (
     <div className="mt-1 space-y-3">
       {/* 任务信息卡片 - 使用 Card 组件 */}
       <Card className="gap-2 px-3 py-3">
-        <CardContent className="space-y-2 px-1">
+        <CardContent className="space-y-3 px-1">
           {/* 任务名称 */}
-          <div className="flex items-center justify-between pb-2">
+          <div className="flex items-center justify-between gap-2 text-base">
             <div className="flex flex-1 items-center space-x-2">
-              <Eye className="h-4 w-4 flex-shrink-0" />
-              <CardTitle className="text-nowrap text-base font-semibold">
+              <CardTitle className="truncate">
                 {task.name || '未命名任务'}
               </CardTitle>
             </div>
@@ -368,23 +369,15 @@ export const TaskDetailUI = ({
             </Badge>
           </div>
 
-          {/* 调度信息 - 优化布局 */}
-          <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-            <div className="flex items-center">
-              <Calendar className="mr-1 h-3 w-3" />
-              <span className="capitalize">{task.scheduleType}</span>
-            </div>
-            <div className="flex items-center">
-              <Clock className="mr-1 h-3 w-3" />
-              <span>
-                {task.lastExecutedAt
-                  ? formatRelativeTime(task.lastExecutedAt)
-                  : formatRelativeTime(task.createdAt)}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Settings className="mr-1 h-3 w-3" />
-              <span className="font-mono">{task.scheduleExpression}</span>
+          {/* 任务配置 */}
+          <div className="grid grid-flow-col gap-x-4 gap-y-2 text-xs">
+            <div className="flex items-center gap-1 truncate text-xs">
+              <Clock className="text-muted-foreground h-3 w-3" />
+              {task.scheduleType === 'cron'
+                ? cronstrue.toString(task.scheduleExpression, {
+                    locale: 'zh_CN',
+                  })
+                : formatIntervalTime(Number(task.scheduleExpression))}
             </div>
           </div>
 
@@ -392,9 +385,9 @@ export const TaskDetailUI = ({
           <div className="flex items-center gap-2">
             <FileText className="text-muted-foreground h-3 w-3" />
             <span className="text-foreground text-xs font-medium">
-              最新报告
+              {totalCount > 0 ? '最新报告' : '暂无报告'}
             </span>
-            {allReports.length > 0 && (
+            {totalCount > 0 && (
               <Badge
                 variant="outline"
                 className="flex items-center gap-1 text-xs"
@@ -409,52 +402,64 @@ export const TaskDetailUI = ({
             <div className="flex items-center justify-center">
               <ErrorMessage error={reportsErrorMessage} />
             </div>
-          ) : allReports.length > 0 ? (
-            <div>
-              <div className="grid grid-cols-1 gap-2 gap-x-3 md:grid-cols-2">
-                {allReports.map((report, index) => (
-                  <Button
-                    variant={'outline'}
-                    key={report.id}
-                    size={'sm'}
-                    className="text-foreground justify-start px-2 text-xs"
-                  >
-                    <span>#{index}</span>
-                    <span className="truncate">{report.title}</span>
-                  </Button>
-                ))}
-              </div>
-
-              {/* 加载更多按钮 */}
-              {hasNextPage && (
-                <div className="flex justify-center pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="flex h-6 items-center gap-1 text-xs"
-                  >
-                    {isFetchingNextPage ? (
-                      <>
-                        <Spinner />
-                        加载中
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="h-3 w-3" />
-                        更多
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-            </div>
           ) : (
-            <div className="py-2 text-center">
-              <p className="text-muted-foreground text-xs">暂无报告</p>
-            </div>
+            allReports.length > 0 && (
+              <div>
+                <div className="grid grid-cols-1 gap-2 gap-x-3 md:grid-cols-2">
+                  {allReports.map((report, index) => (
+                    <Button
+                      variant={'outline'}
+                      key={report.id}
+                      size={'sm'}
+                      className="text-foreground justify-start px-2 text-xs"
+                    >
+                      <span>#{index}</span>
+                      <span className="truncate">{report.title}</span>
+                    </Button>
+                  ))}
+                </div>
+
+                {/* 加载更多按钮 */}
+                {hasNextPage && (
+                  <div className="flex justify-center pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      className="flex h-6 items-center gap-1 text-xs"
+                    >
+                      {isFetchingNextPage ? (
+                        <>
+                          <Spinner />
+                          加载中
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-3 w-3" />
+                          更多
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )
           )}
+
+          {/* 立即执行任务 */}
+          <Button
+            size={'sm'}
+            className="w-full text-xs"
+            onClick={() => {
+              sendMessage({
+                text: `立即执行任务 ${task.name}`,
+              })
+            }}
+          >
+            <Play className="h-4 w-4" />
+            立即执行
+          </Button>
         </CardContent>
       </Card>
     </div>

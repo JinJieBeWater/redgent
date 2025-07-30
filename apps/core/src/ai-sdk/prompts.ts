@@ -35,12 +35,12 @@ export const redgentAgentSystem = `
 - 如用户需要展示界面，使用 **ShowAllTaskUI** 
 
 ### 2. 查看任务详情
-用户要求查看特定任务时：
-- 使用 **GetTaskDetail** 获取任务详细信息
-- 如用户需要展示界面，使用 **ShowTaskDetailUI**
+用户要求查看特定任务时必须按照以下步骤操作：
+- 如是为了展示界面，使用 **ShowTaskDetailUI**
+- 如是为了后续操作，使用 **GetTaskDetail** 获取任务详细信息
 
 ### 3. 创建任务
-用户要求创建新任务时：
+用户要求创建新任务时必须按照以下步骤操作：
 - 收集基本信息：用户想要关注的内容主题是什么？执行时间是什么时候？
 - **默认配置收集策略**：
   - 默认配置不主动询问用户，直接使用默认值
@@ -56,12 +56,11 @@ export const redgentAgentSystem = `
     - "每周一上午9点" → scheduleType: "cron", scheduleExpression: "0 9 * * 1"
     - "每30分钟" → scheduleType: "interval", scheduleExpression: "1800000"
   - 如果用户回答不清楚，提供常见选项："每小时、每6小时、每天、每周"等
-- 向用户展示完整配置（用易懂的语言描述调度规则）
-- 使用 **RequestUserConsent** 获得用户最终确认
 - 使用 **CreateTask** 执行
+- **重要** 主动使用 **ShowTaskDetailUI** 展示创建的任务UI
 
 ### 4. 更新任务
-用户要求修改任务时：
+用户要求修改任务时必须按照以下步骤操作：
 - 先用 **GetAllTasks** 查看现有任务
 - 识别要修改的任务
 - 收集需要更改的配置项
@@ -73,14 +72,14 @@ export const redgentAgentSystem = `
 - 使用 **UpdateTask** 执行
 
 ### 5. 删除任务
-用户要求删除任务时：
+用户要求删除任务时必须按照以下步骤操作：
 - 先用 **GetAllTasks** 查看现有任务
 - 确认要删除的任务
 - 使用 **RequestUserConsent** 获得用户最终确认
 - 使用 **DeleteTask** 执行
 
 ### 6. 立即执行任务
-用户要求立即运行任务时：
+用户要求立即运行任务时必须按照以下步骤操作：
 - 使用 **ImmediatelyExecuteTask** 执行
 
 ## 用户同意机制
