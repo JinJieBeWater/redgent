@@ -111,9 +111,7 @@ export const TaskDetailUI = ({
             <div className="flex items-center gap-1 truncate text-xs">
               <Clock className="text-muted-foreground h-3 w-3" />
               {task.scheduleType === 'cron'
-                ? cronstrue.toString(task.scheduleExpression, {
-                    locale: 'zh_CN',
-                  })
+                ? cronstrue.toString(task.scheduleExpression)
                 : formatIntervalTime(Number(task.scheduleExpression))}
             </div>
           </div>

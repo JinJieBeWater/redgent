@@ -1,6 +1,7 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 import * as Joi from 'joi'
 
 import { AppController } from './app.controller'
@@ -36,6 +37,7 @@ import { TrpcModule } from './processors/trpc/trpc.module'
         abortEarly: true,
       },
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     TrpcModule,
     RedditModule,

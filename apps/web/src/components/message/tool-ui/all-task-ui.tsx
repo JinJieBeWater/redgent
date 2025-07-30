@@ -1,6 +1,8 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { useEffect } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
+import { useSubscription } from '@trpc/tanstack-react-query'
 import { Spinner } from '@web/components/spinner'
 import { TaskMini } from '@web/components/task/task-list'
 import { Badge } from '@web/components/ui/badge'
@@ -37,6 +39,12 @@ export const AllTaskUI = ({
       },
     ),
   )
+  const { data: subscripttionData, status: subscripttionStatus } =
+    useSubscription(trpc.task.execute.subscriptionOptions())
+  useEffect(() => {
+    console.log('subscripttionStatus', subscripttionStatus)
+    console.log('subscripttionData', subscripttionData)
+  }, [subscripttionData, subscripttionStatus])
 
   const { messages, setMessages } = useChatContext()
 
