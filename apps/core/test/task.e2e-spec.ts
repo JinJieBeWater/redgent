@@ -14,8 +14,14 @@ import { createMockTaskConfig } from './data-factory'
 const mockTaskConfig = createMockTaskConfig({
   name: '监测 ReactJs 动态',
   prompt: '帮我每天6点监测一次有关 ReactJs 生态圈的动态',
-  keywords: ['reactjs', 'react'],
-  subreddits: ['react', 'reactjs'],
+  payload: {
+    dataSource: {
+      reddit: {
+        subreddits: ['react', 'reactjs'],
+      },
+    },
+    keywords: ['reactjs', 'react'],
+  },
 })
 
 describe('analysis-task (e2e)', () => {

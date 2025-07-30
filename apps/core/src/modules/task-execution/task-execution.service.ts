@@ -10,7 +10,7 @@ import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber } from 'rxjs'
 import z from 'zod'
 
-import { Task, TaskStatus as TaskStatusModel } from '@redgent/db'
+import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
 import {
   CommentNode,
   RedditLinkInfoUntrusted,
@@ -52,7 +52,7 @@ export class TaskExecutionService {
             return
           }
 
-          if (taskConfig.enableFiltering) {
+          if (taskConfig.enableCache) {
             links = await this._filterLinks(links, subscriber)
             if (links.length === 0) {
               subscriber.complete()
@@ -70,14 +70,12 @@ export class TaskExecutionService {
             links,
             subscriber,
           )
-          const analysisResult = await this._analyzeContent(
-            taskConfig,
-            completeLinkData,
-            subscriber,
-          )
+          const { title: reportTitle, content: reportContent } =
+            await this._analyze(taskConfig, completeLinkData, subscriber)
           await this._saveResults(
             taskConfig,
-            analysisResult,
+            reportTitle,
+            reportContent,
             startTime,
             subscriber,
           )
@@ -115,9 +113,12 @@ export class TaskExecutionService {
       message: '正在从 Reddit 抓取帖子...',
     })
 
+    const { dataSource } = taskConfig.payload
+    const { reddit } = dataSource
+
     const links = await this.redditService.getHotLinksByQueriesAndSubreddits(
-      taskConfig.keywords,
-      taskConfig.subreddits,
+      taskConfig.payload.keywords,
+      reddit?.subreddits,
     )
 
     // 过滤ups为0的帖子 和 评论数为0的帖子
@@ -259,7 +260,7 @@ export class TaskExecutionService {
     return completeLinkData
   }
 
-  private async _analyzeContent(
+  private async _analyze(
     taskConfig: Task,
     completeLinkData: {
       content: RedditLinkInfoUntrusted
@@ -284,7 +285,8 @@ export class TaskExecutionService {
 
   private async _saveResults(
     taskConfig: Task,
-    analysisResult: PrismaJson.ReportContent,
+    reportTitle: string,
+    reportContent: PrismaJson.ReportContent,
     startTime: number,
     subscriber: Subscriber<TaskProgress>,
   ) {
@@ -302,7 +304,8 @@ export class TaskExecutionService {
       this.prismaService.taskReport.create({
         data: {
           taskId: taskConfig.id,
-          content: analysisResult,
+          title: reportTitle,
+          content: reportContent,
           executionDuration,
         },
       }),
@@ -382,29 +385,43 @@ export class TaskExecutionService {
       content: RedditLinkInfoUntrusted
       comment: CommentNode[]
     }[],
-  ): Promise<PrismaJson.ReportContent> {
+  ): Promise<Pick<TaskReport, 'title' | 'content'>> {
     try {
       const { object: analysisResult } = await generateObject({
         model: myProvider.languageModel('analysis-model'),
         schema: z.object({
-          title: z.string().describe('报告的整体标题'),
-          overallSummary: z.string().describe('对所有分析内容的总体情况'),
-          findings: z
-            .array(
-              z.object({
-                point: z.string().describe('发现的要点总结，类似小标题'),
-                elaboration: z.string().describe('对该要点的详细阐述和分析'),
-                supportingPostIds: z
-                  .array(z.string())
-                  .describe('支持该发现的源帖子的 ID 列表'),
-              }),
-            )
-            .describe('具体的、分点的分析发现列表'),
+          title: z
+            .string()
+            .describe(
+              "用最简单的语言总结最重要的发现，例：'用户对夜间模式的视觉疲劳反馈'",
+            ),
+
+          content: z.object({
+            findings: z
+              .array(
+                z.object({
+                  elaboration: z
+                    .string()
+                    .describe(
+                      "直接陈述发现的具体内容，保持原始信息完整性，例：'多名用户反映开启夜间模式2小时后出现眼睛干涩症状'",
+                    ),
+
+                  supportingLinkIds: z
+                    .array(z.string())
+                    .min(1)
+                    .describe('关联原始数据的id列表'),
+                }),
+              )
+              .min(1),
+          }),
         }),
         prompt: analyzeRedditContentPrompt(taskConfig.prompt, completeLinkData),
       })
 
-      return analysisResult
+      return {
+        title: analysisResult.title,
+        content: analysisResult.content,
+      }
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         const err = error.responseBody

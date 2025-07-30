@@ -94,7 +94,7 @@ describe(TaskExecutionService.name, () => {
     })
 
     it('应该在不过滤的情况下成功执行任务', async () => {
-      const taskConfig = { ...mockTaskConfig, enableFiltering: false }
+      const taskConfig = { ...mockTaskConfig, enableCache: false }
 
       const progressObservable = service.execute(taskConfig)
       const progressEvents = await lastValueFrom(
@@ -116,7 +116,7 @@ describe(TaskExecutionService.name, () => {
     })
 
     it('应该在过滤新链接的情况下成功执行任务', async () => {
-      const taskConfig = { ...mockTaskConfig, enableFiltering: true }
+      const taskConfig = { ...mockTaskConfig, enableCache: true }
 
       // Mock mget to return one cached link and one new one
       cacheManager.mget.mockResolvedValue([1, undefined])
@@ -151,7 +151,7 @@ describe(TaskExecutionService.name, () => {
     })
 
     it('应该在启用过滤且没有找到新链接时取消任务', async () => {
-      const taskConfig = { ...mockTaskConfig, enableFiltering: true }
+      const taskConfig = { ...mockTaskConfig, enableCache: true }
 
       // Mock mget to return all links as cached
       cacheManager.mget.mockResolvedValue(mockRedditLinks.map(() => 1))

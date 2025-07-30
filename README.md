@@ -103,7 +103,7 @@ sequenceDiagram
 抓取逻辑根据 `TaskConfig` 的配置来执行：
 
 1.  **数据源**: 根据任务中指定的 `subreddits` 和 `keywords`，从 Reddit API 并行抓取相关的热门帖子，汇集成原始内容池。
-2.  **过滤与去重**: 如果 `TaskConfig` 中的 `enableFiltering` 选项为 `true`，系统会启用缓存机制。它会将当前抓取到的内容与历史缓存进行对比，过滤掉那些在近期（如过去36小时内）已经处理过的帖子，从而有效避免重复分析。
+2.  **过滤与去重**: 如果 `TaskConfig` 中的 `enableCache` 选项为 `true`，系统会启用缓存机制。它会将当前抓取到的内容与历史缓存进行对比，过滤掉那些在近期（如过去36小时内）已经处理过的帖子，从而有效避免重复分析。
 3.  **生成结果集**: 最终，将排序后的帖子列表作为可分析的数据集，交由下游的分析模块进行处理。
 
 下面的序列图展示了这个过程：
@@ -117,10 +117,10 @@ sequenceDiagram
     participant LLM as LLM
 
 
-    P->>TC: 读取 keywords, subreddits, enableFiltering
+    P->>TC: 读取 keywords, subreddits, enableCache
     P->>Reddit: 根据 keywords/subreddits 抓取内容
     Reddit-->>P: 返回原始帖子列表
-    alt 如果 enableFiltering is true
+    alt 如果 enableCache is true
         P->>Cache: 对比帖子列表进行去重
         Cache-->>P: 返回过滤后的列表
     end

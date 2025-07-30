@@ -104,9 +104,7 @@ export const LatestReportUI = ({
             >
               <div className="flex w-full items-center gap-2">
                 <span>#{index + 1}</span>
-                <span className="truncate">
-                  {report.content?.title || '未命名报告'}
-                </span>
+                <span className="truncate">{report.title || '未命名报告'}</span>
               </div>
               <div className="mt-1 flex w-full items-center gap-2 text-xs">
                 {report.task?.name && (
@@ -357,7 +355,7 @@ export const TaskDetailUI = ({
           <div className="flex items-center justify-between pb-2">
             <div className="flex flex-1 items-center space-x-2">
               <Eye className="h-4 w-4 flex-shrink-0" />
-              <CardTitle className="text-base font-semibold text-nowrap">
+              <CardTitle className="text-nowrap text-base font-semibold">
                 {task.name || '未命名任务'}
               </CardTitle>
             </div>
@@ -388,19 +386,6 @@ export const TaskDetailUI = ({
               <Settings className="mr-1 h-3 w-3" />
               <span className="font-mono">{task.scheduleExpression}</span>
             </div>
-            {task.subreddits && task.subreddits.length > 0 && (
-              <div className="flex items-center">
-                <Hash className="mr-1 h-3 w-3" />
-                <span>
-                  {task.subreddits.map((sub, index) => (
-                    <span key={sub}>
-                      r/{sub}
-                      {index < task.subreddits.length - 1 && ', '}
-                    </span>
-                  ))}
-                </span>
-              </div>
-            )}
           </div>
 
           {/* 执行报告部分 */}
@@ -435,7 +420,7 @@ export const TaskDetailUI = ({
                     className="text-foreground justify-start px-2 text-xs"
                   >
                     <span>#{index}</span>
-                    <span className="truncate">{report.content?.title}</span>
+                    <span className="truncate">{report.title}</span>
                   </Button>
                 ))}
               </div>

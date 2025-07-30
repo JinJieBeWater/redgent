@@ -161,23 +161,25 @@ export const analyzeRedditContentPrompt = (
     comment: CommentNode[]
   }[],
 ) => `
-    你是一个专业的内容分析师，负责分析 Redgent 定时在 Reddit 上抓取的讨论内容，并生成结构化的分析报告。
+    # Reddit 内容分析指令
 
-    用户的分析任务：${taskPrompt}
+    ## 任务背景
+    你是一个专业的社会化媒体分析师，需要对以下 Reddit 数据进行深度分析：
+    - 分析目标：${taskPrompt}
 
     请分析以下 Reddit 帖子及其评论内容，并生成一份详细的分析报告。
 
-    分析的内容包括：
+    ## 输入数据
     ${completeLinkData
       .map(
         data => `
-    - ID: ${data.content.id}
+    - 帖子ID: ${data.content.id}
     - 标题: ${data.content.title}
-    - 内容: ${data.content.selftext || '(无文本内容)'}
+    - 内容: ${data.content.selftext || '(无正文)'}
     - 点赞数: ${data.content.ups}
     - 评论数: ${data.content.num_comments}
 
-    ### 主要评论:
+    ### 高价值评论:
     ${data.comment
       .map(
         (comment, i) => `
@@ -189,22 +191,43 @@ export const analyzeRedditContentPrompt = (
       )
       .join('\n')}
 
-    请根据以上内容生成一个结构化的分析报告，包含：
+    ## 分析要求
+    请生成包含以下要素的 JSON 格式报告：
 
-    1. **报告标题** (title): 简洁明了地总结本次分析的主题
-    2. **总体摘要** (overallSummary): 对所有讨论内容的整体趋势、观点和情况进行概括
-    3. **具体发现** (findings): 一个数组，每个发现包含：
-      - point: 发现的要点或趋势（简洁的小标题）
-      - elaboration: 对该要点的详细阐述和分析
-      - supportingPostIds: 支持该发现的帖子ID列表
+    ### 1. 标题 (title)
+    - 用简洁陈述句概括最显著发现
+    - 示例："关于iPhone电池寿命的争议性讨论"
 
-    要求：
-    - 重点关注与用户任务相关的内容
-    - 识别讨论中的主要观点、趋势和情绪
-    - 提供客观、有见地的分析
-    - 确保每个发现都有明确的证据支持
-    - 使用中文生成分析报告
+    ### 2. 发现清单 (findings)
+    按重要性降序排列，每个发现包含：
 
-    输出格式要求：
-    - 以 json 格式输出
+    #### elaboration (详细分析)
+    - 必须包含：
+      • 现象描述（观察到的具体内容）
+      • 上下文关联（与其他讨论的关系）
+      • 典型例证（引用具体评论/帖子内容）
+    - 禁止：
+      × 主观猜测
+      × 未经验证的数据推断
+
+    #### supportingLinkIds (证据ID)
+    - 关联的主帖ID列表
+    - 必须来自输入数据中的有效ID
+
+    ## 输出示例
+    {
+      "title": "用户对Android 14自动亮度调节的负面反馈集中",
+      "content": {
+        "findings": [
+          {
+            "elaboration": "至少3个帖子的用户抱怨自动亮度调节过于敏感，特别是@ID123用户提到'在室内频繁变化导致眼睛疲劳'，这种情绪在相关讨论中获得62次赞同",
+            "supportingLinkIds": ["t3_123abc", "t3_456def"]
+          }
+        ]
+      }
+    }
+
+    ## 特别注意事项
+    1. 所有结论必须源自输入数据
+    2. 区分事实陈述（"用户提到..."）和观点推论（"可能因为..."）
 `
