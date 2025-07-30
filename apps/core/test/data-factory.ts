@@ -305,12 +305,18 @@ export function createMockTaskConfig(overrides?: Partial<Task>): Task {
     scheduleType: 'cron',
     scheduleExpression: '0 0 * * *',
     prompt: '每天早上6点抓取reactjs生态圈的最新动态',
-    keywords: ['react', 'reactjs'],
-    subreddits: ['react', 'reactjs'],
+    payload: {
+      keywords: ['react', 'reactjs'],
+      dataSource: {
+        reddit: {
+          subreddits: ['react', 'reactjs'],
+        },
+      },
+    },
     createdAt: new Date(),
     updatedAt: new Date(),
     status: 'active',
-    enableFiltering: true,
+    enableCache: true,
     lastExecutedAt: null,
     lastFailureAt: null,
     lastErrorMessage: null,
@@ -337,7 +343,7 @@ export const TEST_DATA_PRESETS = {
   standardTask: createMockTaskConfig(),
 
   /** 禁用过滤的任务配置 */
-  taskWithoutFiltering: createMockTaskConfig({ enableFiltering: false }),
+  taskWithoutFiltering: createMockTaskConfig({ enableCache: false }),
 
   /** 简单的 Reddit 评论数据 */
   simpleRedditComments: createMockRedditComments(2),

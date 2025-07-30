@@ -25,17 +25,16 @@ model Task {
 
   prompt String
 
-  keywords String[]
+  status TaskStatus @default(active)
 
-  subreddits String[]
+  /// [TaskPayload]
+  payload Json
 
   scheduleType ScheduleType
 
   scheduleExpression String
 
-  status TaskStatus @default(active)
-
-  enableFiltering Boolean @default(true)
+  enableCache Boolean @default(true)
 
   lastExecutedAt DateTime?
 
@@ -68,12 +67,14 @@ enum TaskStatus {
 model TaskReport {
   id String @id @default(uuid()) @db.Uuid
 
-  createdAt DateTime @default(now())
+  title String
 
   /// [ReportContent]
-  content Json?
+  content Json
 
-  executionDuration Int?
+  executionDuration Int
+
+  createdAt DateTime @default(now())
 
   taskId String @db.Uuid
 

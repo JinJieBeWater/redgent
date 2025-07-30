@@ -5,8 +5,16 @@ import { ScheduleType, TaskReport, TaskStatus } from '@redgent/db'
 export const createTaskSchema = z.object({
   name: z.string().describe('简短任务名称'),
   prompt: z.string().describe('用户原封不动的输入'),
-  keywords: z.array(z.string()).describe('关键词列表'),
-  subreddits: z.array(z.string()).describe('Reddit 子版块列表'),
+  payload: z
+    .object({
+      keywords: z.array(z.string()).describe('关键词列表'),
+      dataSource: z.object({
+        reddit: z.object({
+          subreddits: z.array(z.string()).describe('Reddit 子版块列表'),
+        }),
+      }),
+    })
+    .describe('任务具体配置参数'),
   scheduleType: z.enum(ScheduleType).describe('定时类型'),
   scheduleExpression: z.string().describe(`
     当 scheduleType 为 cron 时，表达式为 cron 表达式
@@ -15,7 +23,7 @@ export const createTaskSchema = z.object({
   status: z
     .enum([TaskStatus.active, TaskStatus.paused])
     .describe('任务状态 激活 或 暂停'),
-  enableFiltering: z.boolean().describe('3天缓存'),
+  enableCache: z.boolean().describe('3天缓存'),
 })
 
 export const updateTaskSchema = createTaskSchema.partial()

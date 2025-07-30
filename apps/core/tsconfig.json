@@ -9,5 +9,13 @@
       "@core/*": ["./src/*"]
     },
     "types": ["vitest/globals"]
-  }
+  },
+  "references": [
+    {
+      "path": "../../packages/shared/tsconfig.json"
+    },
+    {
+      "path": "../../packages/database/tsconfig.json"
+    }
+  ]
 }

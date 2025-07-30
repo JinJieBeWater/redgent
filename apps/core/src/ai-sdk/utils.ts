@@ -40,22 +40,20 @@ interface ResponseHandler {
 export const MOCK_RESPONSES = {
   /** 标准分析结果，符合 ReportContent 类型 */
   analysisResult: {
-    title: '测试分析报告',
-    overallSummary:
-      '这是一个模拟的分析总结，用于测试环境中验证AI分析功能的正确性',
-    findings: [
-      {
-        point: '关键趋势1',
-        elaboration: '详细分析了第一个重要趋势的影响和意义',
-        supportingPostIds: ['link-1', 'link-2'],
-      },
-      {
-        point: '市场观察2',
-        elaboration: '基于Reddit讨论内容得出的市场观察结论',
-        supportingPostIds: ['link-2', 'link-3'],
-      },
-    ],
-  } satisfies TaskReport['content'],
+    title: '测试分析结果',
+    content: {
+      findings: [
+        {
+          elaboration: '详细分析了第一个重要趋势的影响和意义',
+          supportingLinkIds: ['link-1', 'link-2'],
+        },
+        {
+          elaboration: '基于Reddit讨论内容得出的市场观察结论',
+          supportingLinkIds: ['link-2', 'link-3'],
+        },
+      ],
+    },
+  } satisfies Pick<TaskReport, 'title' | 'content'>,
 
   /** 默认任务创建确认消息 */
   defaultMessage:
@@ -182,10 +180,7 @@ registerResponseHandler({
 
     const textContent =
       lastMessage.content.find(c => c.type === 'text')?.text || ''
-    return (
-      textContent.includes('你是一个专业的内容分析师') &&
-      textContent.includes('请分析以下 Reddit 帖子')
-    )
+    return textContent.includes('# Reddit 内容分析指令')
   },
   response: () => JSON.stringify(MOCK_RESPONSES.analysisResult),
 })
