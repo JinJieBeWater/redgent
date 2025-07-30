@@ -19,7 +19,7 @@ import {
   Play,
 } from 'lucide-react'
 
-import { ErrorMessage } from './common'
+import { ErrorMessage, LoadingMessage } from './common'
 
 export const TaskDetailUI = ({
   part,
@@ -66,7 +66,7 @@ export const TaskDetailUI = ({
     reportsData?.pages[reportsData.pages.length - 1]?.total ?? 0
 
   if (taskPending || reportsPending) {
-    return <Spinner />
+    return <LoadingMessage />
   }
 
   if (taskError) {

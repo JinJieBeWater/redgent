@@ -8,7 +8,7 @@ import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { ChevronDown, FileText, Hash } from 'lucide-react'
 
-import { ErrorMessage } from './common'
+import { ErrorMessage, LoadingMessage } from './common'
 
 export const LatestReportUI = ({
   part,
@@ -38,7 +38,7 @@ export const LatestReportUI = ({
 
   const isPending = reportListPending
   if (isPending) {
-    return <Spinner />
+    return <LoadingMessage />
   }
 
   if (isError) {

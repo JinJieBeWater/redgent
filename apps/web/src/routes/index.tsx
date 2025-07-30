@@ -120,7 +120,8 @@ function App() {
         {messages.length > 0 && (
           <>
             <PreviewMessages messages={messages} status={status} />
-            <div ref={bottomRef} className="h-64"></div>
+            {/* 滚动锚点 */}
+            <div ref={bottomRef} className="h-80"></div>
           </>
         )}
 

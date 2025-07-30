@@ -10,7 +10,7 @@ import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import { ChevronDown, Hash, List } from 'lucide-react'
 
-import { ErrorMessage } from './common'
+import { ErrorMessage, LoadingMessage } from './common'
 
 export const AllTaskUI = ({
   part,
@@ -42,7 +42,7 @@ export const AllTaskUI = ({
 
   const isPending = taskListPending
   if (isPending) {
-    return <Spinner />
+    return <LoadingMessage />
   }
 
   if (isError) {
