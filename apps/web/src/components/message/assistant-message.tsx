@@ -1,12 +1,10 @@
 import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
-import {
-  AllTaskUI,
-  LatestReportUI,
-  RequestUserConsentUI,
-  TaskDetailUI,
-} from './tool-message'
+import { AllTaskUI } from './tool-ui/all-task-ui'
+import { LatestReportUI } from './tool-ui/latest-report-ui'
+import { RequestUserConsentUI } from './tool-ui/request-user-consent-ui'
+import { TaskDetailUI } from './tool-ui/task-detail-ui'
 
 export const AssistantMessage = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
