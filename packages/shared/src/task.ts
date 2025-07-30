@@ -3,11 +3,11 @@ import z from 'zod'
 import { ScheduleType, TaskReport, TaskStatus } from '@redgent/db'
 
 export const createTaskSchema = z.object({
-  name: z.string().describe('简短任务名称'),
+  name: z.string().describe('简短任务名称 AI自动生成'),
   prompt: z.string().describe('用户原封不动的输入'),
   payload: z
     .object({
-      keywords: z.array(z.string()).describe('关键词列表'),
+      keywords: z.array(z.string()).describe('关键词列表 AI自动生成'),
       dataSource: z.object({
         reddit: z.object({
           subreddits: z.array(z.string()).describe('Reddit 子版块列表'),
@@ -22,7 +22,8 @@ export const createTaskSchema = z.object({
     `),
   status: z
     .enum([TaskStatus.active, TaskStatus.paused])
-    .describe('任务状态 激活 或 暂停'),
+    .default(TaskStatus.active)
+    .describe('任务状态激活或暂停, 用户不说明时默认为激活'),
   enableCache: z.boolean().describe('3天缓存'),
 })
 

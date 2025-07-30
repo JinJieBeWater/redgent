@@ -120,7 +120,7 @@ export const LatestReportUI = ({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center gap-2 py-4">
+        <div className="flex items-center justify-center gap-2">
           <p className="text-muted-foreground text-sm">暂无报告</p>
         </div>
       )}
