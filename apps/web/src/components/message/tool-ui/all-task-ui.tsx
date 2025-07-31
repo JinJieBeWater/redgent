@@ -40,7 +40,7 @@ export const AllTaskUI = ({
     ),
   )
   const { data: subscripttionData, status: subscripttionStatus } =
-    useSubscription(trpc.task.execute.subscriptionOptions())
+    useSubscription(trpc.task.execute.subscribe.subscriptionOptions({}))
   useEffect(() => {
     console.log('subscripttionStatus', subscripttionStatus)
     console.log('subscripttionData', subscripttionData)

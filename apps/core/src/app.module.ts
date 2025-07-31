@@ -1,7 +1,6 @@
 import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { EventEmitterModule } from '@nestjs/event-emitter'
 import * as Joi from 'joi'
 
 import { AppController } from './app.controller'
@@ -10,6 +9,7 @@ import { RedditModule } from './modules/reddit/reddit.module'
 import { TaskAgentModule } from './modules/task-agent/task-agent.module'
 import { TaskExecutionModule } from './modules/task-execution/task-execution.module'
 import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module'
+import { EeModule } from './processors/ee/ee.module'
 import { PrismaModule } from './processors/prisma/prisma.module'
 import { TrpcModule } from './processors/trpc/trpc.module'
 
@@ -37,7 +37,7 @@ import { TrpcModule } from './processors/trpc/trpc.module'
         abortEarly: true,
       },
     }),
-    EventEmitterModule.forRoot(),
+    EeModule,
     PrismaModule,
     TrpcModule,
     RedditModule,

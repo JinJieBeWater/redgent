@@ -1,6 +1,6 @@
 import { ReportRouter } from '@core/modules/report/report.router'
 import { TaskRouter } from '@core/modules/task/task.router'
-import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common'
+import { INestApplication, Injectable } from '@nestjs/common'
 import * as trpcExpress from '@trpc/server/adapters/express'
 
 import { createContext, TrpcService } from './trpc.service'
