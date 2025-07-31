@@ -42,10 +42,10 @@ export const PreviewMessage = ({
     <div
       key={message.id}
       className={cn(
-        'flex gap-4 rounded-lg px-4 py-2 text-sm',
+        'flex gap-4 rounded-lg py-2 text-sm',
         message.role === 'assistant'
           ? 'mr-4 justify-self-start'
-          : 'bg-primary-foreground ml-4 justify-self-end outline',
+          : 'bg-primary-foreground ml-4 justify-self-end px-2 outline',
       )}
     >
       {message.role === 'assistant' && (

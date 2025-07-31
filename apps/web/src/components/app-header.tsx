@@ -1,12 +1,44 @@
+import type z from 'zod'
+import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Activity, Plus } from 'lucide-react'
+import { useSubscription } from '@trpc/tanstack-react-query'
+import { trpc } from '@web/router'
+import { Activity, Home } from 'lucide-react'
+
+import type { ExecuteSubscribeOutputSchema } from '@redgent/shared'
 
 import { ModeToggle } from './mode-toggle'
 import { Button } from './ui/button'
 
 export default function Header() {
+  const [message, setMessage] = useState('')
+  const { data, error, status } = useSubscription(
+    trpc.task.execute.subscribe.subscriptionOptions({}),
+  )
+
+  useEffect(() => {
+    console.log(data)
+    console.log(status)
+    if (status === 'error') {
+      setMessage(error.message)
+    } else if (status === 'connecting') {
+      setMessage('连接中...')
+    } else if (status === 'idle') {
+      setMessage('空闲')
+    } else if (status === 'pending') {
+      if (data && (data as any).data) {
+        const res = (data as any).data as z.infer<
+          typeof ExecuteSubscribeOutputSchema
+        >
+
+        setMessage(`${res.name} ${res.progress.message}`)
+      } else {
+        setMessage('监听中...')
+      }
+    }
+  }, [status, data])
   return (
-    <header className="flex items-center justify-between px-4 py-2">
+    <header className="max-w-screen flex items-center justify-between px-4 py-2">
       {/* 新对话 */}
       <nav>
         <Button
@@ -16,16 +48,16 @@ export default function Header() {
           asChild
         >
           <Link to="/" aria-label="首页">
-            <Plus className="h-4 w-4" />
+            <Home className="h-4 w-4" />
           </Link>
         </Button>
       </nav>
       {/* 中间显示激活任务数量 */}
       <nav>
-        <Button variant="ghost" asChild>
+        <Button variant="ghost" asChild className="max-w-80 md:max-w-none">
           <Link to="/" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
-            <span>4 个激活任务</span>
+            <span className="truncate">{message}</span>
           </Link>
         </Button>
       </nav>

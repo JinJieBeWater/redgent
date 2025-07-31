@@ -3,6 +3,7 @@ import type { AppMessage } from '@core/shared'
 import { MarkdownRenderer } from '../markdown'
 import { AllTaskUI } from './tool-ui/all-task-ui'
 import { LatestReportUI } from './tool-ui/latest-report-ui'
+import { ReportUI } from './tool-ui/report-ui'
 import { RequestUserConsentUI } from './tool-ui/request-user-consent-ui'
 import { TaskDetailUI } from './tool-ui/task-detail-ui'
 
@@ -58,6 +59,13 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
             }
             return null
           }
+          case 'tool-ShowReportUI': {
+            const { state } = part
+            if (state === 'input-available' || state === 'output-available') {
+              return <ReportUI key={index} message={message} part={part} />
+            }
+            return null
+          }
           case 'tool-ShowAllTaskUI': {
             const { state } = part
             if (state === 'input-available' || state === 'output-available') {
@@ -68,7 +76,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
           case 'tool-ShowTaskDetailUI': {
             const { state } = part
             if (state === 'input-available' || state === 'output-available') {
-              return <TaskDetailUI key={index} part={part} />
+              return <TaskDetailUI key={index} message={message} part={part} />
             }
             return null
           }

@@ -1,5 +1,9 @@
 import z from 'zod'
 
+export const ByIdSchema = z.object({
+  id: z.string(),
+})
+
 export const PaginateSchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   cursor: z.string().nullish(),

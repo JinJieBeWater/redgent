@@ -5,11 +5,12 @@ import { TrpcService } from '@core/processors/trpc/trpc.service'
 import { Injectable } from '@nestjs/common'
 import { tracked } from '@trpc/server'
 
+import { ExecuteSubscribeOutputSchema } from '@redgent/shared'
+
 import { TASK_EXECUTE_EVENT } from './task.constants'
 import {
   DetailSchema,
   ExecuteSubscribeInputSchema,
-  ExecuteSubscribeOutputSchema,
   ExecuteSubscribeOutputSchemaWithYield,
   PaginateSchema,
 } from './task.dto'

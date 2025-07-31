@@ -2,11 +2,37 @@ import { Injectable } from '@nestjs/common'
 import z from 'zod'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
-import { PaginateByTaskIdSchema, PaginateSchema } from './report.dto'
+import {
+  ByIdSchema,
+  PaginateByTaskIdSchema,
+  PaginateSchema,
+} from './report.dto'
 
 @Injectable()
 export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async byId({ id }: z.infer<typeof ByIdSchema>) {
+    const report = await this.prisma.taskReport.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        task: {
+          select: {
+            name: true,
+          },
+        },
+        taskId: true,
+        createdAt: true,
+        executionDuration: true,
+      },
+    })
+    return report
+  }
 
   async paginate({ limit, cursor }: z.infer<typeof PaginateSchema>) {
     const [reports, total] = await Promise.all([

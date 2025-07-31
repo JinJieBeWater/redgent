@@ -9,6 +9,7 @@ import {
   createTaskSchema,
   TaskProgressStatus,
   TaskReportMiniSchema,
+  TaskReportSchema,
   TaskSchema,
 } from '@redgent/shared'
 
@@ -247,6 +248,30 @@ export class TaskAgentService {
         return {
           task,
           page,
+        }
+      },
+    }),
+
+    ShowReportUI: tool({
+      description: '展示任务报告',
+      inputSchema: z.object({
+        id: z.uuid().describe('报告id'),
+      }),
+      outputSchema: z.object({
+        report: TaskReportSchema.and(
+          z.object({
+            task: z.object({
+              name: z.string(),
+            }),
+          }),
+        ).nullable(),
+      }),
+      execute: async ({ id }) => {
+        const report = await this.trpcRouter.caller.report.byId({
+          id,
+        })
+        return {
+          report,
         }
       },
     }),

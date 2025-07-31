@@ -106,7 +106,8 @@ function App() {
     if (
       lastPart.type === 'tool-ShowAllTaskUI' ||
       lastPart.type === 'tool-ShowTaskDetailUI' ||
-      lastPart.type === 'tool-RequestUserConsent'
+      lastPart.type === 'tool-RequestUserConsent' ||
+      lastPart.type.startsWith('tool-Show')
     ) {
       scrollToElement()
     }
@@ -161,7 +162,7 @@ function App() {
           <>
             <PreviewMessages messages={messages} status={status} />
             {/* 滚动锚点 */}
-            <div ref={bottomRef} className="h-80"></div>
+            <div ref={bottomRef} className="h-48"></div>
           </>
         )}
 
@@ -247,6 +248,16 @@ function App() {
                   setMessages([
                     {
                       id: generateId(),
+                      role: 'user',
+                      parts: [
+                        {
+                          type: 'text',
+                          text: '查看任务',
+                        },
+                      ],
+                    },
+                    {
+                      id: generateId(),
                       role: 'assistant',
                       parts: [
                         {
@@ -267,6 +278,16 @@ function App() {
                 variant={'outline'}
                 onClick={() => {
                   setMessages([
+                    {
+                      id: generateId(),
+                      role: 'user',
+                      parts: [
+                        {
+                          type: 'text',
+                          text: '最新报告',
+                        },
+                      ],
+                    },
                     {
                       id: generateId(),
                       role: 'assistant',
