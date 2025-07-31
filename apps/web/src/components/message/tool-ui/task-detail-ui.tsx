@@ -1,5 +1,6 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { getStatusInfo } from '@web/components/task/task-list'
@@ -27,10 +28,11 @@ export const TaskDetailUI = ({
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowTaskDetailUI') return null
+
   const { input } = part
   if (!input?.taskId) return null
 
-  const { sendMessage } = useChatContext()
+  const { sendMessage, addToolResult } = useChatContext()
 
   // 获取任务详情
   const {
@@ -38,7 +40,15 @@ export const TaskDetailUI = ({
     isPending: taskPending,
     isError: taskError,
     error: taskErrorMessage,
-  } = useQuery(trpc.task.detail.queryOptions({ id: input.taskId }))
+  } = useQuery(
+    trpc.task.detail.queryOptions(
+      { id: input.taskId },
+      {
+        initialData: part.output?.task,
+        staleTime: 1000,
+      },
+    ),
+  )
 
   // 获取任务的报告列表
   const {
@@ -57,13 +67,44 @@ export const TaskDetailUI = ({
       },
       {
         getNextPageParam: lastPage => lastPage.nextCursor,
+        staleTime: 1000,
+        initialData:
+          part.state === 'output-available'
+            ? {
+                pages: [part.output.page],
+                pageParams: [],
+              }
+            : undefined,
       },
     ),
   )
 
-  const allReports = reportsData?.pages.flatMap(page => page.reports) ?? []
-  const totalCount =
-    reportsData?.pages[reportsData.pages.length - 1]?.total ?? 0
+  const allReports = useMemo(() => {
+    return reportsData?.pages.flatMap(page => page.reports) ?? []
+  }, [reportsData?.pages])
+  const totalCount = useMemo(() => {
+    return reportsData?.pages[reportsData.pages.length - 1]?.total ?? 0
+  }, [reportsData?.pages])
+  const nextCursor = useMemo(() => {
+    return reportsData?.pages[reportsData.pages.length - 1]?.nextCursor
+  }, [reportsData?.pages])
+
+  // 订阅最新的数据 维护对应 part 的 output
+  useEffect(() => {
+    if (allReports.length === 0 || !task) return
+    addToolResult({
+      tool: 'ShowTaskDetailUI',
+      toolCallId: part.toolCallId,
+      output: {
+        task,
+        page: {
+          reports: allReports,
+          total: totalCount,
+          nextCursor: nextCursor,
+        },
+      },
+    })
+  }, [allReports, totalCount, nextCursor, task])
 
   if (taskPending || reportsPending) {
     return <LoadingMessage />

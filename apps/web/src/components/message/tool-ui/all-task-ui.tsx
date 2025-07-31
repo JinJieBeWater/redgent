@@ -1,14 +1,14 @@
-import type { AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useSubscription } from '@trpc/tanstack-react-query'
 import { Spinner } from '@web/components/spinner'
 import { TaskMini } from '@web/components/task/task-list'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
 import { trpc } from '@web/router'
+import { generateId } from 'ai'
 import { ChevronDown, Hash, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
@@ -16,9 +16,11 @@ import { ErrorMessage, LoadingMessage } from './common'
 export const AllTaskUI = ({
   part,
 }: {
+  message: AppMessage
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowAllTaskUI') return null
+
   const { input } = part
   const {
     data,
@@ -35,17 +37,44 @@ export const AllTaskUI = ({
       },
       {
         getNextPageParam: lastPage => lastPage.nextCursor,
+        staleTime: 1000,
+        initialData:
+          part.state === 'output-available'
+            ? {
+                pages: [part.output],
+                pageParams: [],
+              }
+            : undefined,
       },
     ),
   )
-  const { data: subscripttionData, status: subscripttionStatus } =
-    useSubscription(trpc.task.execute.subscribe.subscriptionOptions({}))
-  useEffect(() => {
-    console.log('subscripttionStatus', subscripttionStatus)
-    console.log('subscripttionData', subscripttionData)
-  }, [subscripttionData, subscripttionStatus])
 
-  const { messages, sendMessage } = useChatContext()
+  const { messages, setMessages, addToolResult } = useChatContext()
+
+  // 合并所有页面的任务数据
+  const allTasks = useMemo(() => {
+    return data?.pages.flatMap(page => page.tasks) ?? []
+  }, [data?.pages])
+  const totalCount = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.total ?? 0
+  }, [data?.pages])
+  const nextCursor = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.nextCursor
+  }, [data?.pages])
+
+  // 订阅最新的数据 维护对应 part 的 output
+  useEffect(() => {
+    if (allTasks.length === 0) return
+    addToolResult({
+      tool: 'ShowAllTaskUI',
+      toolCallId: part.toolCallId,
+      output: {
+        nextCursor: nextCursor,
+        tasks: allTasks,
+        total: totalCount,
+      },
+    })
+  }, [allTasks, totalCount, nextCursor])
 
   const isPending = taskListPending
   if (isPending) {
@@ -55,10 +84,6 @@ export const AllTaskUI = ({
   if (isError) {
     return <ErrorMessage error={error} />
   }
-
-  // 合并所有页面的任务数据
-  const allTasks = data?.pages.flatMap(page => page.tasks) ?? []
-  const totalCount = data?.pages[data.pages.length - 1]?.total ?? 0
 
   /** 处理任务点击事件 */
   const handleTaskClick = (task: (typeof allTasks)[number]) => {
@@ -70,9 +95,33 @@ export const AllTaskUI = ({
     ) {
       return
     }
-    sendMessage({
-      text: `查看 ${task.name} 任务`,
-    })
+    setMessages([
+      ...messages,
+      {
+        id: generateId(),
+        role: 'user',
+        parts: [
+          {
+            type: 'text',
+            text: `查看 "${task.name}" 任务`,
+          },
+        ],
+      },
+      {
+        id: generateId(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool-ShowTaskDetailUI',
+            toolCallId: generateId(),
+            state: 'input-available',
+            input: {
+              taskId: task.id,
+            },
+          },
+        ],
+      },
+    ])
   }
 
   return (

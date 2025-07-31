@@ -7,8 +7,8 @@ import { createContext, TrpcService } from './trpc.service'
 
 @Injectable()
 export class TrpcRouter {
-  router: ReturnType<typeof this.register>
-  _caller: ReturnType<typeof this.createCaller>
+  private _router: ReturnType<typeof this.register>
+  private _caller: ReturnType<typeof this.createCaller>
   constructor(
     private readonly trpcService: TrpcService,
     private readonly taskRouter: TaskRouter,
@@ -24,7 +24,7 @@ export class TrpcRouter {
 
   createCaller() {
     const { createCallerFactory } = this.trpcService.t
-    const createCaller = createCallerFactory(this.router)
+    const createCaller = createCallerFactory(this._router)
     return createCaller({
       authorization: null,
     })
@@ -37,14 +37,18 @@ export class TrpcRouter {
     return this._caller
   }
 
+  get router() {
+    return this._router
+  }
+
   applyMiddleware(app: INestApplication) {
-    if (!this.router) {
-      this.router = this.register()
+    if (!this._router) {
+      this._router = this.register()
     }
     app.use(
       `/trpc`,
       trpcExpress.createExpressMiddleware({
-        router: this.router,
+        router: this._router,
         createContext,
       }),
     )
