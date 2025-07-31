@@ -1,5 +1,5 @@
 import type { AppMessage } from '@core/shared'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
@@ -8,7 +8,7 @@ import { Button } from '@web/components/ui/button'
 import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
-import { DefaultChatTransport, generateId } from 'ai'
+import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
@@ -108,6 +108,42 @@ function App() {
     }
   }, [scrollToElement, lastPart])
 
+  /** 处理操作按钮 */
+  const handleConsentButtonClick = useCallback(
+    (consent: 'accept' | 'reject') => {
+      if (
+        lastMessage?.role === 'assistant' &&
+        lastPart?.type === 'tool-RequestUserConsent' &&
+        lastPart?.input?.message
+      ) {
+        setMessages([
+          ...messages.slice(0, -1),
+          {
+            ...lastMessage,
+            parts: [
+              ...lastMessage.parts,
+              {
+                type: 'tool-RequestUserConsent',
+                toolCallId: lastPart.toolCallId,
+                state: 'output-available',
+                input: {
+                  message: lastPart.input.message,
+                },
+                output: {
+                  consent,
+                },
+              },
+            ],
+          },
+        ])
+        sendMessage({
+          text: consent === 'accept' ? '接受' : '拒绝',
+        })
+      }
+    },
+    [messages, lastMessage, lastPart, sendMessage],
+  )
+
   return (
     <ChatContextProvider value={context}>
       <div
@@ -120,7 +156,8 @@ function App() {
         {messages.length > 0 && (
           <>
             <PreviewMessages messages={messages} status={status} />
-            <div ref={bottomRef} className="h-64"></div>
+            {/* 滚动锚点 */}
+            <div ref={bottomRef} className="h-80"></div>
           </>
         )}
 
@@ -163,65 +200,17 @@ function App() {
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <Button
                   size="lg"
+                  variant="destructive"
                   onClick={() => {
-                    if (
-                      lastPart?.type !== 'tool-RequestUserConsent' ||
-                      !lastPart?.input?.message
-                    )
-                      return
-                    setMessages([
-                      ...messages.slice(0, -1),
-                      {
-                        ...lastMessage,
-                        parts: [
-                          ...lastMessage.parts,
-                          {
-                            type: 'tool-RequestUserConsent',
-                            toolCallId: lastPart.toolCallId,
-                            state: 'output-available',
-                            input: {
-                              message: lastPart.input.message,
-                            },
-                            output: {
-                              consent: 'accept',
-                            },
-                          },
-                        ],
-                      },
-                    ])
+                    handleConsentButtonClick('accept')
                   }}
                 >
                   接受
                 </Button>
                 <Button
                   size="lg"
-                  variant="destructive"
                   onClick={() => {
-                    if (
-                      lastPart?.type !== 'tool-RequestUserConsent' ||
-                      !lastPart?.input?.message
-                    )
-                      return
-                    setMessages([
-                      ...messages.slice(0, -1),
-                      {
-                        ...lastMessage,
-                        parts: [
-                          ...lastMessage.parts,
-                          {
-                            type: 'tool-RequestUserConsent',
-                            toolCallId: lastPart.toolCallId,
-                            state: 'output-available',
-                            input: {
-                              message: lastPart.input.message,
-                            },
-                            output: {
-                              consent: 'reject',
-                            },
-                          },
-                        ],
-                      },
-                    ])
+                    handleConsentButtonClick('reject')
                   }}
                 >
                   拒绝
@@ -232,65 +221,23 @@ function App() {
           {/* 建议输入 */}
           {messages.length <= 0 && (
             <div className="mt-4 flex items-center gap-4">
-              <Button
-                variant={'outline'}
-                onClick={() =>
-                  setMessages([
-                    ...messages,
-                    {
-                      role: 'assistant',
-                      id: generateId(),
-                      parts: [
-                        {
-                          type: 'tool-ShowLatestReportUI',
-                          state: 'input-available',
-                          toolCallId: generateId(),
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }
-              >
-                最新报告
-              </Button>
-              <Button
-                variant={'outline'}
-                onClick={() =>
-                  setMessages([
-                    ...messages,
-                    {
-                      role: 'assistant',
-                      id: generateId(),
-                      parts: [
-                        {
-                          type: 'tool-ShowAllTaskUI',
-                          state: 'input-available',
-                          toolCallId: generateId(),
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }
-              >
-                查看任务
-              </Button>
-              {[['创建任务']].map(([prompt], index) => {
-                return (
-                  <Button
-                    key={index}
-                    variant={'outline'}
-                    onClick={() =>
-                      sendMessage({
-                        text: prompt.trim(),
-                      })
-                    }
-                  >
-                    {prompt}
-                  </Button>
-                )
-              })}
+              {[['创建任务'], ['查看任务'], ['最新报告']].map(
+                ([prompt], index) => {
+                  return (
+                    <Button
+                      key={index}
+                      variant={'outline'}
+                      onClick={() =>
+                        sendMessage({
+                          text: prompt.trim(),
+                        })
+                      }
+                    >
+                      {prompt}
+                    </Button>
+                  )
+                },
+              )}
             </div>
           )}
         </div>

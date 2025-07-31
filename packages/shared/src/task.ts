@@ -1,13 +1,15 @@
 import z from 'zod'
 
-import { ScheduleType, TaskReport, TaskStatus } from '@redgent/db'
+import { ScheduleType, Task, TaskReport, TaskStatus } from '@redgent/db'
+
+import { TaskReportSchema } from './task-report'
 
 export const createTaskSchema = z.object({
-  name: z.string().describe('简短任务名称'),
+  name: z.string().describe('简短任务名称 AI自动生成'),
   prompt: z.string().describe('用户原封不动的输入'),
   payload: z
     .object({
-      keywords: z.array(z.string()).describe('关键词列表'),
+      keywords: z.array(z.string()).describe('关键词列表 AI自动生成'),
       dataSource: z.object({
         reddit: z.object({
           subreddits: z.array(z.string()).describe('Reddit 子版块列表'),
@@ -22,11 +24,21 @@ export const createTaskSchema = z.object({
     `),
   status: z
     .enum([TaskStatus.active, TaskStatus.paused])
-    .describe('任务状态 激活 或 暂停'),
-  enableCache: z.boolean().describe('3天缓存'),
+    .default(TaskStatus.active)
+    .describe('任务状态激活或暂停, 用户不说明时默认为激活'),
+  enableCache: z.boolean().default(true).describe('3天缓存'),
 })
 
 export const updateTaskSchema = createTaskSchema.partial()
+
+export const TaskSchema: z.ZodType<Task> = createTaskSchema.extend({
+  id: z.uuid(),
+  lastExecutedAt: z.date().nullable(),
+  lastErrorMessage: z.string().nullable(),
+  lastFailureAt: z.date().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+})
 
 /**
  * 定义所有可能的任务进度状态
@@ -77,126 +89,111 @@ export type TaskProgressStatus =
 // 进度更新的类型定义
 // =================================================================
 
-/** 基础进度接口 */
-interface BaseProgress {
-  status: TaskProgressStatus
-  message: string
-}
+export const BaseTaskProgressSchema = z.object({
+  status: z.enum(TaskProgressStatus),
+  message: z.string(),
+})
+
+// 错误对象的联合类型（支持 Error 实例或普通错误对象）
+const ErrorSchema = z.union([
+  z.instanceof(Error),
+  z.object({
+    message: z.string(),
+    stack: z.string().optional(),
+    name: z.string().optional(),
+  }),
+])
 
 // 1. 任务生命周期状态
-export interface TaskStartProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.TASK_START
-  data?: {
-    reportId: string
-  }
-}
+const TaskStartProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.TASK_START),
+})
 
-export interface TaskCompleteProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.TASK_COMPLETE
-  data: TaskReport
-}
+const TaskCompleteProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.TASK_COMPLETE),
+  data: TaskReportSchema,
+})
 
-export interface TaskCancelProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.TASK_CANCEL
-}
+const TaskCancelProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.TASK_CANCEL),
+})
 
-export interface TaskErrorProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.TASK_ERROR
-  data: {
-    error: Error
-  }
-}
+const TaskErrorProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.TASK_ERROR),
+  data: z.object({
+    error: ErrorSchema,
+  }),
+})
 
 // 2. 数据抓取阶段
-export interface FetchStartProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.FETCH_START
-}
+const FetchStartProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.FETCH_START),
+})
 
-export interface FetchCompleteProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.FETCH_COMPLETE
-  data: {
-    /** 本次抓取到的链接总数 */
-    count: number
-  }
-}
+const FetchCompleteProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.FETCH_COMPLETE),
+})
 
 // 3. 数据过滤阶段
-export interface FilterStartProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.FILTER_START
-}
+const FilterStartProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.FILTER_START),
+})
 
-export interface FilterCompleteProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.FILTER_COMPLETE
-  data: {
-    /** 过滤前的链接数 */
-    originalCount: number
-    /** 过滤后的新链接数 */
-    uniqueCount: number
-  }
-}
+const FilterCompleteProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.FILTER_COMPLETE),
+})
 
 // 4. 筛选阶段
-export interface SelectStartProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.SELECT_START
-}
+const SelectStartProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.SELECT_START),
+})
 
-export interface SelectCompleteProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.SELECT_COMPLETE
-  data: {
-    /** 过滤前的链接数 */
-    originalCount: number
-    /** 过滤后的新链接数 */
-    uniqueCount: number
-    /** 筛选后的链接数组 */
-    links: { id: string; title: string; selftext: string | undefined }[]
-  }
-}
+const SelectCompleteProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.SELECT_COMPLETE),
+})
 
 // 5. 获取完整内容阶段
-export interface FetchContentStartProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.FETCH_CONTENT_START
-}
+const FetchContentStartProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.FETCH_CONTENT_START),
+})
 
-export interface FetchContentCompleteProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.FETCH_CONTENT_COMPLETE
-}
+const FetchContentCompleteProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.FETCH_CONTENT_COMPLETE),
+})
 
 // 6. AI 分析阶段
-export interface AnalyzeStartProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.ANALYZE_START
-  data: {
-    /** 待分析的链接数 */
-    count: number
-  }
-}
+const AnalyzeStartProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.ANALYZE_START),
+})
 
-export interface AnalyzeCompleteProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.ANALYZE_COMPLETE
-}
+const AnalyzeCompleteProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.ANALYZE_COMPLETE),
+})
 
 // 7. 通用信息
-export interface InfoProgress extends BaseProgress {
-  status: typeof TaskProgressStatus.INFO
-}
+const InfoProgressSchema = BaseTaskProgressSchema.extend({
+  status: z.literal(TaskProgressStatus.INFO),
+})
 
 /**
- * 任务进度的联合类型
- *
- * 通过检查 `status` 字段来确定具体的进度类型。
+ * 任务进度的区分联合类型
  */
-export type TaskProgress =
-  | TaskStartProgress
-  | TaskCompleteProgress
-  | TaskCancelProgress
-  | TaskErrorProgress
-  | FetchStartProgress
-  | FetchCompleteProgress
-  | FilterStartProgress
-  | FilterCompleteProgress
-  | SelectStartProgress
-  | SelectCompleteProgress
-  | FetchContentStartProgress
-  | FetchContentCompleteProgress
-  | AnalyzeStartProgress
-  | AnalyzeCompleteProgress
-  | InfoProgress
+export const TaskProgressSchema = z.discriminatedUnion('status', [
+  TaskStartProgressSchema,
+  TaskCompleteProgressSchema,
+  TaskCancelProgressSchema,
+  TaskErrorProgressSchema,
+  FetchStartProgressSchema,
+  FetchCompleteProgressSchema,
+  FilterStartProgressSchema,
+  FilterCompleteProgressSchema,
+  SelectStartProgressSchema,
+  SelectCompleteProgressSchema,
+  FetchContentStartProgressSchema,
+  FetchContentCompleteProgressSchema,
+  AnalyzeStartProgressSchema,
+  AnalyzeCompleteProgressSchema,
+  InfoProgressSchema,
+])
+
+export type TaskProgress = z.infer<typeof TaskProgressSchema>

@@ -1,3 +1,4 @@
+import { EeModule } from '@core/processors/ee/ee.module'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 
@@ -19,6 +20,7 @@ describe('TaskAgentService', () => {
         PrismaModule,
         TaskScheduleModule,
         TaskExecutionModule,
+        EeModule,
       ],
       providers: [TaskAgentService],
     }).compile()

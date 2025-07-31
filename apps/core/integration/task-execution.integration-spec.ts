@@ -1,6 +1,7 @@
 import { RedditService } from '@core/modules/reddit/reddit.service'
 import { ReportService } from '@core/modules/report/report.service'
 import { TaskExecutionService } from '@core/modules/task-execution/task-execution.service'
+import { EeModule } from '@core/processors/ee/ee.module'
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -8,11 +9,7 @@ import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
 import { createMockContext } from 'test/mocks'
 
-import {
-  TaskCancelProgress,
-  TaskCompleteProgress,
-  TaskProgressStatus,
-} from '@redgent/shared'
+import { TaskProgressStatus } from '@redgent/shared'
 
 import { PrismaService } from '../src/processors/prisma/prisma.service'
 import {
@@ -55,6 +52,7 @@ describe(TaskExecutionService.name, () => {
           isGlobal: true,
           ttl: 60 * 60 * 1000, // 1 hour
         }),
+        EeModule,
       ],
       providers: [
         TaskExecutionService,
@@ -85,6 +83,8 @@ describe(TaskExecutionService.name, () => {
   it('应该获取链接，不过滤（全部为新链接），并缓存它们', async () => {
     const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
+    vi.spyOn(taskExecutionService, 'analyze')
+
     const progressObservable = taskExecutionService.execute(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
@@ -102,8 +102,10 @@ describe(TaskExecutionService.name, () => {
     )!
     expect(filterStart).toBeDefined()
     expect(filterComplete).toBeDefined()
-    expect(filterComplete.data.uniqueCount).toBe(3)
-    expect(filterComplete.data.originalCount).toBe(3)
+    expect(taskExecutionService.analyze).toHaveBeenCalledWith(
+      mockTaskConfig,
+      mockCompleteLinkData,
+    )
 
     // 2. 验证 cacheManager.mset 被调用，并且缓存了所有 3 个链接
     expect(cacheMsetSpy).toHaveBeenCalledTimes(1)
@@ -113,13 +115,15 @@ describe(TaskExecutionService.name, () => {
     expect(msetArgs[0].key).toContain(`redgent:link:${mockRedditLinks[0].id}`)
 
     // 5. 验证任务最后走到了 TASK_COMPLETE 状态
-    const lastEvent = progressEvents.at(-1) as TaskCompleteProgress
-    expect(lastEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
+    const lastEvent = progressEvents.at(-1)
+    expect(lastEvent?.status).toBe(TaskProgressStatus.TASK_COMPLETE)
   })
 
   it('应该获取链接，过滤掉已缓存的链接，只缓存新链接', async () => {
     // 预先缓存第一个链接
     await cacheManager.set(`redgent:link:${mockRedditLinks[0].id}`, 1)
+
+    vi.spyOn(taskExecutionService, 'analyze')
 
     const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
@@ -136,8 +140,12 @@ describe(TaskExecutionService.name, () => {
       p => p.status === TaskProgressStatus.FILTER_COMPLETE,
     )!
     expect(filterComplete).toBeDefined()
-    expect(filterComplete.data.uniqueCount).toBe(2)
-    expect(filterComplete.data.originalCount).toBe(3)
+    expect(taskExecutionService.analyze).toHaveBeenCalledWith(
+      mockTaskConfig,
+      mockCompleteLinkData.filter(
+        link => link.content !== mockCompleteLinkData[0].content,
+      ),
+    )
 
     // 2. 验证 cacheManager.mset 只为新链接调用
     expect(cacheMsetSpy).toHaveBeenCalledTimes(1)
@@ -146,13 +154,7 @@ describe(TaskExecutionService.name, () => {
     expect(msetArgs[0].key).toContain(`redgent:link:${mockRedditLinks[1].id}`)
     expect(msetArgs[1].key).toContain(`redgent:link:${mockRedditLinks[2].id}`)
 
-    // 3. 验证 AI 分析的是过滤后的链接
-    const analyzeStart = progressEvents.find(
-      p => p.status === TaskProgressStatus.ANALYZE_START,
-    )!
-    expect(analyzeStart.data.count).toBe(2)
-
-    // 4. 验证任务最后走到了 TASK_COMPLETE 状态
+    // 3. 验证任务最后走到了 TASK_COMPLETE 状态
     const lastEvent = progressEvents[progressEvents.length - 1]
     expect(lastEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
   })
@@ -176,8 +178,8 @@ describe(TaskExecutionService.name, () => {
     )
 
     // 1. 验证最后一个事件是 TASK_CANCEL
-    const lastEvent = progressEvents.at(-1) as TaskCancelProgress
-    expect(lastEvent.status).toBe(TaskProgressStatus.TASK_CANCEL)
+    const lastEvent = progressEvents.at(-1)
+    expect(lastEvent?.status).toBe(TaskProgressStatus.TASK_CANCEL)
 
     // 2. 验证 mset 没有被调用
     expect(cacheMsetSpy).not.toHaveBeenCalled()

@@ -41,6 +41,7 @@ export class TaskAgentService {
               status: true,
             },
             where: status ? { status } : undefined,
+            orderBy: { createdAt: 'desc' },
           })
           return {
             data: tasks,
@@ -171,17 +172,21 @@ export class TaskAgentService {
           )
           const lastProgress = TaskProgresss[TaskProgresss.length - 1]
           if (lastProgress.status !== TaskProgressStatus.TASK_COMPLETE) {
-            throw new Error('任务未完成')
+            return {
+              message: '任务未完成',
+              data: lastProgress.message,
+              status: lastProgress.status,
+            }
           }
           const report = lastProgress.data
 
           return {
             data: report,
             message: '任务执行成功',
+            status: lastProgress.status,
           }
         } catch (error) {
           this.logger.error(error)
-          throw error
         }
       },
     }),

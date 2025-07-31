@@ -1,3 +1,4 @@
+import { EeModule } from '@core/processors/ee/ee.module'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Test, TestingModule } from '@nestjs/testing'
 import { ModelMessage } from 'ai'
@@ -6,7 +7,7 @@ import { lastValueFrom, toArray } from 'rxjs'
 import { createMockContext } from 'test/mocks'
 import { Mocked } from 'vitest'
 
-import { TaskCompleteProgress, TaskProgressStatus } from '@redgent/shared'
+import { TaskProgressStatus } from '@redgent/shared'
 
 import {
   createMockLinkWithComments,
@@ -41,6 +42,7 @@ describe(TaskExecutionService.name, () => {
     clearCustomHandlers()
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [EeModule],
       providers: [
         TaskExecutionService,
         {
@@ -111,8 +113,8 @@ describe(TaskExecutionService.name, () => {
         TaskProgressStatus.ANALYZE_COMPLETE,
         TaskProgressStatus.TASK_COMPLETE,
       ])
-      const completeEvent = progressEvents.pop() as TaskCompleteProgress
-      expect(completeEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
+      const completeEvent = progressEvents.pop()
+      expect(completeEvent?.status).toBe(TaskProgressStatus.TASK_COMPLETE)
     })
 
     it('应该在过滤新链接的情况下成功执行任务', async () => {
@@ -146,8 +148,8 @@ describe(TaskExecutionService.name, () => {
       expect(cacheManager.mget).toHaveBeenCalledWith(expectedCacheKeys)
       expect(cacheManager.mset).toHaveBeenCalled()
 
-      const completeEvent = progressEvents.pop() as TaskCompleteProgress
-      expect(completeEvent.status).toBe(TaskProgressStatus.TASK_COMPLETE)
+      const completeEvent = progressEvents.pop()
+      expect(completeEvent?.status).toBe(TaskProgressStatus.TASK_COMPLETE)
     })
 
     it('应该在启用过滤且没有找到新链接时取消任务', async () => {

@@ -4,10 +4,11 @@ import {
   selectMostRelevantLinksPrompt,
 } from '@core/ai-sdk/prompts'
 import { myProvider } from '@core/ai-sdk/provider'
+import { EeService } from '@core/processors/ee/ee.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { APICallError, generateObject } from 'ai'
-import { Observable, Subscriber } from 'rxjs'
+import { Observable, Subscriber, tap } from 'rxjs'
 import z from 'zod'
 
 import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
@@ -16,10 +17,13 @@ import {
   RedditLinkInfoUntrusted,
   TaskProgress,
   TaskProgressStatus,
+  TaskReportContentSchema,
 } from '@redgent/shared'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
+import { TASK_EXECUTE_EVENT } from '../task/task.constants'
+import { ExecuteSubscribeOutputSchema } from '../task/task.dto'
 
 @Injectable()
 export class TaskExecutionService {
@@ -32,6 +36,7 @@ export class TaskExecutionService {
     private readonly redditService: RedditService,
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly ee: EeService,
   ) {}
 
   /**
@@ -87,7 +92,15 @@ export class TaskExecutionService {
       }
 
       void run()
-    })
+    }).pipe(
+      tap(progress => {
+        this.ee.emit(TASK_EXECUTE_EVENT, {
+          taskId: taskConfig.id,
+          name: taskConfig.name,
+          progress,
+        } satisfies z.infer<typeof ExecuteSubscribeOutputSchema>)
+      }),
+    )
   }
 
   private async _startTask(
@@ -122,14 +135,16 @@ export class TaskExecutionService {
     )
 
     // 过滤ups为0的帖子 和 评论数为0的帖子
-    const filteredLinks = links.filter(
+    let filteredLinks = links.filter(
       link => link.ups > 0 || link.num_comments > 0,
     )
 
-    // // 帖子数量大于30时，按照ups排序，取前30个
-    // if (filteredLinks.length > 30) {
-    //   filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 30)
-    // }
+    // 由于 v5 版本的 openRouter provider 暂不兼容 只能使用deepseek的api
+    // chat 模型上下文不够大 暂时处理
+    // 帖子数量大于50时，按照ups排序，取前50个
+    if (filteredLinks.length > 50) {
+      filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 30)
+    }
 
     if (filteredLinks.length === 0) {
       subscriber.next({
@@ -140,7 +155,6 @@ export class TaskExecutionService {
       subscriber.next({
         status: TaskProgressStatus.FETCH_COMPLETE,
         message: `从 Reddit 抓取到 ${filteredLinks.length} 个帖子`,
-        data: { count: filteredLinks.length },
       })
     }
     return filteredLinks
@@ -180,10 +194,6 @@ export class TaskExecutionService {
       subscriber.next({
         status: TaskProgressStatus.FILTER_COMPLETE,
         message: `缓存查询完成，发现 ${newLinks.length} 个新帖子`,
-        data: {
-          originalCount: links.length,
-          uniqueCount: newLinks.length,
-        },
       })
     }
     return newLinks
@@ -226,15 +236,6 @@ export class TaskExecutionService {
       subscriber.next({
         status: TaskProgressStatus.SELECT_COMPLETE,
         message: `筛选完成，选出 ${filteredLinks.length} 个最相关的帖子`,
-        data: {
-          originalCount: links.length,
-          uniqueCount: filteredLinks.length,
-          links: filteredLinks.map(link => ({
-            id: link.id,
-            title: link.title,
-            selftext: link.selftext,
-          })),
-        },
       })
     }
     return filteredLinks
@@ -271,7 +272,6 @@ export class TaskExecutionService {
     subscriber.next({
       status: TaskProgressStatus.ANALYZE_START,
       message: `正在调用 AI 服务分析 ${completeLinkData.length} 个帖子...`,
-      data: { count: completeLinkData.length },
     })
 
     const analysisResult = await this.analyze(taskConfig, completeLinkData)
@@ -328,15 +328,22 @@ export class TaskExecutionService {
       where: { id: taskConfig.id },
       data: {
         lastFailureAt: new Date(),
-        lastErrorMessage: (error as Error).message,
+        lastErrorMessage: error instanceof Error ? error.message : '未知错误',
         status: TaskStatusModel.active,
       },
     })
 
-    subscriber.error({
-      status: TaskProgressStatus.TASK_ERROR,
-      message: `任务 "${taskConfig.name}" 执行失败 ${error instanceof Error ? error.message : ''}`,
-    })
+    if (APICallError.isInstance(error)) {
+      subscriber.error({
+        status: TaskProgressStatus.TASK_ERROR,
+        message: `任务 "${taskConfig.name}" AI 服务调用失败 ${error.message}`,
+      })
+    } else {
+      subscriber.error({
+        status: TaskProgressStatus.TASK_ERROR,
+        message: `任务 "${taskConfig.name}" 执行失败 ${error instanceof Error ? error.message : ''}`,
+      })
+    }
   }
 
   async selectMostRelevantLinks(
@@ -379,7 +386,7 @@ export class TaskExecutionService {
    * @param completeLinkData 完整的链接数据和评论
    * @returns 分析报告内容
    */
-  private async analyze(
+  async analyze(
     taskConfig: Task,
     completeLinkData: {
       content: RedditLinkInfoUntrusted
@@ -396,24 +403,7 @@ export class TaskExecutionService {
               "用最简单的语言总结最重要的发现，例：'用户对夜间模式的视觉疲劳反馈'",
             ),
 
-          content: z.object({
-            findings: z
-              .array(
-                z.object({
-                  elaboration: z
-                    .string()
-                    .describe(
-                      "直接陈述发现的具体内容，保持原始信息完整性，例：'多名用户反映开启夜间模式2小时后出现眼睛干涩症状'",
-                    ),
-
-                  supportingLinkIds: z
-                    .array(z.string())
-                    .min(1)
-                    .describe('关联原始数据的id列表'),
-                }),
-              )
-              .min(1),
-          }),
+          content: TaskReportContentSchema,
         }),
         prompt: analyzeRedditContentPrompt(taskConfig.prompt, completeLinkData),
       })

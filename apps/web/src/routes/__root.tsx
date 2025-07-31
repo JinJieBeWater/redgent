@@ -1,6 +1,7 @@
 import type { AppRouter } from '@core/shared'
 import type { QueryClient } from '@tanstack/react-query'
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import Header from '@web/components/app-header'
@@ -32,6 +33,7 @@ function RootComponent() {
       </div>
       <Toaster position="top-center" />
       <TanStackRouterDevtools />
+      <ReactQueryDevtools initialIsOpen={false} />
     </>
   )
 }
