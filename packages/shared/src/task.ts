@@ -197,3 +197,14 @@ export const TaskProgressSchema = z.discriminatedUnion('status', [
 ])
 
 export type TaskProgress = z.infer<typeof TaskProgressSchema>
+
+export const ExecuteSubscribeOutputSchema = z.object({
+  taskId: z.uuid(),
+  name: z.string().describe('任务名称'),
+  progress: z.union([
+    BaseTaskProgressSchema,
+    BaseTaskProgressSchema.extend({
+      data: TaskReportSchema,
+    }),
+  ]),
+})

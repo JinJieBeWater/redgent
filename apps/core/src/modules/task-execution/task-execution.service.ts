@@ -14,6 +14,7 @@ import z from 'zod'
 import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
 import {
   CommentNode,
+  ExecuteSubscribeOutputSchema,
   RedditLinkInfoUntrusted,
   TaskProgress,
   TaskProgressStatus,
@@ -23,7 +24,6 @@ import {
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { TASK_EXECUTE_EVENT } from '../task/task.constants'
-import { ExecuteSubscribeOutputSchema } from '../task/task.dto'
 
 @Injectable()
 export class TaskExecutionService {
