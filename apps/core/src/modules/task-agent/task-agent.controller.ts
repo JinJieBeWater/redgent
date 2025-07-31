@@ -40,6 +40,13 @@ export class TaskAgentController {
 
       const stream = createUIMessageStream<AppMessage>({
         execute({ writer }) {
+          const msg = convertToModelMessages(chat.messages, {
+            tools: self.taskAgentService.tools(writer),
+            ignoreIncompleteToolCalls: true,
+          })
+
+          console.log(msg)
+
           const result = streamText({
             model: myProvider.languageModel('chat-model'),
             messages: convertToModelMessages(chat.messages, {

@@ -1,5 +1,5 @@
 import type { AppMessage } from '@core/shared'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
@@ -108,6 +108,42 @@ function App() {
     }
   }, [scrollToElement, lastPart])
 
+  /** 处理操作按钮 */
+  const handleConsentButtonClick = useCallback(
+    (consent: 'accept' | 'reject') => {
+      if (
+        lastMessage?.role === 'assistant' &&
+        lastPart?.type === 'tool-RequestUserConsent' &&
+        lastPart?.input?.message
+      ) {
+        setMessages([
+          ...messages.slice(0, -1),
+          {
+            ...lastMessage,
+            parts: [
+              ...lastMessage.parts,
+              {
+                type: 'tool-RequestUserConsent',
+                toolCallId: lastPart.toolCallId,
+                state: 'output-available',
+                input: {
+                  message: lastPart.input.message,
+                },
+                output: {
+                  consent,
+                },
+              },
+            ],
+          },
+        ])
+        sendMessage({
+          text: consent === 'accept' ? '接受' : '拒绝',
+        })
+      }
+    },
+    [messages, lastMessage, lastPart, sendMessage],
+  )
+
   return (
     <ChatContextProvider value={context}>
       <div
@@ -166,31 +202,7 @@ function App() {
                   size="lg"
                   variant="destructive"
                   onClick={() => {
-                    if (
-                      lastPart?.type !== 'tool-RequestUserConsent' ||
-                      !lastPart?.input?.message
-                    )
-                      return
-                    setMessages([
-                      ...messages.slice(0, -1),
-                      {
-                        ...lastMessage,
-                        parts: [
-                          ...lastMessage.parts,
-                          {
-                            type: 'tool-RequestUserConsent',
-                            toolCallId: lastPart.toolCallId,
-                            state: 'output-available',
-                            input: {
-                              message: lastPart.input.message,
-                            },
-                            output: {
-                              consent: 'accept',
-                            },
-                          },
-                        ],
-                      },
-                    ])
+                    handleConsentButtonClick('accept')
                   }}
                 >
                   接受
@@ -198,31 +210,7 @@ function App() {
                 <Button
                   size="lg"
                   onClick={() => {
-                    if (
-                      lastPart?.type !== 'tool-RequestUserConsent' ||
-                      !lastPart?.input?.message
-                    )
-                      return
-                    setMessages([
-                      ...messages.slice(0, -1),
-                      {
-                        ...lastMessage,
-                        parts: [
-                          ...lastMessage.parts,
-                          {
-                            type: 'tool-RequestUserConsent',
-                            toolCallId: lastPart.toolCallId,
-                            state: 'output-available',
-                            input: {
-                              message: lastPart.input.message,
-                            },
-                            output: {
-                              consent: 'reject',
-                            },
-                          },
-                        ],
-                      },
-                    ])
+                    handleConsentButtonClick('reject')
                   }}
                 >
                   拒绝

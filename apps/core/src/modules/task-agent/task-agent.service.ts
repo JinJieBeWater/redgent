@@ -41,6 +41,7 @@ export class TaskAgentService {
               status: true,
             },
             where: status ? { status } : undefined,
+            orderBy: { createdAt: 'desc' },
           })
           return {
             data: tasks,
