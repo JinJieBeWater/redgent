@@ -61,7 +61,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
           case 'tool-ShowAllTaskUI': {
             const { state } = part
             if (state === 'input-available' || state === 'output-available') {
-              return <AllTaskUI key={index} part={part} />
+              return <AllTaskUI key={index} message={message} part={part} />
             }
             return null
           }

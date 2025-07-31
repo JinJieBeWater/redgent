@@ -5,7 +5,12 @@ import { lastValueFrom, pipe, tap, toArray } from 'rxjs'
 import z from 'zod'
 
 import { TaskStatus } from '@redgent/db'
-import { createTaskSchema, TaskProgressStatus } from '@redgent/shared'
+import {
+  createTaskSchema,
+  TaskProgressStatus,
+  TaskReportMiniSchema,
+  TaskSchema,
+} from '@redgent/shared'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'
@@ -222,10 +227,27 @@ export class TaskAgentService {
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
       }),
+      outputSchema: z.object({
+        task: TaskSchema,
+        page: z.object({
+          reports: z.array(TaskReportMiniSchema),
+          total: z.number(),
+          nextCursor: z.string(),
+        }),
+      }),
       execute: async ({ taskId }) => {
-        return await this.trpcRouter.caller.task.detail({
-          id: taskId,
-        })
+        const [task, page] = await Promise.all([
+          this.trpcRouter.caller.task.detail({
+            id: taskId,
+          }),
+          this.trpcRouter.caller.report.paginateByTaskId({
+            taskId,
+          }),
+        ])
+        return {
+          task,
+          page,
+        }
       },
     }),
 

@@ -1,5 +1,7 @@
 import z from 'zod'
 
+import { TaskReport } from '@redgent/db'
+
 export const TaskReportContentSchema = z.object({
   findings: z
     .array(
@@ -19,11 +21,15 @@ export const TaskReportContentSchema = z.object({
     .min(1),
 })
 
-export const TaskReportSchema = z.object({
+export const TaskReportMiniSchema = z.object({
   id: z.uuid(),
   title: z.string(),
-  content: TaskReportContentSchema,
-  executionDuration: z.number(),
   createdAt: z.date(),
   taskId: z.uuid(),
 })
+
+export const TaskReportSchema: z.ZodType<TaskReport> =
+  TaskReportMiniSchema.extend({
+    content: TaskReportContentSchema,
+    executionDuration: z.number(),
+  })

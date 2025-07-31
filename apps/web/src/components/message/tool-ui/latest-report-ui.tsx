@@ -1,9 +1,11 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
+import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { ChevronDown, FileText, Hash } from 'lucide-react'
@@ -43,6 +45,32 @@ export const LatestReportUI = ({
       },
     ),
   )
+  // 合并所有页面的报告数据
+  const allReports = useMemo(() => {
+    return data?.pages.flatMap(page => page.reports) ?? []
+  }, [data?.pages])
+  const totalCount = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.total ?? 0
+  }, [data?.pages])
+  const nextCursor = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.nextCursor
+  }, [data?.pages])
+
+  const { addToolResult } = useChatContext()
+
+  // 订阅最新的数据 维护对应 part 的 output
+  useEffect(() => {
+    if (allReports.length === 0) return
+    addToolResult({
+      tool: 'ShowLatestReportUI',
+      toolCallId: part.toolCallId,
+      output: {
+        nextCursor: nextCursor,
+        reports: allReports,
+        total: totalCount,
+      },
+    })
+  }, [allReports, totalCount, nextCursor])
 
   const isPending = reportListPending
   if (isPending) {
@@ -52,10 +80,6 @@ export const LatestReportUI = ({
   if (isError) {
     return <ErrorMessage error={error} />
   }
-
-  // 合并所有页面的报告数据
-  const allReports = data?.pages.flatMap(page => page.reports) ?? []
-  const totalCount = data?.pages[data.pages.length - 1]?.total ?? 0
 
   return (
     <div className="space-y-2">

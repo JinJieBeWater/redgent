@@ -1,5 +1,6 @@
-import type { AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { TaskMini } from '@web/components/task/task-list'
@@ -15,6 +16,7 @@ import { ErrorMessage, LoadingMessage } from './common'
 export const AllTaskUI = ({
   part,
 }: {
+  message: AppMessage
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowAllTaskUI') return null
@@ -47,7 +49,32 @@ export const AllTaskUI = ({
     ),
   )
 
-  const { messages, setMessages } = useChatContext()
+  const { messages, setMessages, addToolResult } = useChatContext()
+
+  // 合并所有页面的任务数据
+  const allTasks = useMemo(() => {
+    return data?.pages.flatMap(page => page.tasks) ?? []
+  }, [data?.pages])
+  const totalCount = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.total ?? 0
+  }, [data?.pages])
+  const nextCursor = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.nextCursor
+  }, [data?.pages])
+
+  // 订阅最新的数据 维护对应 part 的 output
+  useEffect(() => {
+    if (allTasks.length === 0) return
+    addToolResult({
+      tool: 'ShowAllTaskUI',
+      toolCallId: part.toolCallId,
+      output: {
+        nextCursor: nextCursor,
+        tasks: allTasks,
+        total: totalCount,
+      },
+    })
+  }, [allTasks, totalCount, nextCursor])
 
   const isPending = taskListPending
   if (isPending) {
@@ -57,10 +84,6 @@ export const AllTaskUI = ({
   if (isError) {
     return <ErrorMessage error={error} />
   }
-
-  // 合并所有页面的任务数据
-  const allTasks = data?.pages.flatMap(page => page.tasks) ?? []
-  const totalCount = data?.pages[data.pages.length - 1]?.total ?? 0
 
   /** 处理任务点击事件 */
   const handleTaskClick = (task: (typeof allTasks)[number]) => {
@@ -100,8 +123,6 @@ export const AllTaskUI = ({
       },
     ])
   }
-
-  // 当分页数据发生变化时，添加最新的ToolUI到消息列表
 
   return (
     <div className="space-y-2">
