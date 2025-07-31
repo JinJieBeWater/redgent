@@ -16,6 +16,7 @@ export const LatestReportUI = ({
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowLatestReportUI') return null
+  if (part.state !== 'output-available') return null
 
   const {
     data,
@@ -32,6 +33,11 @@ export const LatestReportUI = ({
       },
       {
         getNextPageParam: lastPage => lastPage.nextCursor,
+        initialData: {
+          pages: [part.output],
+          pageParams: [],
+        },
+        staleTime: 1000,
       },
     ),
   )

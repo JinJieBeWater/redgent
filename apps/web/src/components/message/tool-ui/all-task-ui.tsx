@@ -19,6 +19,8 @@ export const AllTaskUI = ({
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowAllTaskUI') return null
+  if (part.state !== 'output-available') return null
+
   const { input } = part
   const {
     data,
@@ -35,6 +37,11 @@ export const AllTaskUI = ({
       },
       {
         getNextPageParam: lastPage => lastPage.nextCursor,
+        initialData: {
+          pages: [part.output],
+          pageParams: [],
+        },
+        staleTime: 1000,
       },
     ),
   )

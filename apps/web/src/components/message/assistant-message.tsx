@@ -53,21 +53,21 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
             )
           case 'tool-ShowLatestReportUI': {
             const { state } = part
-            if (state === 'input-available') {
+            if (state === 'output-available') {
               return <LatestReportUI key={index} part={part} />
             }
             return null
           }
           case 'tool-ShowAllTaskUI': {
             const { state } = part
-            if (state === 'input-available') {
+            if (state === 'output-available') {
               return <AllTaskUI key={index} part={part} />
             }
             return null
           }
           case 'tool-ShowTaskDetailUI': {
             const { state } = part
-            if (state === 'input-available') {
+            if (state === 'output-available') {
               return <TaskDetailUI key={index} part={part} />
             }
             return null

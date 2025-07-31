@@ -27,6 +27,8 @@ export const TaskDetailUI = ({
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowTaskDetailUI') return null
+  if (part.state !== 'output-available') return null
+
   const { input } = part
   if (!input?.taskId) return null
 
@@ -38,7 +40,15 @@ export const TaskDetailUI = ({
     isPending: taskPending,
     isError: taskError,
     error: taskErrorMessage,
-  } = useQuery(trpc.task.detail.queryOptions({ id: input.taskId }))
+  } = useQuery(
+    trpc.task.detail.queryOptions(
+      { id: input.taskId },
+      {
+        initialData: part.output,
+        staleTime: 1000,
+      },
+    ),
+  )
 
   // 获取任务的报告列表
   const {

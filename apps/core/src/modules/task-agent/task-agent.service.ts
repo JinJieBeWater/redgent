@@ -1,3 +1,4 @@
+import { TrpcRouter } from '@core/processors/trpc/trpc.router'
 import { Injectable, Logger } from '@nestjs/common'
 import { tool, UIDataTypes, UIMessage, UIMessageStreamWriter } from 'ai'
 import { lastValueFrom, pipe, tap, toArray } from 'rxjs'
@@ -17,6 +18,7 @@ export class TaskAgentService {
     private readonly taskScheduleService: TaskScheduleService,
     private readonly prismaService: PrismaService,
     private readonly taskExecutionService: TaskExecutionService,
+    private readonly trpcRouter: TrpcRouter,
   ) {}
   readonly tools = (
     writer: UIMessageStreamWriter<UIMessage<unknown, UIDataTypes>>,
@@ -194,6 +196,9 @@ export class TaskAgentService {
     ShowLatestReportUI: tool({
       description: '当用户要求展示最新任务报告时，调用该工具',
       inputSchema: z.object({}),
+      execute: async () => {
+        return await this.trpcRouter.caller.report.paginate({})
+      },
     }),
 
     ShowAllTaskUI: tool({
@@ -204,6 +209,11 @@ export class TaskAgentService {
           .optional()
           .describe('任务状态，默认不输入，即状态为所有状态'),
       }),
+      execute: async ({ status }) => {
+        return await this.trpcRouter.caller.task.paginate({
+          status,
+        })
+      },
     }),
 
     ShowTaskDetailUI: tool({
@@ -212,6 +222,11 @@ export class TaskAgentService {
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
       }),
+      execute: async ({ taskId }) => {
+        return await this.trpcRouter.caller.task.detail({
+          id: taskId,
+        })
+      },
     }),
 
     RequestUserConsent: tool({

@@ -17,12 +17,16 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const [input, setInput] = useState('')
+  const isSendAutomatically = useRef(false)
   const context = useChat<AppMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
     onError: err => {
       toast.error(`发生错误，请重试！${err.message ? err.message : ''}`)
+    },
+    sendAutomaticallyWhen: ({}) => {
+      return isSendAutomatically.current
     },
   })
   const { messages, sendMessage, status, setMessages } = context
