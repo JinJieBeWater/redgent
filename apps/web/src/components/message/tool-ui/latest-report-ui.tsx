@@ -1,5 +1,6 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import type z from 'zod'
 import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
@@ -8,7 +9,10 @@ import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
+import { generateId } from 'ai'
 import { ChevronDown, FileText, Hash } from 'lucide-react'
+
+import type { TaskReportMiniSchema } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
@@ -56,7 +60,7 @@ export const LatestReportUI = ({
     return data?.pages[data.pages.length - 1]?.nextCursor
   }, [data?.pages])
 
-  const { addToolResult } = useChatContext()
+  const { addToolResult, setMessages, messages } = useChatContext()
 
   // 订阅最新的数据 维护对应 part 的 output
   useEffect(() => {
@@ -79,6 +83,45 @@ export const LatestReportUI = ({
 
   if (isError) {
     return <ErrorMessage error={error} />
+  }
+
+  /** 处理报告点击事件 */
+  const handleReportClick = (report: z.infer<typeof TaskReportMiniSchema>) => {
+    // 避免重复添加任务
+    const latestMessage = messages[messages.length - 1]
+    if (
+      latestMessage?.parts[0].type === 'tool-ShowReportUI' &&
+      latestMessage.parts[0].input?.id === report.id
+    ) {
+      return
+    }
+    setMessages([
+      ...messages,
+      {
+        id: generateId(),
+        role: 'user',
+        parts: [
+          {
+            type: 'text',
+            text: `查看 "${report.title}" 报告`,
+          },
+        ],
+      },
+      {
+        id: generateId(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool-ShowReportUI',
+            toolCallId: generateId(),
+            state: 'input-available',
+            input: {
+              id: report.id,
+            },
+          },
+        ],
+      },
+    ])
   }
 
   return (
@@ -104,6 +147,9 @@ export const LatestReportUI = ({
               key={report.id}
               size={'sm'}
               className="text-foreground h-auto flex-col items-start justify-start px-2 py-2 text-xs"
+              onClick={() => {
+                handleReportClick(report)
+              }}
             >
               <div className="flex w-full items-center gap-2">
                 <span>#{index + 1}</span>

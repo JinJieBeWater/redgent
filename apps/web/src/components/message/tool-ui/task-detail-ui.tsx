@@ -1,4 +1,4 @@
-import type { AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -10,6 +10,7 @@ import { Card, CardContent, CardTitle } from '@web/components/ui/card'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatIntervalTime } from '@web/lib/format-interval-time'
 import { trpc } from '@web/router'
+import { generateId } from 'ai'
 import cronstrue from 'cronstrue'
 import {
   AlertCircle,
@@ -19,12 +20,16 @@ import {
   Hash,
   Play,
 } from 'lucide-react'
+import { z } from 'zod'
+
+import type { TaskReportMiniSchema } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
 export const TaskDetailUI = ({
   part,
 }: {
+  message: AppMessage
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowTaskDetailUI') return null
@@ -32,7 +37,7 @@ export const TaskDetailUI = ({
   const { input } = part
   if (!input?.taskId) return null
 
-  const { sendMessage, addToolResult } = useChatContext()
+  const { sendMessage, addToolResult, setMessages, messages } = useChatContext()
 
   // 获取任务详情
   const {
@@ -126,6 +131,45 @@ export const TaskDetailUI = ({
   const statusInfo = getStatusInfo(task.status)
   const StatusIcon = statusInfo.icon
 
+  /** 处理报告点击事件 */
+  const handleReportClick = (report: z.infer<typeof TaskReportMiniSchema>) => {
+    // 避免重复添加任务
+    const latestMessage = messages[messages.length - 1]
+    if (
+      latestMessage?.parts[0].type === 'tool-ShowReportUI' &&
+      latestMessage.parts[0].input?.id === report.id
+    ) {
+      return
+    }
+    setMessages([
+      ...messages,
+      {
+        id: generateId(),
+        role: 'user',
+        parts: [
+          {
+            type: 'text',
+            text: `查看 "${report.title}" 报告`,
+          },
+        ],
+      },
+      {
+        id: generateId(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool-ShowReportUI',
+            toolCallId: generateId(),
+            state: 'input-available',
+            input: {
+              id: report.id,
+            },
+          },
+        ],
+      },
+    ])
+  }
+
   return (
     <div className="mt-1 space-y-3">
       {/* 任务信息卡片 - 使用 Card 组件 */}
@@ -188,6 +232,9 @@ export const TaskDetailUI = ({
                       key={report.id}
                       size={'sm'}
                       className="text-foreground justify-start px-2 text-xs"
+                      onClick={() => {
+                        handleReportClick(report)
+                      }}
                     >
                       <span>#{index}</span>
                       <span className="truncate">{report.title}</span>

@@ -106,7 +106,8 @@ function App() {
     if (
       lastPart.type === 'tool-ShowAllTaskUI' ||
       lastPart.type === 'tool-ShowTaskDetailUI' ||
-      lastPart.type === 'tool-RequestUserConsent'
+      lastPart.type === 'tool-RequestUserConsent' ||
+      lastPart.type.startsWith('tool-Show')
     ) {
       scrollToElement()
     }

@@ -44,7 +44,7 @@ export const TaskMini = memo(
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <Eye className="text-muted-foreground h-4 w-4 flex-shrink-0" />
           <h3
-            className="text-foreground line-clamp-1 text-sm font-medium"
+            className="text-foreground truncate text-sm font-medium"
             title={task.name}
           >
             {task.name || '未命名任务'}
