@@ -8,7 +8,7 @@ import { Button } from '@web/components/ui/button'
 import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
-import { DefaultChatTransport } from 'ai'
+import { DefaultChatTransport, generateId } from 'ai'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
@@ -225,23 +225,65 @@ function App() {
           {/* 建议输入 */}
           {messages.length <= 0 && (
             <div className="mt-4 flex items-center gap-4">
-              {[['创建任务'], ['查看任务'], ['最新报告']].map(
-                ([prompt], index) => {
-                  return (
-                    <Button
-                      key={index}
-                      variant={'outline'}
-                      onClick={() =>
-                        sendMessage({
-                          text: prompt.trim(),
-                        })
-                      }
-                    >
-                      {prompt}
-                    </Button>
-                  )
-                },
-              )}
+              {[['创建任务']].map(([prompt], index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant={'outline'}
+                    onClick={() =>
+                      sendMessage({
+                        text: prompt.trim(),
+                      })
+                    }
+                  >
+                    {prompt}
+                  </Button>
+                )
+              })}
+
+              <Button
+                variant={'outline'}
+                onClick={() => {
+                  setMessages([
+                    {
+                      id: generateId(),
+                      role: 'assistant',
+                      parts: [
+                        {
+                          type: 'tool-ShowAllTaskUI',
+                          toolCallId: generateId(),
+                          state: 'input-available',
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }}
+              >
+                查看任务
+              </Button>
+
+              <Button
+                variant={'outline'}
+                onClick={() => {
+                  setMessages([
+                    {
+                      id: generateId(),
+                      role: 'assistant',
+                      parts: [
+                        {
+                          type: 'tool-ShowLatestReportUI',
+                          toolCallId: generateId(),
+                          state: 'input-available',
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }}
+              >
+                最新报告
+              </Button>
             </div>
           )}
         </div>

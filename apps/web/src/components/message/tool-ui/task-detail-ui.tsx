@@ -27,7 +27,6 @@ export const TaskDetailUI = ({
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowTaskDetailUI') return null
-  if (part.state !== 'output-available') return null
 
   const { input } = part
   if (!input?.taskId) return null

@@ -1,14 +1,13 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useSubscription } from '@trpc/tanstack-react-query'
 import { Spinner } from '@web/components/spinner'
 import { TaskMini } from '@web/components/task/task-list'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
 import { trpc } from '@web/router'
+import { generateId } from 'ai'
 import { ChevronDown, Hash, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
@@ -19,7 +18,6 @@ export const AllTaskUI = ({
   part: UIMessagePart<AppUIDataTypes, AppToolUI>
 }) => {
   if (part.type !== 'tool-ShowAllTaskUI') return null
-  if (part.state !== 'output-available') return null
 
   const { input } = part
   const {
@@ -37,22 +35,19 @@ export const AllTaskUI = ({
       },
       {
         getNextPageParam: lastPage => lastPage.nextCursor,
-        initialData: {
-          pages: [part.output],
-          pageParams: [],
-        },
         staleTime: 1000,
+        initialData:
+          part.state === 'output-available'
+            ? {
+                pages: [part.output],
+                pageParams: [],
+              }
+            : undefined,
       },
     ),
   )
-  const { data: subscripttionData, status: subscripttionStatus } =
-    useSubscription(trpc.task.execute.subscribe.subscriptionOptions({}))
-  useEffect(() => {
-    console.log('subscripttionStatus', subscripttionStatus)
-    console.log('subscripttionData', subscripttionData)
-  }, [subscripttionData, subscripttionStatus])
 
-  const { messages, sendMessage } = useChatContext()
+  const { messages, setMessages } = useChatContext()
 
   const isPending = taskListPending
   if (isPending) {
@@ -77,10 +72,36 @@ export const AllTaskUI = ({
     ) {
       return
     }
-    sendMessage({
-      text: `查看 ${task.name} 任务`,
-    })
+    setMessages([
+      ...messages,
+      {
+        id: generateId(),
+        role: 'user',
+        parts: [
+          {
+            type: 'text',
+            text: `查看 "${task.name}" 任务`,
+          },
+        ],
+      },
+      {
+        id: generateId(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'tool-ShowTaskDetailUI',
+            toolCallId: generateId(),
+            state: 'input-available',
+            input: {
+              taskId: task.id,
+            },
+          },
+        ],
+      },
+    ])
   }
+
+  // 当分页数据发生变化时，添加最新的ToolUI到消息列表
 
   return (
     <div className="space-y-2">
