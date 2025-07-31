@@ -13,7 +13,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
 
   const { parts } = message
   return (
-    <>
+    <div className="space-y-4">
       {parts.map((part, index) => {
         const { type } = part
         switch (type) {
@@ -88,6 +88,6 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
             )
         }
       })}
-    </>
+    </div>
   )
 }

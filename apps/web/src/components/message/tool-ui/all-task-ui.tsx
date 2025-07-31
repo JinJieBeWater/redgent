@@ -9,7 +9,6 @@ import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
 import { trpc } from '@web/router'
-import { generateId } from 'ai'
 import { ChevronDown, Hash, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
@@ -46,7 +45,7 @@ export const AllTaskUI = ({
     console.log('subscripttionData', subscripttionData)
   }, [subscripttionData, subscripttionStatus])
 
-  const { messages, setMessages } = useChatContext()
+  const { messages, sendMessage } = useChatContext()
 
   const isPending = taskListPending
   if (isPending) {
@@ -71,23 +70,9 @@ export const AllTaskUI = ({
     ) {
       return
     }
-    setMessages([
-      ...messages,
-      {
-        role: 'assistant',
-        id: generateId(),
-        parts: [
-          {
-            type: 'tool-ShowTaskDetailUI',
-            state: 'input-available',
-            toolCallId: generateId(),
-            input: {
-              taskId: task.id,
-            },
-          },
-        ],
-      },
-    ])
+    sendMessage({
+      text: `查看 ${task.name} 任务`,
+    })
   }
 
   return (

@@ -8,7 +8,7 @@ import { TrpcService } from './trpc.service'
 @Module({
   imports: [TaskModule, ReportModule],
   providers: [TrpcService, TrpcRouter],
-  exports: [TrpcService],
+  exports: [TrpcService, TrpcRouter],
 })
 @Global()
 export class TrpcModule {}

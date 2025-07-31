@@ -8,7 +8,7 @@ import { Button } from '@web/components/ui/button'
 import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
-import { DefaultChatTransport, generateId } from 'ai'
+import { DefaultChatTransport } from 'ai'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
@@ -221,65 +221,23 @@ function App() {
           {/* 建议输入 */}
           {messages.length <= 0 && (
             <div className="mt-4 flex items-center gap-4">
-              <Button
-                variant={'outline'}
-                onClick={() =>
-                  setMessages([
-                    ...messages,
-                    {
-                      role: 'assistant',
-                      id: generateId(),
-                      parts: [
-                        {
-                          type: 'tool-ShowLatestReportUI',
-                          state: 'input-available',
-                          toolCallId: generateId(),
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }
-              >
-                最新报告
-              </Button>
-              <Button
-                variant={'outline'}
-                onClick={() =>
-                  setMessages([
-                    ...messages,
-                    {
-                      role: 'assistant',
-                      id: generateId(),
-                      parts: [
-                        {
-                          type: 'tool-ShowAllTaskUI',
-                          state: 'input-available',
-                          toolCallId: generateId(),
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }
-              >
-                查看任务
-              </Button>
-              {[['创建任务']].map(([prompt], index) => {
-                return (
-                  <Button
-                    key={index}
-                    variant={'outline'}
-                    onClick={() =>
-                      sendMessage({
-                        text: prompt.trim(),
-                      })
-                    }
-                  >
-                    {prompt}
-                  </Button>
-                )
-              })}
+              {[['创建任务'], ['查看任务'], ['最新报告']].map(
+                ([prompt], index) => {
+                  return (
+                    <Button
+                      key={index}
+                      variant={'outline'}
+                      onClick={() =>
+                        sendMessage({
+                          text: prompt.trim(),
+                        })
+                      }
+                    >
+                      {prompt}
+                    </Button>
+                  )
+                },
+              )}
             </div>
           )}
         </div>

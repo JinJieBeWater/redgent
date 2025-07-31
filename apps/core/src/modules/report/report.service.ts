@@ -21,12 +21,16 @@ export class ReportService {
         orderBy: {
           createdAt: 'desc',
         },
-        include: {
+        select: {
+          id: true,
+          title: true,
           task: {
             select: {
               name: true,
             },
           },
+          createdAt: true,
+          taskId: true,
         },
       }),
       this.prisma.taskReport.count(),
@@ -58,6 +62,12 @@ export class ReportService {
         },
         orderBy: {
           createdAt: 'desc',
+        },
+        select: {
+          id: true,
+          title: true,
+          createdAt: true,
+          taskId: true,
         },
       }),
       this.prisma.taskReport.count({
