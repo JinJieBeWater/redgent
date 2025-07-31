@@ -27,8 +27,8 @@
     "task-execution": "ts-node src/ai-sdk/prompt-evaluation/task-execution.ts"
   },
   "dependencies": {
-    "@ai-sdk/deepseek": "1.0.0-beta.8",
-    "@ai-sdk/provider": "^2.0.0-beta.1",
+    "@ai-sdk/deepseek": "1.0.0-beta.12",
+    "@ai-sdk/provider": "2.0.0-beta.2",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -42,7 +42,7 @@
     "@redgent/db": "workspace:*",
     "@redgent/shared": "workspace:*",
     "@trpc/server": "^11.4.3",
-    "ai": "5.0.0-beta.25",
+    "ai": "5.0.0-beta.33",
     "axios": "^1.10.0",
     "cache-manager": "^7.0.1",
     "class-transformer": "^0.5.1",
