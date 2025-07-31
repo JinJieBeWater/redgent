@@ -164,6 +164,7 @@ function App() {
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <Button
                   size="lg"
+                  variant="destructive"
                   onClick={() => {
                     if (
                       lastPart?.type !== 'tool-RequestUserConsent' ||
@@ -196,7 +197,6 @@ function App() {
                 </Button>
                 <Button
                   size="lg"
-                  variant="destructive"
                   onClick={() => {
                     if (
                       lastPart?.type !== 'tool-RequestUserConsent' ||
