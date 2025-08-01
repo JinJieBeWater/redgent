@@ -2,6 +2,7 @@ import type { AppMessage } from '@core/shared'
 
 import { MarkdownRenderer } from '../markdown'
 import { AllTaskUI } from './tool-ui/all-task-ui'
+import { ImmediatelyExecuteTaskUI } from './tool-ui/immediately-execute-task-ui'
 import { LatestReportUI } from './tool-ui/latest-report-ui'
 import { ReportUI } from './tool-ui/report-ui'
 import { RequestUserConsentUI } from './tool-ui/request-user-consent-ui'
@@ -46,12 +47,17 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
           case 'tool-DeleteTask':
             return null
           case 'tool-ImmediatelyExecuteTask':
-            return (
-              <MarkdownRenderer
-                key={index}
-                content="暂不支持 ImmediatelyExecuteTask"
-              />
-            )
+            const { state } = part
+            if (state === 'input-available' || state === 'output-available') {
+              return (
+                <ImmediatelyExecuteTaskUI
+                  key={index}
+                  part={part}
+                  message={message}
+                />
+              )
+            }
+            return null
           case 'tool-ShowLatestReportUI': {
             const { state } = part
             if (state === 'input-available' || state === 'output-available') {

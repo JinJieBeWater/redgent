@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { ScheduleType, Task, TaskReport, TaskStatus } from '@redgent/db'
+import { ScheduleType, Task, TaskStatus } from '@redgent/db'
 
 import { TaskReportSchema } from './task-report'
 

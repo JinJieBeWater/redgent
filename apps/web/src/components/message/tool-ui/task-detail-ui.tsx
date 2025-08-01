@@ -243,29 +243,31 @@ export const TaskDetailUI = ({
                 </div>
 
                 {/* 加载更多按钮 */}
-                {hasNextPage && (
-                  <div className="flex justify-center pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                      className="flex h-6 items-center gap-1 text-xs"
-                    >
-                      {isFetchingNextPage ? (
-                        <>
-                          <Spinner />
-                          加载中
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="h-3 w-3" />
-                          更多
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
+                {hasNextPage &&
+                  reportsData.pages[reportsData.pages.length - 1]?.total >
+                    allReports.length && (
+                    <div className="flex justify-center pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchNextPage()}
+                        disabled={isFetchingNextPage}
+                        className="flex h-6 items-center gap-1 text-xs"
+                      >
+                        {isFetchingNextPage ? (
+                          <>
+                            <Spinner />
+                            加载中
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="h-3 w-3" />
+                            更多
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
               </div>
             )
           )}

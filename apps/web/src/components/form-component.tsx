@@ -82,25 +82,24 @@ export const FormComponent: React.FC<FormComponentProps> = ({
             size="sm"
             disabled={clearButtonDisabled}
           >
-            <X />
+            <X className="mt-0.5" />
             <span>clean</span>
           </Button>
         )}
         <Button
           onClick={handleSubmit}
           size="sm"
-          className="h-7.5 w-auto"
           disabled={(!input.trim() && status === 'ready') || status === 'error'}
         >
           {status === 'error' && (
             <div className="flex items-center gap-2">
-              <RotateCcw />
+              <RotateCcw className="mt-0.5" />
               <span>重试</span>
             </div>
           )}
           {status === 'ready' && (
             <div className="flex items-center gap-2">
-              <Send />
+              <Send className="mt-0.5" />
               <span>Send</span>
             </div>
           )}

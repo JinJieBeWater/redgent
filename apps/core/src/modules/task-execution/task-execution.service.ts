@@ -210,7 +210,7 @@ export class TaskExecutionService {
 
     subscriber.next({
       status: TaskProgressStatus.SELECT_START,
-      message: `帖子过多（${links.length} > ${this.MAX_LINKS_PER_TASK}），开始筛选...`,
+      message: `精选中...`,
     })
 
     const linkInfoToSelect = links.map(link => ({
@@ -235,7 +235,7 @@ export class TaskExecutionService {
     } else {
       subscriber.next({
         status: TaskProgressStatus.SELECT_COMPLETE,
-        message: `筛选完成，选出 ${filteredLinks.length} 个最相关的帖子`,
+        message: `选出${filteredLinks.length}个最相关的帖子`,
       })
     }
     return filteredLinks
@@ -247,7 +247,7 @@ export class TaskExecutionService {
   ) {
     subscriber.next({
       status: TaskProgressStatus.FETCH_CONTENT_START,
-      message: `正在为 ${links.length} 个帖子获取完整内容...`,
+      message: `为${links.length}个帖子获取完整内容...`,
     })
 
     const completeLinkData = await this.redditService.getCommentsByLinkIds(
@@ -271,7 +271,7 @@ export class TaskExecutionService {
   ) {
     subscriber.next({
       status: TaskProgressStatus.ANALYZE_START,
-      message: `正在调用 AI 服务分析 ${completeLinkData.length} 个帖子...`,
+      message: `AI 分析中...`,
     })
 
     const analysisResult = await this.analyze(taskConfig, completeLinkData)

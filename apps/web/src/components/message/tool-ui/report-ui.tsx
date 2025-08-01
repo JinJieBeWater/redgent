@@ -145,7 +145,7 @@ export const ReportUI = ({
                     finding.supportingLinkIds.length > 0 && (
                       <div className="mt-1">
                         <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                          <span>相关链接</span>
+                          <span className="shrink-0">相关链接</span>
                           {finding.supportingLinkIds.map((id, index) => (
                             <Badge variant="outline" key={index}>
                               <a
