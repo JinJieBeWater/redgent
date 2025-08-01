@@ -2,12 +2,20 @@ import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import { useEffect, useState } from 'react'
 import { useSubscription } from '@trpc/tanstack-react-query'
+import { Button } from '@web/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@web/components/ui/collapsible'
 import { Progress } from '@web/components/ui/progress'
+import { cn } from '@web/lib/utils'
 import { trpc } from '@web/router'
 import {
   AlertCircle,
   Brain,
   CheckCircle,
+  ChevronsUpDown,
   Download,
   FileText,
   Filter,
@@ -120,6 +128,8 @@ export const ImmediatelyExecuteTaskUI = ({
       latestHistory.progress.status,
     )
 
+  const [isOpen, setIsOpen] = useState(false)
+
   if (!executeHistory?.length) {
     return (
       <div className="rounded-lg border p-3">
@@ -133,55 +143,75 @@ export const ImmediatelyExecuteTaskUI = ({
 
   return (
     <div className="space-y-4 rounded-lg border p-3">
-      {/* 任务标题和进度 */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold">{latestHistory?.name || '任务执行'}</h3>
-          <div className="text-muted-foreground text-sm">{getProgress()}%</div>
-        </div>
-        <Progress value={getProgress()} className="h-2" />
-      </div>
-
-      {/* 执行步骤列表 */}
-      <div className="max-h-64 space-y-2 overflow-y-auto">
-        {executeHistory.map((item, index) => {
-          const Icon = getStatusIcon(item.progress.status)
-          const isLatest = index === executeHistory.length - 1
-          const isError = item.progress.status === 'TASK_ERROR'
-          const isComplete =
-            item.progress.status.includes('COMPLETE') ||
-            item.progress.status === 'TASK_COMPLETE'
-
-          return (
-            <div key={index} className="flex items-start gap-3">
-              <div
-                className={`mt-0.5 flex-shrink-0 ${
-                  isError
-                    ? 'text-destructive'
-                    : isComplete
-                      ? 'text-green-600'
-                      : 'text-muted-foreground'
-                }`}
-              >
-                {isLatest && isInProgress ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Icon className="h-4 w-4" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div
-                  className={`text-sm ${
-                    isError ? 'text-destructive' : 'text-foreground'
-                  }`}
-                >
-                  {item.progress.message}
-                </div>
+      <Collapsible
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        className="flex w-full flex-col gap-4"
+      >
+        {/* 任务标题和进度 */}
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-end gap-2">
+              <h3 className="font-semibold">
+                {latestHistory?.name || '任务执行'}
+              </h3>
+              <div className="text-muted-foreground text-sm">
+                {getProgress()}%
               </div>
             </div>
-          )
-        })}
-      </div>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-7">
+                <ChevronsUpDown />
+                <span className="sr-only">Toggle</span>
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          <Progress value={getProgress()} className="h-2" />
+        </div>
+        <CollapsibleContent className="flex flex-col gap-2">
+          {/* 执行步骤列表 */}
+          <div className="max-h-64 space-y-2 overflow-y-auto">
+            {executeHistory.map((item, index) => {
+              const Icon = getStatusIcon(item.progress.status)
+              const isLatest = index === executeHistory.length - 1
+              const isError = item.progress.status === 'TASK_ERROR'
+              const isComplete =
+                item.progress.status.includes('COMPLETE') ||
+                item.progress.status === 'TASK_COMPLETE'
+
+              return (
+                <div key={index} className="flex items-start gap-2">
+                  <div
+                    className={`mt-0.5 flex-shrink-0 ${
+                      isError
+                        ? 'text-destructive'
+                        : isComplete
+                          ? 'text-green-600'
+                          : 'text-muted-foreground'
+                    }`}
+                  >
+                    {isLatest && isInProgress ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Icon className="h-3.5 w-3.5" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={cn(
+                        'text-xs',
+                        isError ? 'text-destructive' : 'text-foreground',
+                      )}
+                    >
+                      {item.progress.message}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   )
 }

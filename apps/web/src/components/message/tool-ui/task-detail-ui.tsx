@@ -195,7 +195,7 @@ export const TaskDetailUI = ({
 
           {/* 任务配置 */}
           <div className="grid grid-flow-col gap-x-4 gap-y-2 text-xs">
-            <div className="flex items-center gap-1 truncate text-xs">
+            <div className="flex items-center gap-2 truncate text-xs">
               <Clock className="text-muted-foreground h-3 w-3" />
               {task.scheduleType === 'cron'
                 ? cronstrue.toString(task.scheduleExpression)
