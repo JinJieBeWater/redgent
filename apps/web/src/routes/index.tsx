@@ -169,7 +169,7 @@ function App() {
         {/* 输入框容器 */}
         <div
           className={cn(
-            'my-4 grid w-full',
+            'my-4 w-full',
             messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
           )}
         >
