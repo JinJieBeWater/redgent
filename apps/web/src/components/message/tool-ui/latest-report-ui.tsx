@@ -146,18 +146,21 @@ export const LatestReportUI = ({
               variant={'outline'}
               key={report.id}
               size={'sm'}
-              className="text-foreground h-auto flex-col items-start justify-start px-2 py-2 text-xs"
+              className="text-foreground h-auto flex-col items-start justify-start p-3 text-xs"
               onClick={() => {
                 handleReportClick(report)
               }}
             >
-              <div className="flex w-full items-center gap-2">
-                <span>#{index + 1}</span>
+              <div
+                className="flex w-full items-center gap-2"
+                title={report.title || '未命名报告'}
+              >
+                <span className="text-muted-foreground">#{index + 1}</span>
                 <span className="truncate">{report.title || '未命名报告'}</span>
               </div>
               <div className="mt-1 flex w-full items-center gap-2 text-xs">
                 {report.task?.name && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="default" className="text-xs">
                     {report.task.name}
                   </Badge>
                 )}
@@ -175,7 +178,7 @@ export const LatestReportUI = ({
       )}
 
       {/* 加载更多按钮 */}
-      {hasNextPage && (
+      {hasNextPage && totalCount > allReports.length && (
         <div className="border-border/50 flex justify-center border-t pt-2">
           <Button
             variant="outline"

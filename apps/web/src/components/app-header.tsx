@@ -31,7 +31,7 @@ export default function Header() {
         >
         setMessage(`${res.name} ${res.progress.message}`)
       } else {
-        message !== '监听中...' && setMessage('监听中...')
+        message !== '' && setMessage('')
       }
     }
   }, [status, data])
@@ -54,7 +54,7 @@ export default function Header() {
             ) : (
               <Activity className="h-4 w-4" />
             )}
-            <span className="truncate">{`${message}`}</span>
+            {message}
           </Link>
         </Button>
       </nav>

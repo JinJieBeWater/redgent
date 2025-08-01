@@ -184,7 +184,7 @@ function App() {
           <FormComponent
             className="mt-6"
             input={input}
-            placeholder="添加一个定时分析任务..."
+            placeholder="添加一个任务..."
             setInput={setInput}
             handleSubmit={() => {
               if (status === 'error') {

@@ -9,6 +9,8 @@ import { Button } from '@web/components/ui/button'
 import { Card, CardContent, CardTitle } from '@web/components/ui/card'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatIntervalTime } from '@web/lib/format-interval-time'
+import { formatRelativeTime } from '@web/lib/format-relative-time'
+import { cn } from '@web/lib/utils'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import cronstrue from 'cronstrue'
@@ -225,19 +227,31 @@ export const TaskDetailUI = ({
           ) : (
             allReports.length > 0 && (
               <div>
-                <div className="grid grid-cols-1 gap-2 gap-x-3 md:grid-cols-2">
+                <div
+                  className={cn(
+                    'grid grid-cols-1 gap-2 gap-x-3',
+                    allReports.length > 1 && 'md:grid-cols-2',
+                  )}
+                >
                   {allReports.map((report, index) => (
                     <Button
                       variant={'outline'}
                       key={report.id}
                       size={'sm'}
-                      className="text-foreground justify-start px-2 text-xs"
+                      className="text-foreground px-2 text-xs"
                       onClick={() => {
                         handleReportClick(report)
                       }}
+                      title={report.title || '未命名报告'}
                     >
-                      <span>#{index}</span>
-                      <span className="truncate">{report.title}</span>
+                      <div className="line-clamp-1 flex gap-1">
+                        <span className="text-muted-foreground">#{index}</span>
+                        <span className="truncate">{report.title}</span>
+                      </div>
+                      {/* 创建时间 */}
+                      <div className="text-muted-foreground text-xs">
+                        {formatRelativeTime(report.createdAt)}
+                      </div>
                     </Button>
                   ))}
                 </div>
