@@ -19,7 +19,7 @@ export default function Header() {
 
   useEffect(() => {
     if (status === 'error') {
-      setMessage(error.message)
+      setMessage(`网络错误 ${error.message || error}`)
     } else if (status === 'connecting') {
       setMessage('连接中...')
     } else if (status === 'idle') {
@@ -31,12 +31,12 @@ export default function Header() {
         >
         setMessage(`${res.name} ${res.progress.message}`)
       } else {
-        setMessage('监听中...')
+        message !== '监听中...' && setMessage('监听中...')
       }
     }
   }, [status, data])
   return (
-    <header className="max-w-screen flex items-center justify-between px-4 py-2">
+    <header className="flex max-w-screen items-center justify-between px-4 py-2">
       {/* 新对话 */}
       <nav>
         <Button variant="ghost" className="h-8 w-8" asChild>
