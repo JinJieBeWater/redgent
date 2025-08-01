@@ -128,8 +128,10 @@ export const LatestReportUI = ({
     <div className="space-y-2">
       {/* 报告列表标题 */}
       <div className="flex items-center gap-2">
-        <FileText className="text-muted-foreground h-4 w-4" />
-        <span className="text-foreground text-sm font-medium">最新报告</span>
+        <FileText className="text-muted-foreground h-4 w-4 shrink-0" />
+        <span className="text-foreground shrink-0 text-sm font-medium">
+          最新报告
+        </span>
         {allReports.length > 0 && (
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <Hash className="h-3 w-3" />
@@ -146,7 +148,7 @@ export const LatestReportUI = ({
               variant={'outline'}
               key={report.id}
               size={'sm'}
-              className="text-foreground h-auto flex-col items-start justify-start p-3 text-xs"
+              className="text-foreground h-auto flex-col items-start justify-start truncate p-3 text-xs"
               onClick={() => {
                 handleReportClick(report)
               }}

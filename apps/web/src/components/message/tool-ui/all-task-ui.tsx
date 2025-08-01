@@ -128,8 +128,10 @@ export const AllTaskUI = ({
     <div className="space-y-2">
       {/* 任务列表标题 */}
       <div className="flex items-center gap-2">
-        <List className="text-muted-foreground h-4 w-4" />
-        <span className="text-foreground text-sm font-medium">任务列表</span>
+        <List className="text-muted-foreground h-4 w-4 shrink-0" />
+        <span className="text-foreground shrink-0 text-sm font-medium">
+          任务列表
+        </span>
         {allTasks.length > 0 && (
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <Hash className="h-3 w-3" />
