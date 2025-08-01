@@ -196,7 +196,95 @@ function App() {
             messages={messages}
             status={status}
             clearMessages={clearMessages}
-          />
+          >
+            {/* 建议输入 */}
+            {messages.length <= 0 && (
+              <div className="flex items-center gap-2">
+                {[['创建任务']].map(([prompt], index) => {
+                  return (
+                    <Button
+                      key={index}
+                      variant={'outline'}
+                      onClick={() =>
+                        sendMessage({
+                          text: prompt.trim(),
+                        })
+                      }
+                      className="h-max px-2 py-1 text-xs font-medium"
+                    >
+                      {prompt}
+                    </Button>
+                  )
+                })}
+
+                <Button
+                  variant={'outline'}
+                  onClick={() => {
+                    setMessages([
+                      {
+                        id: generateId(),
+                        role: 'user',
+                        parts: [
+                          {
+                            type: 'text',
+                            text: '查看任务',
+                          },
+                        ],
+                      },
+                      {
+                        id: generateId(),
+                        role: 'assistant',
+                        parts: [
+                          {
+                            type: 'tool-ShowAllTaskUI',
+                            toolCallId: generateId(),
+                            state: 'input-available',
+                            input: {},
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                  className="h-max px-2 py-1 text-xs font-medium"
+                >
+                  查看任务
+                </Button>
+
+                <Button
+                  variant={'outline'}
+                  onClick={() => {
+                    setMessages([
+                      {
+                        id: generateId(),
+                        role: 'user',
+                        parts: [
+                          {
+                            type: 'text',
+                            text: '最新报告',
+                          },
+                        ],
+                      },
+                      {
+                        id: generateId(),
+                        role: 'assistant',
+                        parts: [
+                          {
+                            type: 'tool-ShowLatestReportUI',
+                            toolCallId: generateId(),
+                            state: 'input-available',
+                            input: {},
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                  className="h-max px-2 py-1 text-xs font-medium"
+                >
+                  最新报告
+                </Button>
+              </div>
+            )}
+          </FormComponent>
 
           {/* 请求用户同意 */}
           {lastMessage?.role === 'assistant' &&
@@ -222,91 +310,6 @@ function App() {
                 </Button>
               </div>
             )}
-
-          {/* 建议输入 */}
-          {messages.length <= 0 && (
-            <div className="mt-4 flex items-center gap-4">
-              {[['创建任务']].map(([prompt], index) => {
-                return (
-                  <Button
-                    key={index}
-                    variant={'outline'}
-                    onClick={() =>
-                      sendMessage({
-                        text: prompt.trim(),
-                      })
-                    }
-                  >
-                    {prompt}
-                  </Button>
-                )
-              })}
-
-              <Button
-                variant={'outline'}
-                onClick={() => {
-                  setMessages([
-                    {
-                      id: generateId(),
-                      role: 'user',
-                      parts: [
-                        {
-                          type: 'text',
-                          text: '查看任务',
-                        },
-                      ],
-                    },
-                    {
-                      id: generateId(),
-                      role: 'assistant',
-                      parts: [
-                        {
-                          type: 'tool-ShowAllTaskUI',
-                          toolCallId: generateId(),
-                          state: 'input-available',
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }}
-              >
-                查看任务
-              </Button>
-
-              <Button
-                variant={'outline'}
-                onClick={() => {
-                  setMessages([
-                    {
-                      id: generateId(),
-                      role: 'user',
-                      parts: [
-                        {
-                          type: 'text',
-                          text: '最新报告',
-                        },
-                      ],
-                    },
-                    {
-                      id: generateId(),
-                      role: 'assistant',
-                      parts: [
-                        {
-                          type: 'tool-ShowLatestReportUI',
-                          toolCallId: generateId(),
-                          state: 'input-available',
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }}
-              >
-                最新报告
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </ChatContextProvider>
