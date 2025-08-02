@@ -139,10 +139,6 @@ export class TaskExecutionService {
     subscriber: Subscriber<TaskProgress>,
     context: ExecuteContext,
   ) {
-    await this.prismaService.task.update({
-      where: { id: taskConfig.id },
-      data: { status: TaskStatusModel.running },
-    })
     subscriber.next({
       status: TaskProgressStatus.TASK_START,
       message: `任务 "${taskConfig.name}" 已开始`,
