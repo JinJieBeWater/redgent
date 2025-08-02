@@ -23,10 +23,9 @@ export const TaskReportContentSchema = z.object({
 
 export const TaskReportMiniSchema = z.object({
   id: z.uuid(),
-  title: z.string().nullable(),
+  title: z.string(),
   createdAt: z.date(),
   taskId: z.uuid(),
-  errorMessage: z.string().nullable(),
 })
 
 export const TaskReportSchema: z.ZodType<TaskReport> =

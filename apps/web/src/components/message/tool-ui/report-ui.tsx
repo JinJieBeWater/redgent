@@ -54,15 +54,6 @@ export const ReportUI = ({
   const { content } = data
   const findings = content?.findings || []
 
-  if (data.errorMessage !== null) {
-    return (
-      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-        <FileText className="h-4 w-4" />
-        <span>任务运行失败</span>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
       {/* 报告标题和基本信息 */}

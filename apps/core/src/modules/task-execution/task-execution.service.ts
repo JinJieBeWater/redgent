@@ -6,7 +6,13 @@ import {
 import { myProvider } from '@core/ai-sdk/provider'
 import { EeService } from '@core/processors/ee/ee.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common'
 import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber, tap } from 'rxjs'
 import z from 'zod'
@@ -142,12 +148,6 @@ export class TaskExecutionService {
     context: ExecuteContext,
   ) {
     await Promise.all([
-      await this.prismaService.taskReport.create({
-        data: {
-          id: context.reportId,
-          taskId: taskConfig.id,
-        },
-      }),
       await this.cacheManager.set(
         `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
         true,
@@ -345,7 +345,7 @@ export class TaskExecutionService {
           id: context.reportId,
           taskId: taskConfig.id,
           title: report.reportTitle,
-          content: report.reportContent || undefined,
+          content: report.reportContent,
           executionDuration,
         },
       }),
@@ -367,14 +367,9 @@ export class TaskExecutionService {
     context: ExecuteContext,
     subscriber: Subscriber<TaskProgress>,
   ) {
+    this.logger.error(error)
     const message = error instanceof Error ? error.message : '未知错误'
     await Promise.all([
-      await this.prismaService.taskReport.update({
-        where: { id: context.reportId },
-        data: {
-          errorMessage: message,
-        },
-      }),
       await this.cacheManager.del(
         `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
       ),
