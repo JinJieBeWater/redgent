@@ -162,10 +162,9 @@ export const LatestReportUI = ({
               </div>
               <div className="mt-1 flex w-full items-end gap-2 text-xs">
                 {report.task?.name && (
-                  <Button
+                  <Badge
                     variant="default"
-                    size={'sm'}
-                    className="h-max px-2 py-1 text-xs"
+                    className="text-xs"
                     onClick={e => {
                       e.stopPropagation()
                       setMessages([
@@ -198,7 +197,7 @@ export const LatestReportUI = ({
                     }}
                   >
                     {report.task.name}
-                  </Button>
+                  </Badge>
                 )}
                 <Badge variant="secondary" className="text-xs">
                   {formatRelativeTime(report.createdAt)}

@@ -76,8 +76,9 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none outline-none transition-[color,box-shadow] focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+        className="dark:bg-input/30 text-foreground scrollbar-hide mx-auto flex touch-manipulation resize-none rounded-b-none border-none bg-transparent px-4 py-4 leading-relaxed shadow-none transition-[color,box-shadow] outline-none focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
         rows={1}
+        name="输入要求"
       />
       <div className="relative flex items-center justify-between gap-2 p-2">
         <div className="self-end-safe">{children}</div>
@@ -94,7 +95,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
         <Button
           onClick={handleSubmit}
           size="sm"
-          className="t-0 absolute bottom-2 right-2"
+          className="t-0 absolute right-2 bottom-2"
           disabled={(!input.trim() && status === 'ready') || status === 'error'}
         >
           {status === 'error' && (
