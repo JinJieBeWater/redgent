@@ -157,11 +157,8 @@ export class TaskAgentService {
       }),
       outputSchema: z.object({
         reportId: z.string().describe('报告id'),
-        status: z
-          .enum(['running', 'success', 'cancel', 'failure'])
-          .describe('执行状态'),
+        status: z.enum(['running', 'success', 'failure']).describe('执行状态'),
         message: z.string().describe('执行消息'),
-        progress: z.array(TaskProgressSchema).describe('任务进度历史'),
         taskName: z.string().describe('任务名称'),
       }),
       execute: async input => {
@@ -171,12 +168,15 @@ export class TaskAgentService {
         if (!task) {
           throw new Error('任务不存在')
         }
-        const { reportId } = this.taskExecutionService.execute(task)
+        const res = await this.taskExecutionService.execute(task)
+        if (res.status === 'cancel') {
+          throw new Error('当前任务已经在执行中')
+        }
         return {
           taskName: task.name,
-          message: '任务正在执行中',
+          message: '任务开始执行',
           status: 'running',
-          reportId,
+          reportId: res.reportId,
           progress: [],
         }
       },

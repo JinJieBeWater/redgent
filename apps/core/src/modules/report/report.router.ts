@@ -1,4 +1,4 @@
-import { TrpcRouter } from '@core/processors/trpc/trpc.interface'
+import { ITrpcRouter } from '@core/processors/trpc/trpc.interface'
 import { TrpcService } from '@core/processors/trpc/trpc.service'
 import { Injectable } from '@nestjs/common'
 
@@ -10,7 +10,7 @@ import {
 import { ReportService } from './report.service'
 
 @Injectable()
-export class ReportRouter implements TrpcRouter {
+export class ReportRouter implements ITrpcRouter {
   constructor(
     private readonly trpcService: TrpcService,
     private readonly reportService: ReportService,

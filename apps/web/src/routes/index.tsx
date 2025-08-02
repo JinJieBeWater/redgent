@@ -9,6 +9,7 @@ import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
 import { DefaultChatTransport, generateId } from 'ai'
+import { FileText, List, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
@@ -210,9 +211,11 @@ function App() {
                           text: prompt.trim(),
                         })
                       }
-                      className="h-max px-2 py-1 text-xs font-medium"
+                      className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                      title={prompt}
                     >
-                      {prompt}
+                      <Plus className="h-3 w-3" />
+                      <span className="hidden sm:block">{prompt}</span>
                     </Button>
                   )
                 })}
@@ -245,9 +248,11 @@ function App() {
                       },
                     ])
                   }}
-                  className="h-max px-2 py-1 text-xs font-medium"
+                  className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                  title="查看任务"
                 >
-                  查看任务
+                  <List className="h-3 w-3" />
+                  <span className="hidden sm:block">查看任务</span>
                 </Button>
 
                 <Button
@@ -278,9 +283,11 @@ function App() {
                       },
                     ])
                   }}
-                  className="h-max px-2 py-1 text-xs font-medium"
+                  className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                  title="最新报告"
                 >
-                  最新报告
+                  <FileText className="h-3 w-3" />
+                  <span className="hidden sm:block">最新报告</span>
                 </Button>
               </div>
             )}

@@ -28,7 +28,10 @@ import {
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { TASK_EXECUTE_EVENT } from '../task/task.constants'
-import { TaskExecutionInputSchema } from './task-execution.dto'
+import {
+  TaskExecutionInputSchema,
+  TaskReportStatusInputSchema,
+} from './task-execution.dto'
 
 export type ExecuteContext = {
   reportId: string
@@ -75,7 +78,7 @@ export class TaskExecutionService {
           }
 
           if (taskConfig.enableCache) {
-            links = await this._filterLinks(links, subscriber)
+            links = await this._filterLinks(taskConfig, links, subscriber)
             if (links.length === 0) {
               subscriber.complete()
               return
@@ -124,14 +127,31 @@ export class TaskExecutionService {
     )
   }
 
-  execute(taskConfig: Task): {
-    reportId: string
-  } {
+  async execute(taskConfig: Task): Promise<
+    | {
+        status: 'cancel'
+      }
+    | {
+        status: 'running'
+        reportId: string
+      }
+  > {
+    // 检查任务是否已在执行
+    const isRunning = await this.cacheManager.get<string>(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
+    if (isRunning) {
+      return {
+        status: 'cancel',
+      }
+    }
     const context: ExecuteContext = {
       reportId: crypto.randomUUID(),
     }
+
     void this.executeObservable(taskConfig, context).subscribe()
     return {
+      status: 'running',
       reportId: context.reportId,
     }
   }
@@ -185,10 +205,7 @@ export class TaskExecutionService {
     }
 
     if (filteredLinks.length === 0) {
-      subscriber.next({
-        status: TaskProgressStatus.TASK_CANCEL,
-        message: '没有发现任何帖子，任务结束。',
-      })
+      this._handleCancel(taskConfig, '没有发现任何帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.FETCH_COMPLETE,
@@ -199,6 +216,7 @@ export class TaskExecutionService {
   }
 
   private async _filterLinks(
+    taskConfig: Task,
     links: RedditLinkInfoUntrusted[],
     subscriber: Subscriber<TaskProgress>,
   ): Promise<RedditLinkInfoUntrusted[]> {
@@ -224,10 +242,7 @@ export class TaskExecutionService {
     }
 
     if (newLinks.length === 0) {
-      subscriber.next({
-        status: TaskProgressStatus.TASK_CANCEL,
-        message: '任务取消',
-      })
+      this._handleCancel(taskConfig, '无新帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.FILTER_COMPLETE,
@@ -266,10 +281,7 @@ export class TaskExecutionService {
     )
 
     if (filteredLinks.length === 0) {
-      subscriber.next({
-        status: TaskProgressStatus.TASK_CANCEL,
-        message: '筛选后没有帖子，任务结束。',
-      })
+      this._handleCancel(taskConfig, '无相关帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.SELECT_COMPLETE,
@@ -333,21 +345,18 @@ export class TaskExecutionService {
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [taskReport] = await Promise.all([
-      await this.prismaService.taskReport.create({
-        data: {
-          id: context.reportId,
-          taskId: taskConfig.id,
-          title: report.reportTitle,
-          content: report.reportContent,
-          executionDuration,
-        },
-      }),
-      await this.cacheManager.del(
-        `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
-      ),
-    ])
-
+    const taskReport = await this.prismaService.taskReport.create({
+      data: {
+        id: context.reportId,
+        taskId: taskConfig.id,
+        title: report.reportTitle,
+        content: report.reportContent,
+        executionDuration,
+      },
+    })
+    await this.cacheManager.del(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
     subscriber.next({
       status: TaskProgressStatus.TASK_COMPLETE,
       message: '任务成功执行完毕',
@@ -363,11 +372,9 @@ export class TaskExecutionService {
   ) {
     this.logger.error(error)
     const message = error instanceof Error ? error.message : '未知错误'
-    await Promise.all([
-      await this.cacheManager.del(
-        `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
-      ),
-    ])
+    await this.cacheManager.del(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
     if (APICallError.isInstance(error)) {
       subscriber.error({
         status: TaskProgressStatus.TASK_ERROR,
@@ -379,6 +386,20 @@ export class TaskExecutionService {
         message: `任务 "${taskConfig.name}" 执行失败 ${message}`,
       })
     }
+  }
+
+  private async _handleCancel(
+    taskConfig: Task,
+    message: string,
+    subscriber: Subscriber<TaskProgress>,
+  ) {
+    await this.cacheManager.del(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
+    subscriber.next({
+      status: TaskProgressStatus.TASK_CANCEL,
+      message: message,
+    })
   }
 
   async selectMostRelevantLinks(
@@ -463,5 +484,33 @@ export class TaskExecutionService {
     return await this.cacheManager.get<string>(
       `${CACHE_KEY_PREFIX_TASK_RUNNING}${input.taskId}`,
     )
+  }
+
+  async reportStatus(input: z.infer<typeof TaskReportStatusInputSchema>) {
+    const taskIsRunning = await this.isRunning(input)
+    const reportIsRunning = input.reportId === taskIsRunning
+    if (reportIsRunning) {
+      return {
+        status: 'running',
+      }
+    }
+    // 查询报告
+    const report = await this.prismaService.taskReport.findUnique({
+      where: {
+        id: input.reportId,
+      },
+      select: {
+        id: true,
+      },
+    })
+    if (report) {
+      return {
+        status: 'success',
+      }
+    } else {
+      return {
+        status: 'failure',
+      }
+    }
   }
 }
