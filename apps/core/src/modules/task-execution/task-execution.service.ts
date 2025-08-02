@@ -15,7 +15,7 @@ import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber, tap } from 'rxjs'
 import z from 'zod'
 
-import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
+import { Task, TaskReport } from '@redgent/db'
 import {
   CommentNode,
   ExecuteSubscribeOutputSchema,
@@ -205,7 +205,7 @@ export class TaskExecutionService {
     }
 
     if (filteredLinks.length === 0) {
-      this._handleCancel(taskConfig, '没有发现任何帖子', subscriber)
+      await this._handleCancel(taskConfig, '没有发现任何帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.FETCH_COMPLETE,
@@ -242,7 +242,7 @@ export class TaskExecutionService {
     }
 
     if (newLinks.length === 0) {
-      this._handleCancel(taskConfig, '无新帖子', subscriber)
+      await this._handleCancel(taskConfig, '无新帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.FILTER_COMPLETE,
@@ -281,7 +281,7 @@ export class TaskExecutionService {
     )
 
     if (filteredLinks.length === 0) {
-      this._handleCancel(taskConfig, '无相关帖子', subscriber)
+      await this._handleCancel(taskConfig, '无相关帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.SELECT_COMPLETE,

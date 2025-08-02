@@ -1,12 +1,11 @@
 import { TrpcRouter } from '@core/processors/trpc/trpc.router'
 import { Injectable, Logger } from '@nestjs/common'
-import { tool, UIDataTypes, UIMessage, UIMessageStreamWriter } from 'ai'
+import { tool } from 'ai'
 import z from 'zod'
 
 import { TaskStatus } from '@redgent/db'
 import {
   createTaskSchema,
-  TaskProgressSchema,
   TaskReportMiniSchema,
   TaskReportSchema,
   TaskSchema,
@@ -25,9 +24,7 @@ export class TaskAgentService {
     private readonly taskExecutionService: TaskExecutionService,
     private readonly trpcRouter: TrpcRouter,
   ) {}
-  readonly tools = (
-    writer: UIMessageStreamWriter<UIMessage<unknown, UIDataTypes>>,
-  ) => ({
+  readonly tools = () => ({
     GetAllTasks: tool({
       description: '列出所有Reddit抓取任务',
       inputSchema: z.object({

@@ -14,6 +14,8 @@ export type AppToolUI = {
   [key in keyof AppTools]: InferUITool<AppTools[key]>
 }
 
-export type AppUIDataTypes = {}
+export type AppUIDataTypes = {
+  [x: string]: unknown
+}
 
 export type AppMessage = UIMessage<AppMetadata, AppUIDataTypes, AppToolUI>
