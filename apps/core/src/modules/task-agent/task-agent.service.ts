@@ -171,7 +171,7 @@ export class TaskAgentService {
         }
         return {
           taskName: task.name,
-          message: '任务开始执行',
+          message: 'running',
           status: 'running',
           reportId: res.reportId,
           progress: [],

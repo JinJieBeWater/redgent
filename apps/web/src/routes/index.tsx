@@ -101,9 +101,9 @@ function App() {
     scrollToElement,
   ])
 
-  /** 处理客户端工具滚动 */
+  /** 处理点击客户端工具滚动 */
   useEffect(() => {
-    if (!lastPart) return
+    if (!lastPart?.type) return
     if (
       lastPart.type === 'tool-ShowAllTaskUI' ||
       lastPart.type === 'tool-ShowTaskDetailUI' ||
@@ -112,7 +112,7 @@ function App() {
     ) {
       scrollToElement()
     }
-  }, [scrollToElement, lastPart])
+  }, [scrollToElement, messages.length, lastPart?.type])
 
   /** 处理操作按钮 */
   const handleConsentButtonClick = useCallback(

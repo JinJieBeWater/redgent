@@ -65,7 +65,7 @@ export const ImmediatelyExecuteTaskUI = ({
       },
     ),
   )
-
+  const { reportId, taskName } = output
   useEffect(() => {
     switch (data?.status) {
       case 'running':
@@ -75,7 +75,8 @@ export const ImmediatelyExecuteTaskUI = ({
           tool: 'ImmediatelyExecuteTask',
           toolCallId: part.toolCallId,
           output: {
-            ...output,
+            reportId: reportId,
+            taskName: taskName,
             status: data.status,
             message: '任务执行成功',
           },
@@ -86,7 +87,8 @@ export const ImmediatelyExecuteTaskUI = ({
           tool: 'ImmediatelyExecuteTask',
           toolCallId: part.toolCallId,
           output: {
-            ...output,
+            reportId: reportId,
+            taskName: taskName,
             status: data.status,
             message: '任务执行失败',
           },
@@ -95,7 +97,7 @@ export const ImmediatelyExecuteTaskUI = ({
       default:
         break
     }
-  }, [data, addToolResult, part.toolCallId, output])
+  }, [data, addToolResult, part.toolCallId, reportId, taskName])
 
   if (!data && isPending) {
     return <LoadingMessage message="正在查询任务执行状态..." />
