@@ -4,15 +4,13 @@ import {
   selectMostRelevantLinksPrompt,
 } from '@core/ai-sdk/prompts'
 import { myProvider } from '@core/ai-sdk/provider'
+import {
+  CACHE_KEY_PREFIX_LINK,
+  CACHE_KEY_PREFIX_TASK_RUNNING,
+} from '@core/common/constants/cache'
 import { EeService } from '@core/processors/ee/ee.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import {
-  Inject,
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber, tap } from 'rxjs'
 import z from 'zod'
@@ -30,16 +28,14 @@ import {
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { TASK_EXECUTE_EVENT } from '../task/task.constants'
+import { TaskExecutionInputSchema } from './task-execution.dto'
 
-type ExecuteContext = {
+export type ExecuteContext = {
   reportId: string
 }
 
 @Injectable()
 export class TaskExecutionService {
-  private readonly CACHE_KEY_PREFIX = 'redgent:'
-  private readonly CACHE_KEY_PREFIX_LINK = `${this.CACHE_KEY_PREFIX}link:`
-  private readonly CACHE_KEY_PREFIX_TASK_REPORT_RUNNING = `${this.CACHE_KEY_PREFIX}task-report-running:`
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
   readonly logger = new Logger(TaskExecutionService.name)
@@ -129,7 +125,6 @@ export class TaskExecutionService {
   }
 
   execute(taskConfig: Task): {
-    taskId: string
     reportId: string
   } {
     const context: ExecuteContext = {
@@ -137,7 +132,6 @@ export class TaskExecutionService {
     }
     void this.executeObservable(taskConfig, context).subscribe()
     return {
-      taskId: taskConfig.id,
       reportId: context.reportId,
     }
   }
@@ -149,8 +143,8 @@ export class TaskExecutionService {
   ) {
     await Promise.all([
       await this.cacheManager.set(
-        `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
-        true,
+        `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+        context.reportId,
         1000 * 60, // 1 minute
       ),
     ])
@@ -213,14 +207,14 @@ export class TaskExecutionService {
       message: '开始查询缓存，并进行过滤',
     })
 
-    const cacheKeys = links.map(l => `${this.CACHE_KEY_PREFIX_LINK}${l.id}`)
+    const cacheKeys = links.map(l => `${CACHE_KEY_PREFIX_LINK}${l.id}`)
     const cachedValues = await this.cacheManager.mget(cacheKeys)
     const newLinks = links.filter(
       (_, index) => cachedValues[index] === undefined,
     )
     if (newLinks.length > 0) {
       const pairsToCache = newLinks.map(p => ({
-        key: `${this.CACHE_KEY_PREFIX_LINK}${p.id}`,
+        key: `${CACHE_KEY_PREFIX_LINK}${p.id}`,
         value: 1,
         ttl: this.CACHE_TTL,
       }))
@@ -232,7 +226,7 @@ export class TaskExecutionService {
     if (newLinks.length === 0) {
       subscriber.next({
         status: TaskProgressStatus.TASK_CANCEL,
-        message: '任务取消: 无新内容',
+        message: '任务取消',
       })
     } else {
       subscriber.next({
@@ -350,7 +344,7 @@ export class TaskExecutionService {
         },
       }),
       await this.cacheManager.del(
-        `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
+        `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
       ),
     ])
 
@@ -371,7 +365,7 @@ export class TaskExecutionService {
     const message = error instanceof Error ? error.message : '未知错误'
     await Promise.all([
       await this.cacheManager.del(
-        `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
+        `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
       ),
     ])
     if (APICallError.isInstance(error)) {
@@ -463,5 +457,11 @@ export class TaskExecutionService {
         throw new Error('无法进行 AI 分析，请稍后重试')
       }
     }
+  }
+
+  async isRunning(input: z.infer<typeof TaskExecutionInputSchema>) {
+    return await this.cacheManager.get<string>(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${input.taskId}`,
+    )
   }
 }

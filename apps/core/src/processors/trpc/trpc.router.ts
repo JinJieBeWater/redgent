@@ -1,4 +1,5 @@
 import { ReportRouter } from '@core/modules/report/report.router'
+import { TaskExecutionRouter } from '@core/modules/task-execution/task-execution.router'
 import { TaskRouter } from '@core/modules/task/task.router'
 import { INestApplication, Injectable } from '@nestjs/common'
 import * as trpcExpress from '@trpc/server/adapters/express'
@@ -13,12 +14,14 @@ export class TrpcRouter {
     private readonly trpcService: TrpcService,
     private readonly taskRouter: TaskRouter,
     private readonly reportRouter: ReportRouter,
+    private readonly taskExecutionRouter: TaskExecutionRouter,
   ) {}
 
   register() {
     return this.trpcService.t.router({
       ...this.taskRouter.apply(),
       ...this.reportRouter.apply(),
+      ...this.taskExecutionRouter.apply(),
     })
   }
 

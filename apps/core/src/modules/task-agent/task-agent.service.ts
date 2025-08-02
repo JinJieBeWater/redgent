@@ -1,14 +1,12 @@
 import { TrpcRouter } from '@core/processors/trpc/trpc.router'
 import { Injectable, Logger } from '@nestjs/common'
 import { tool, UIDataTypes, UIMessage, UIMessageStreamWriter } from 'ai'
-import { lastValueFrom, pipe, tap, toArray } from 'rxjs'
 import z from 'zod'
 
 import { TaskStatus } from '@redgent/db'
 import {
   createTaskSchema,
   TaskProgressSchema,
-  TaskProgressStatus,
   TaskReportMiniSchema,
   TaskReportSchema,
   TaskSchema,
@@ -158,27 +156,26 @@ export class TaskAgentService {
         taskId: z.uuid().describe('任务id'),
       }),
       outputSchema: z.object({
+        reportId: z.string().describe('报告id'),
         status: z
           .enum(['running', 'success', 'cancel', 'failure'])
           .describe('执行状态'),
         message: z.string().describe('执行消息'),
-        taskId: z.uuid().describe('任务id'),
-        reportId: z.string().describe('报告id'),
         progress: z.array(TaskProgressSchema).describe('任务进度历史'),
+        taskName: z.string().describe('任务名称'),
       }),
       execute: async input => {
-        this.logger.debug('immediatelyExecuteTask 工具被调用')
         const task = await this.prismaService.task.findUnique({
           where: { id: input.taskId },
         })
         if (!task) {
           throw new Error('任务不存在')
         }
-        const { reportId, taskId } = this.taskExecutionService.execute(task)
+        const { reportId } = this.taskExecutionService.execute(task)
         return {
+          taskName: task.name,
           message: '任务正在执行中',
           status: 'running',
-          taskId,
           reportId,
           progress: [],
         }
