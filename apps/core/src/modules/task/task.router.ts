@@ -1,6 +1,6 @@
 import { on } from 'node:events'
 import { EeService } from '@core/processors/ee/ee.service'
-import { TrpcRouter } from '@core/processors/trpc/trpc.interface'
+import { ITrpcRouter } from '@core/processors/trpc/trpc.interface'
 import { TrpcService } from '@core/processors/trpc/trpc.service'
 import { Injectable } from '@nestjs/common'
 import { tracked } from '@trpc/server'
@@ -17,7 +17,7 @@ import {
 import { TaskService } from './task.service'
 
 @Injectable()
-export class TaskRouter implements TrpcRouter {
+export class TaskRouter implements ITrpcRouter {
   constructor(
     private readonly trpcService: TrpcService,
     private readonly taskService: TaskService,

@@ -4,6 +4,10 @@ import {
   selectMostRelevantLinksPrompt,
 } from '@core/ai-sdk/prompts'
 import { myProvider } from '@core/ai-sdk/provider'
+import {
+  CACHE_KEY_PREFIX_LINK,
+  CACHE_KEY_PREFIX_TASK_RUNNING,
+} from '@core/common/constants/cache'
 import { EeService } from '@core/processors/ee/ee.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
@@ -11,7 +15,7 @@ import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber, tap } from 'rxjs'
 import z from 'zod'
 
-import { Task, TaskReport, TaskStatus as TaskStatusModel } from '@redgent/db'
+import { Task, TaskReport } from '@redgent/db'
 import {
   CommentNode,
   ExecuteSubscribeOutputSchema,
@@ -24,10 +28,17 @@ import {
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { TASK_EXECUTE_EVENT } from '../task/task.constants'
+import {
+  TaskExecutionInputSchema,
+  TaskReportStatusInputSchema,
+} from './task-execution.dto'
+
+export type ExecuteContext = {
+  reportId: string
+}
 
 @Injectable()
 export class TaskExecutionService {
-  private readonly CACHE_KEY_PREFIX_POST = 'redgent:link:'
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
   readonly logger = new Logger(TaskExecutionService.name)
@@ -44,12 +55,21 @@ export class TaskExecutionService {
    * @param taskConfig 任务配置
    * @returns Observable<TaskProgress>
    */
-  execute(taskConfig: Task): Observable<TaskProgress> {
+  executeObservable(
+    taskConfig: Task,
+    context?: ExecuteContext,
+  ): Observable<TaskProgress> {
+    if (!context) {
+      context = {
+        reportId: crypto.randomUUID(),
+      }
+    }
     return new Observable((subscriber: Subscriber<TaskProgress>) => {
       const run = async () => {
-        const startTime = performance.now()
         try {
-          await this._startTask(taskConfig, subscriber)
+          const startTime = performance.now()
+
+          await this._startTask(taskConfig, subscriber, context)
 
           let links = await this._fetchLinks(taskConfig, subscriber)
           if (links.length === 0) {
@@ -58,7 +78,7 @@ export class TaskExecutionService {
           }
 
           if (taskConfig.enableCache) {
-            links = await this._filterLinks(links, subscriber)
+            links = await this._filterLinks(taskConfig, links, subscriber)
             if (links.length === 0) {
               subscriber.complete()
               return
@@ -79,15 +99,18 @@ export class TaskExecutionService {
             await this._analyze(taskConfig, completeLinkData, subscriber)
           await this._saveResults(
             taskConfig,
-            reportTitle,
-            reportContent,
-            startTime,
+            {
+              reportTitle,
+              reportContent,
+            },
             subscriber,
+            context,
+            startTime,
           )
 
           subscriber.complete()
         } catch (error) {
-          await this._handleError(error, taskConfig, subscriber)
+          await this._handleError(error, taskConfig, context, subscriber)
         }
       }
 
@@ -96,6 +119,7 @@ export class TaskExecutionService {
       tap(progress => {
         this.ee.emit(TASK_EXECUTE_EVENT, {
           taskId: taskConfig.id,
+          reportId: context.reportId,
           name: taskConfig.name,
           progress,
         } satisfies z.infer<typeof ExecuteSubscribeOutputSchema>)
@@ -103,17 +127,53 @@ export class TaskExecutionService {
     )
   }
 
+  async execute(taskConfig: Task): Promise<
+    | {
+        status: 'cancel'
+      }
+    | {
+        status: 'running'
+        reportId: string
+      }
+  > {
+    // 检查任务是否已在执行
+    const isRunning = await this.cacheManager.get<string>(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
+    if (isRunning) {
+      return {
+        status: 'cancel',
+      }
+    }
+    const context: ExecuteContext = {
+      reportId: crypto.randomUUID(),
+    }
+
+    void this.executeObservable(taskConfig, context).subscribe()
+    return {
+      status: 'running',
+      reportId: context.reportId,
+    }
+  }
+
   private async _startTask(
     taskConfig: Task,
     subscriber: Subscriber<TaskProgress>,
+    context: ExecuteContext,
   ) {
-    await this.prismaService.task.update({
-      where: { id: taskConfig.id },
-      data: { status: TaskStatusModel.running },
-    })
+    await Promise.all([
+      await this.cacheManager.set(
+        `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+        context.reportId,
+        1000 * 60, // 1 minute
+      ),
+    ])
     subscriber.next({
       status: TaskProgressStatus.TASK_START,
       message: `任务 "${taskConfig.name}" 已开始`,
+      data: {
+        reportId: context.reportId,
+      },
     })
   }
 
@@ -139,18 +199,13 @@ export class TaskExecutionService {
       link => link.ups > 0 || link.num_comments > 0,
     )
 
-    // 由于 v5 版本的 openRouter provider 暂不兼容 只能使用deepseek的api
-    // chat 模型上下文不够大 暂时处理
-    // 帖子数量大于50时，按照ups排序，取前50个
-    if (filteredLinks.length > 50) {
-      filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 30)
+    // 由于 v5 版本的 openRouter provider 暂不兼容 只能使用deepseek的api 上下文不够用
+    if (filteredLinks.length > 20) {
+      filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 20)
     }
 
     if (filteredLinks.length === 0) {
-      subscriber.next({
-        status: TaskProgressStatus.TASK_CANCEL,
-        message: '没有发现任何帖子，任务结束。',
-      })
+      await this._handleCancel(taskConfig, '没有发现任何帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.FETCH_COMPLETE,
@@ -161,6 +216,7 @@ export class TaskExecutionService {
   }
 
   private async _filterLinks(
+    taskConfig: Task,
     links: RedditLinkInfoUntrusted[],
     subscriber: Subscriber<TaskProgress>,
   ): Promise<RedditLinkInfoUntrusted[]> {
@@ -169,14 +225,14 @@ export class TaskExecutionService {
       message: '开始查询缓存，并进行过滤',
     })
 
-    const cacheKeys = links.map(l => `${this.CACHE_KEY_PREFIX_POST}${l.id}`)
+    const cacheKeys = links.map(l => `${CACHE_KEY_PREFIX_LINK}${l.id}`)
     const cachedValues = await this.cacheManager.mget(cacheKeys)
     const newLinks = links.filter(
       (_, index) => cachedValues[index] === undefined,
     )
     if (newLinks.length > 0) {
       const pairsToCache = newLinks.map(p => ({
-        key: `${this.CACHE_KEY_PREFIX_POST}${p.id}`,
+        key: `${CACHE_KEY_PREFIX_LINK}${p.id}`,
         value: 1,
         ttl: this.CACHE_TTL,
       }))
@@ -186,14 +242,11 @@ export class TaskExecutionService {
     }
 
     if (newLinks.length === 0) {
-      subscriber.next({
-        status: TaskProgressStatus.TASK_CANCEL,
-        message: '所有帖子都已被处理过，没有新内容，任务结束。',
-      })
+      await this._handleCancel(taskConfig, '无新帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.FILTER_COMPLETE,
-        message: `缓存查询完成，发现 ${newLinks.length} 个新帖子`,
+        message: `发现${newLinks.length}个新帖子`,
       })
     }
     return newLinks
@@ -210,7 +263,7 @@ export class TaskExecutionService {
 
     subscriber.next({
       status: TaskProgressStatus.SELECT_START,
-      message: `帖子过多（${links.length} > ${this.MAX_LINKS_PER_TASK}），开始筛选...`,
+      message: `精选中...`,
     })
 
     const linkInfoToSelect = links.map(link => ({
@@ -228,14 +281,11 @@ export class TaskExecutionService {
     )
 
     if (filteredLinks.length === 0) {
-      subscriber.next({
-        status: TaskProgressStatus.TASK_CANCEL,
-        message: '筛选后没有帖子，任务结束。',
-      })
+      await this._handleCancel(taskConfig, '无相关帖子', subscriber)
     } else {
       subscriber.next({
         status: TaskProgressStatus.SELECT_COMPLETE,
-        message: `筛选完成，选出 ${filteredLinks.length} 个最相关的帖子`,
+        message: `选出${filteredLinks.length}个最相关的帖子`,
       })
     }
     return filteredLinks
@@ -247,7 +297,7 @@ export class TaskExecutionService {
   ) {
     subscriber.next({
       status: TaskProgressStatus.FETCH_CONTENT_START,
-      message: `正在为 ${links.length} 个帖子获取完整内容...`,
+      message: `为${links.length}个帖子获取完整内容...`,
     })
 
     const completeLinkData = await this.redditService.getCommentsByLinkIds(
@@ -271,7 +321,7 @@ export class TaskExecutionService {
   ) {
     subscriber.next({
       status: TaskProgressStatus.ANALYZE_START,
-      message: `正在调用 AI 服务分析 ${completeLinkData.length} 个帖子...`,
+      message: `AI 分析中...`,
     })
 
     const analysisResult = await this.analyze(taskConfig, completeLinkData)
@@ -285,32 +335,28 @@ export class TaskExecutionService {
 
   private async _saveResults(
     taskConfig: Task,
-    reportTitle: string,
-    reportContent: PrismaJson.ReportContent,
-    startTime: number,
+    report: {
+      reportTitle: TaskReport['title']
+      reportContent: TaskReport['content']
+    },
     subscriber: Subscriber<TaskProgress>,
+    context: ExecuteContext,
+    startTime: number,
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [, taskReport] = await Promise.all([
-      this.prismaService.task.update({
-        where: { id: taskConfig.id },
-        data: {
-          lastExecutedAt: new Date(),
-          status: TaskStatusModel.active,
-        },
-      }),
-
-      this.prismaService.taskReport.create({
-        data: {
-          taskId: taskConfig.id,
-          title: reportTitle,
-          content: reportContent,
-          executionDuration,
-        },
-      }),
-    ])
-
+    const taskReport = await this.prismaService.taskReport.create({
+      data: {
+        id: context.reportId,
+        taskId: taskConfig.id,
+        title: report.reportTitle,
+        content: report.reportContent,
+        executionDuration,
+      },
+    })
+    await this.cacheManager.del(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
     subscriber.next({
       status: TaskProgressStatus.TASK_COMPLETE,
       message: '任务成功执行完毕',
@@ -321,18 +367,14 @@ export class TaskExecutionService {
   private async _handleError(
     error: unknown,
     taskConfig: Task,
+    context: ExecuteContext,
     subscriber: Subscriber<TaskProgress>,
   ) {
     this.logger.error(error)
-    await this.prismaService.task.update({
-      where: { id: taskConfig.id },
-      data: {
-        lastFailureAt: new Date(),
-        lastErrorMessage: error instanceof Error ? error.message : '未知错误',
-        status: TaskStatusModel.active,
-      },
-    })
-
+    const message = error instanceof Error ? error.message : '未知错误'
+    await this.cacheManager.del(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
     if (APICallError.isInstance(error)) {
       subscriber.error({
         status: TaskProgressStatus.TASK_ERROR,
@@ -341,9 +383,23 @@ export class TaskExecutionService {
     } else {
       subscriber.error({
         status: TaskProgressStatus.TASK_ERROR,
-        message: `任务 "${taskConfig.name}" 执行失败 ${error instanceof Error ? error.message : ''}`,
+        message: `任务 "${taskConfig.name}" 执行失败 ${message}`,
       })
     }
+  }
+
+  private async _handleCancel(
+    taskConfig: Task,
+    message: string,
+    subscriber: Subscriber<TaskProgress>,
+  ) {
+    await this.cacheManager.del(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
+    subscriber.next({
+      status: TaskProgressStatus.TASK_CANCEL,
+      message: message,
+    })
   }
 
   async selectMostRelevantLinks(
@@ -420,6 +476,40 @@ export class TaskExecutionService {
       } else {
         this.logger.error(error)
         throw new Error('无法进行 AI 分析，请稍后重试')
+      }
+    }
+  }
+
+  async isRunning(input: z.infer<typeof TaskExecutionInputSchema>) {
+    return await this.cacheManager.get<string>(
+      `${CACHE_KEY_PREFIX_TASK_RUNNING}${input.taskId}`,
+    )
+  }
+
+  async reportStatus(input: z.infer<typeof TaskReportStatusInputSchema>) {
+    const taskIsRunning = await this.isRunning(input)
+    const reportIsRunning = input.reportId === taskIsRunning
+    if (reportIsRunning) {
+      return {
+        status: 'running',
+      }
+    }
+    // 查询报告
+    const report = await this.prismaService.taskReport.findUnique({
+      where: {
+        id: input.reportId,
+      },
+      select: {
+        id: true,
+      },
+    })
+    if (report) {
+      return {
+        status: 'success',
+      }
+    } else {
+      return {
+        status: 'failure',
       }
     }
   }

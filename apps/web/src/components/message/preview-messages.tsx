@@ -45,7 +45,7 @@ export const PreviewMessage = ({
         'flex gap-4 rounded-lg py-2 text-sm',
         message.role === 'assistant'
           ? 'mr-4 justify-self-start'
-          : 'bg-primary-foreground ml-4 justify-self-end px-2 outline',
+          : 'bg-primary-foreground ml-12 justify-self-end px-2 outline',
       )}
     >
       {message.role === 'assistant' && (

@@ -59,9 +59,6 @@ export class TaskService {
         enableCache: true,
         updatedAt: true,
         createdAt: true,
-        lastErrorMessage: true,
-        lastExecutedAt: true,
-        lastFailureAt: true,
       },
     })
   }

@@ -137,7 +137,7 @@ export class TaskScheduleService implements OnModuleInit {
    */
   private executeTask(task: Task) {
     this.logger.log(`Executing task: "${task.name}" (ID: ${task.id})`)
-    this.taskExecutionService.execute(task).subscribe({
+    this.taskExecutionService.executeObservable(task).subscribe({
       next: progress => {
         this.logger.log(
           `Task "${task.name}" (ID: ${task.id}) execution progress:`,

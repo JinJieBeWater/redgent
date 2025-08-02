@@ -9,6 +9,8 @@ import { Button } from '@web/components/ui/button'
 import { Card, CardContent, CardTitle } from '@web/components/ui/card'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatIntervalTime } from '@web/lib/format-interval-time'
+import { formatRelativeTime } from '@web/lib/format-relative-time'
+import { cn } from '@web/lib/utils'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import cronstrue from 'cronstrue'
@@ -20,6 +22,7 @@ import {
   Hash,
   Play,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import type { TaskReportMiniSchema } from '@redgent/shared'
@@ -30,14 +33,18 @@ export const TaskDetailUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    {
+      type: 'tool-ShowTaskDetailUI'
+      state: 'input-available' | 'output-available'
+    }
+  >
 }) => {
-  if (part.type !== 'tool-ShowTaskDetailUI') return null
-
   const { input } = part
-  if (!input?.taskId) return null
 
-  const { sendMessage, addToolResult, setMessages, messages } = useChatContext()
+  const { sendMessage, addToolResult, setMessages, messages, status } =
+    useChatContext()
 
   // 获取任务详情
   const {
@@ -109,7 +116,7 @@ export const TaskDetailUI = ({
         },
       },
     })
-  }, [allReports, totalCount, nextCursor, task])
+  }, [allReports, totalCount, nextCursor, task, addToolResult, part.toolCallId])
 
   if (taskPending || reportsPending) {
     return <LoadingMessage />
@@ -193,7 +200,7 @@ export const TaskDetailUI = ({
 
           {/* 任务配置 */}
           <div className="grid grid-flow-col gap-x-4 gap-y-2 text-xs">
-            <div className="flex items-center gap-1 truncate text-xs">
+            <div className="flex items-center gap-2 truncate text-xs">
               <Clock className="text-muted-foreground h-3 w-3" />
               {task.scheduleType === 'cron'
                 ? cronstrue.toString(task.scheduleExpression)
@@ -225,47 +232,63 @@ export const TaskDetailUI = ({
           ) : (
             allReports.length > 0 && (
               <div>
-                <div className="grid grid-cols-1 gap-2 gap-x-3 md:grid-cols-2">
+                <div
+                  className={cn(
+                    'grid grid-cols-1 gap-2 gap-x-3',
+                    allReports.length > 1 && 'md:grid-cols-2',
+                  )}
+                >
                   {allReports.map((report, index) => (
                     <Button
                       variant={'outline'}
                       key={report.id}
                       size={'sm'}
-                      className="text-foreground justify-start px-2 text-xs"
+                      className="text-foreground flex justify-between px-2 text-xs"
                       onClick={() => {
                         handleReportClick(report)
                       }}
+                      title={report.title || '未命名报告'}
                     >
-                      <span>#{index}</span>
-                      <span className="truncate">{report.title}</span>
+                      <div className="line-clamp-1 flex gap-1">
+                        <span className="text-muted-foreground">#{index}</span>
+                        <span className="truncate">
+                          {report.title || '未命名报告'}
+                        </span>
+                      </div>
+                      {/* 创建时间 */}
+                      <div className="text-muted-foreground text-xs">
+                        {formatRelativeTime(report.createdAt)}
+                      </div>
                     </Button>
                   ))}
                 </div>
 
                 {/* 加载更多按钮 */}
-                {hasNextPage && (
-                  <div className="flex justify-center pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                      className="flex h-6 items-center gap-1 text-xs"
-                    >
-                      {isFetchingNextPage ? (
-                        <>
-                          <Spinner />
-                          加载中
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="h-3 w-3" />
-                          更多
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
+                {hasNextPage &&
+                  reportsData.pages[reportsData.pages.length - 1]?.total >
+                    allReports.length && (
+                    <div className="flex justify-center pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchNextPage()}
+                        disabled={isFetchingNextPage}
+                        className="flex h-6 items-center gap-1 text-xs"
+                      >
+                        {isFetchingNextPage ? (
+                          <>
+                            <Spinner className="h-3 w-3" />
+                            加载中
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="h-3 w-3" />
+                            更多
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
               </div>
             )
           )}
@@ -275,9 +298,13 @@ export const TaskDetailUI = ({
             size={'sm'}
             className="w-full text-xs"
             onClick={() => {
-              sendMessage({
-                text: `立即执行任务 ${task.name}`,
-              })
+              if (status === 'ready') {
+                sendMessage({
+                  text: `立即执行任务 "${task.name}"`,
+                })
+              } else {
+                toast.info('请等待当前任务完成')
+              }
             }}
           >
             <Play className="h-4 w-4" />

@@ -3,8 +3,6 @@ import { initTRPC } from '@trpc/server'
 import * as trpcExpress from '@trpc/server/adapters/express'
 import superjson from 'superjson'
 
-import { TrpcRouter } from './trpc.router'
-
 export async function createContext({
   req,
 }: trpcExpress.CreateExpressContextOptions) {

@@ -10,6 +10,11 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": ["DATABASE_URL"]
     },
+    "web#build": {
+      "dependsOn": ["core#build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**"]
+    },
     "lint": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*", "eslint.config.*"]

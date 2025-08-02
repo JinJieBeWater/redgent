@@ -19,10 +19,11 @@ import { ErrorMessage, LoadingMessage } from './common'
 export const LatestReportUI = ({
   part,
 }: {
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    { type: 'tool-ShowLatestReportUI' }
+  >
 }) => {
-  if (part.type !== 'tool-ShowLatestReportUI') return null
-
   const {
     data,
     fetchNextPage,
@@ -74,7 +75,7 @@ export const LatestReportUI = ({
         total: totalCount,
       },
     })
-  }, [allReports, totalCount, nextCursor])
+  }, [allReports, totalCount, nextCursor, addToolResult, part.toolCallId])
 
   const isPending = reportListPending
   if (isPending) {
@@ -128,8 +129,10 @@ export const LatestReportUI = ({
     <div className="space-y-2">
       {/* 报告列表标题 */}
       <div className="flex items-center gap-2">
-        <FileText className="text-muted-foreground h-4 w-4" />
-        <span className="text-foreground text-sm font-medium">最新报告</span>
+        <FileText className="text-muted-foreground h-4 w-4 shrink-0" />
+        <span className="text-foreground shrink-0 text-sm font-medium">
+          最新报告
+        </span>
         {allReports.length > 0 && (
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <Hash className="h-3 w-3" />
@@ -146,18 +149,54 @@ export const LatestReportUI = ({
               variant={'outline'}
               key={report.id}
               size={'sm'}
-              className="text-foreground h-auto flex-col items-start justify-start px-2 py-2 text-xs"
+              className="text-foreground h-auto flex-col items-start justify-start truncate p-3 text-xs"
               onClick={() => {
                 handleReportClick(report)
               }}
             >
-              <div className="flex w-full items-center gap-2">
-                <span>#{index + 1}</span>
+              <div
+                className="flex w-full items-center gap-2"
+                title={report.title || '未命名报告'}
+              >
+                <span className="text-muted-foreground">#{index + 1}</span>
                 <span className="truncate">{report.title || '未命名报告'}</span>
               </div>
-              <div className="mt-1 flex w-full items-center gap-2 text-xs">
+              <div className="mt-1 flex w-full items-end gap-2 text-xs">
                 {report.task?.name && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge
+                    variant="default"
+                    className="text-xs"
+                    onClick={e => {
+                      e.stopPropagation()
+                      setMessages([
+                        ...messages,
+                        {
+                          id: generateId(),
+                          role: 'user',
+                          parts: [
+                            {
+                              type: 'text',
+                              text: `查看任务 "${report.task.name}"`,
+                            },
+                          ],
+                        },
+                        {
+                          id: generateId(),
+                          role: 'assistant',
+                          parts: [
+                            {
+                              type: 'tool-ShowTaskDetailUI',
+                              toolCallId: generateId(),
+                              state: 'input-available',
+                              input: {
+                                taskId: report.taskId,
+                              },
+                            },
+                          ],
+                        },
+                      ])
+                    }}
+                  >
                     {report.task.name}
                   </Badge>
                 )}
@@ -175,7 +214,7 @@ export const LatestReportUI = ({
       )}
 
       {/* 加载更多按钮 */}
-      {hasNextPage && (
+      {hasNextPage && totalCount > allReports.length && (
         <div className="border-border/50 flex justify-center border-t pt-2">
           <Button
             variant="outline"

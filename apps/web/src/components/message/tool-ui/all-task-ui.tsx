@@ -17,10 +17,11 @@ export const AllTaskUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    { type: 'tool-ShowAllTaskUI' }
+  >
 }) => {
-  if (part.type !== 'tool-ShowAllTaskUI') return null
-
   const { input } = part
   const {
     data,
@@ -74,7 +75,7 @@ export const AllTaskUI = ({
         total: totalCount,
       },
     })
-  }, [allTasks, totalCount, nextCursor])
+  }, [allTasks, totalCount, nextCursor, addToolResult, part.toolCallId])
 
   const isPending = taskListPending
   if (isPending) {
@@ -128,8 +129,10 @@ export const AllTaskUI = ({
     <div className="space-y-2">
       {/* 任务列表标题 */}
       <div className="flex items-center gap-2">
-        <List className="text-muted-foreground h-4 w-4" />
-        <span className="text-foreground text-sm font-medium">任务列表</span>
+        <List className="text-muted-foreground h-4 w-4 shrink-0" />
+        <span className="text-foreground shrink-0 text-sm font-medium">
+          任务列表
+        </span>
         {allTasks.length > 0 && (
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <Hash className="h-3 w-3" />
@@ -158,29 +161,30 @@ export const AllTaskUI = ({
       )}
 
       {/* 加载更多按钮 */}
-      {hasNextPage && (
-        <div className="border-border/50 flex justify-center border-t pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="flex items-center gap-2 text-xs"
-          >
-            {isFetchingNextPage ? (
-              <>
-                <Spinner />
-                加载中...
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4" />
-                加载更多
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+      {hasNextPage &&
+        data.pages[data.pages.length - 1]?.total > allTasks.length && (
+          <div className="border-border/50 flex justify-center border-t pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="flex items-center gap-2 text-xs"
+            >
+              {isFetchingNextPage ? (
+                <>
+                  <Spinner />
+                  加载中...
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4" />
+                  加载更多
+                </>
+              )}
+            </Button>
+          </div>
+        )}
     </div>
   )
 }

@@ -1,14 +1,20 @@
-import type z from 'zod'
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useSubscription } from '@trpc/tanstack-react-query'
 import { trpc } from '@web/router'
-import { Activity, Home } from 'lucide-react'
+import { Activity, AlertCircle, Sparkle } from 'lucide-react'
+import z from 'zod'
 
 import type { ExecuteSubscribeOutputSchema } from '@redgent/shared'
 
 import { ModeToggle } from './mode-toggle'
 import { Button } from './ui/button'
+
+function hasDataProperty(
+  obj: unknown,
+): obj is { data: z.infer<typeof ExecuteSubscribeOutputSchema> } {
+  return typeof obj === 'object' && obj !== null && 'data' in obj
+}
 
 export default function Header() {
   const [message, setMessage] = useState('')
@@ -17,51 +23,43 @@ export default function Header() {
   )
 
   useEffect(() => {
-    console.log(data)
-    console.log(status)
     if (status === 'error') {
-      setMessage(error.message)
-    } else if (status === 'connecting') {
-      setMessage('连接中...')
+      setMessage(`网络错误 ${error.message || error}`)
     } else if (status === 'idle') {
       setMessage('空闲')
     } else if (status === 'pending') {
-      if (data && (data as any).data) {
-        const res = (data as any).data as z.infer<
-          typeof ExecuteSubscribeOutputSchema
-        >
-
+      if (data && hasDataProperty(data)) {
+        const res = data.data
         setMessage(`${res.name} ${res.progress.message}`)
-      } else {
-        setMessage('监听中...')
       }
     }
-  }, [status, data])
+  }, [status, data, error])
   return (
-    <header className="max-w-screen flex items-center justify-between px-4 py-2">
+    <header className="flex max-w-screen items-center justify-between px-4 py-2">
       {/* 新对话 */}
-      <nav>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-full"
-          asChild
-        >
+      <nav className="shrink-0 grow-0">
+        <Button variant="ghost" className="h-8 w-8" asChild>
           <Link to="/" aria-label="首页">
-            <Home className="h-4 w-4" />
+            <Sparkle className="h-4 w-4" />
           </Link>
         </Button>
       </nav>
       {/* 中间显示激活任务数量 */}
-      <nav>
-        <Button variant="ghost" asChild className="max-w-80 md:max-w-none">
-          <Link to="/" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            <span className="truncate">{message}</span>
+      <nav className="flex grow-1 items-center justify-center">
+        <Button variant="ghost" asChild>
+          <Link to="/" className="mx-4 flex animate-pulse items-center gap-2">
+            {status === 'error' ? (
+              <AlertCircle className="h-4 w-4" />
+            ) : (
+              <Activity className="h-4 w-4" />
+            )}
+            <p className="line-clamp-1 max-w-[50vw] truncate">{message}</p>
           </Link>
         </Button>
       </nav>
-      <ModeToggle />
+      <nav className="shrink-0 grow-0">
+        <ModeToggle />
+      </nav>
     </header>
   )
 }

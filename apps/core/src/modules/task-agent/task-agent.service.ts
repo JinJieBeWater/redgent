@@ -1,13 +1,11 @@
 import { TrpcRouter } from '@core/processors/trpc/trpc.router'
 import { Injectable, Logger } from '@nestjs/common'
-import { tool, UIDataTypes, UIMessage, UIMessageStreamWriter } from 'ai'
-import { lastValueFrom, pipe, tap, toArray } from 'rxjs'
+import { tool } from 'ai'
 import z from 'zod'
 
 import { TaskStatus } from '@redgent/db'
 import {
   createTaskSchema,
-  TaskProgressStatus,
   TaskReportMiniSchema,
   TaskReportSchema,
   TaskSchema,
@@ -26,9 +24,7 @@ export class TaskAgentService {
     private readonly taskExecutionService: TaskExecutionService,
     private readonly trpcRouter: TrpcRouter,
   ) {}
-  readonly tools = (
-    writer: UIMessageStreamWriter<UIMessage<unknown, UIDataTypes>>,
-  ) => ({
+  readonly tools = () => ({
     GetAllTasks: tool({
       description: '列出所有Reddit抓取任务',
       inputSchema: z.object({
@@ -156,45 +152,29 @@ export class TaskAgentService {
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
       }),
+      outputSchema: z.object({
+        reportId: z.string().describe('报告id'),
+        status: z.enum(['running', 'success', 'failure']).describe('执行状态'),
+        message: z.string().describe('执行消息'),
+        taskName: z.string().describe('任务名称'),
+      }),
       execute: async input => {
-        try {
-          this.logger.debug('immediatelyExecuteTask 工具被调用')
-          const task = await this.prismaService.task.findUnique({
-            where: { id: input.taskId },
-          })
-          if (!task) {
-            throw new Error('任务不存在')
-          }
-          const TaskProgresss = await lastValueFrom(
-            this.taskExecutionService.execute(task).pipe(
-              toArray(),
-              pipe(
-                tap(progress => {
-                  this.logger.log(
-                    `Task "${task.name}" (ID: ${task.id}) execution progress:`,
-                    JSON.stringify(progress, null, 2),
-                  )
-                }),
-              ),
-            ),
-          )
-          const lastProgress = TaskProgresss[TaskProgresss.length - 1]
-          if (lastProgress.status !== TaskProgressStatus.TASK_COMPLETE) {
-            return {
-              message: '任务未完成',
-              data: lastProgress.message,
-              status: lastProgress.status,
-            }
-          }
-          const report = lastProgress.data
-
-          return {
-            data: report,
-            message: '任务执行成功',
-            status: lastProgress.status,
-          }
-        } catch (error) {
-          this.logger.error(error)
+        const task = await this.prismaService.task.findUnique({
+          where: { id: input.taskId },
+        })
+        if (!task) {
+          throw new Error('任务不存在')
+        }
+        const res = await this.taskExecutionService.execute(task)
+        if (res.status === 'cancel') {
+          throw new Error('当前任务已经在执行中')
+        }
+        return {
+          taskName: task.name,
+          message: 'running',
+          status: 'running',
+          reportId: res.reportId,
+          progress: [],
         }
       },
     }),

@@ -8,13 +8,14 @@
     "db:deploy": "prisma migrate deploy"
   },
   "files": [
-    "dist"
+    "dist",
+    "generated"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "import": "./src/index.ts"
     }
   },
   "dependencies": {

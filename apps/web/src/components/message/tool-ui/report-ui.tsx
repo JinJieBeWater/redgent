@@ -2,6 +2,7 @@ import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@web/components/ui/badge'
+import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
@@ -14,12 +15,17 @@ export const ReportUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    {
+      type: 'tool-ShowReportUI'
+      state: 'input-available' | 'output-available'
+    }
+  >
 }) => {
-  if (part.type !== 'tool-ShowReportUI') return null
+  const { setMessages, messages } = useChatContext()
 
   const { input } = part
-  if (!input?.id) return null
 
   const { data, isPending, isError, error } = useQuery(
     trpc.report.byId.queryOptions(
@@ -51,23 +57,21 @@ export const ReportUI = ({
   const { content } = data
   const findings = content?.findings || []
 
-  const { setMessages, messages } = useChatContext()
-
   return (
     <div className="space-y-4">
       {/* 报告标题和基本信息 */}
       <div className="space-y-3">
         <div className="flex-1 space-y-2">
-          <h3 className="text-base font-medium leading-relaxed">
+          <h3 className="text-base leading-relaxed font-medium">
             {data.title || '未命名报告'}
           </h3>
 
           {/* 报告元信息 */}
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
             {data.task?.name && (
-              <Badge
+              <Button
                 variant="secondary"
-                className="cursor-pointer text-xs"
+                className="h-max cursor-pointer px-2 py-0.5 text-xs"
                 onClick={() => {
                   setMessages([
                     ...messages,
@@ -99,18 +103,20 @@ export const ReportUI = ({
                 }}
               >
                 {data.task.name}
-              </Badge>
+              </Button>
             )}
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               <span>创建时间：{formatRelativeTime(data.createdAt)}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>
-                执行时间：{(data.executionDuration / 1000).toFixed(1)}s
-              </span>
-            </div>
+            {data.executionDuration && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>
+                  执行时间：{(data.executionDuration / 1000).toFixed(1)}s
+                </span>
+              </div>
+            )}
           </div>
 
           {/* 发现数量统计 */}
@@ -145,7 +151,7 @@ export const ReportUI = ({
                     finding.supportingLinkIds.length > 0 && (
                       <div className="mt-1">
                         <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                          <span>相关链接</span>
+                          <span className="shrink-0">相关链接</span>
                           {finding.supportingLinkIds.map((id, index) => (
                             <Badge variant="outline" key={index}>
                               <a

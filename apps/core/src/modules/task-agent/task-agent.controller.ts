@@ -41,7 +41,7 @@ export class TaskAgentController {
       const stream = createUIMessageStream<AppMessage>({
         execute({ writer }) {
           const msg = convertToModelMessages(chat.messages, {
-            tools: self.taskAgentService.tools(writer),
+            tools: self.taskAgentService.tools(),
             ignoreIncompleteToolCalls: true,
           })
 
@@ -53,7 +53,7 @@ export class TaskAgentController {
               ignoreIncompleteToolCalls: true,
             }),
             system: redgentAgentSystem,
-            tools: self.taskAgentService.tools(writer),
+            tools: self.taskAgentService.tools(),
             onError: error => {
               // 记录错误日志但不暴露敏感信息
               self.logger.error('任务代理错误 streamText:', error)

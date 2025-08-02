@@ -11,6 +11,7 @@ generator client {
 
 generator json {
   provider = "prisma-json-types-generator"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -36,12 +37,6 @@ model Task {
 
   enableCache Boolean @default(true)
 
-  lastExecutedAt DateTime?
-
-  lastFailureAt DateTime?
-
-  lastErrorMessage String?
-
   reports TaskReport[]
 
   createdAt DateTime @default(now())
@@ -59,8 +54,6 @@ enum TaskStatus {
   active
 
   paused
-
-  running
 }
 
 /// 分析报告模型 - 存储AI分析Reddit内容后生成的结果

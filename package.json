@@ -27,14 +27,5 @@
   "engines": {
     "node": ">=18"
   },
-  "prettier": "@redgent/prettier-config",
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,mdx,html,css}": [
-      "prettier --write"
-    ]
-  }
+  "prettier": "@redgent/prettier-config"
 }

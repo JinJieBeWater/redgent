@@ -9,6 +9,7 @@ import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
 import { DefaultChatTransport, generateId } from 'ai'
+import { FileText, List, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
@@ -25,11 +26,21 @@ function App() {
     onError: err => {
       toast.error(`发生错误，请重试！${err.message ? err.message : ''}`)
     },
-    sendAutomaticallyWhen: ({}) => {
+    sendAutomaticallyWhen: () => {
       return isSendAutomatically.current
     },
   })
-  const { messages, sendMessage, status, setMessages } = context
+  const { messages, sendMessage, status, setMessages: rawSetMessages } = context
+  const setMessages = useCallback(
+    (input: Parameters<typeof rawSetMessages>[0]) => {
+      if (status !== 'ready') {
+        toast.info('请等待当前对话完成')
+      } else {
+        rawSetMessages(input)
+      }
+    },
+    [status, rawSetMessages],
+  )
 
   /** 出现错误时重新提交 */
   const handleErrorSubmit = () => {
@@ -100,9 +111,9 @@ function App() {
     scrollToElement,
   ])
 
-  /** 处理客户端工具滚动 */
+  /** 处理点击客户端工具滚动 */
   useEffect(() => {
-    if (!lastPart) return
+    if (!lastPart?.type) return
     if (
       lastPart.type === 'tool-ShowAllTaskUI' ||
       lastPart.type === 'tool-ShowTaskDetailUI' ||
@@ -111,7 +122,7 @@ function App() {
     ) {
       scrollToElement()
     }
-  }, [scrollToElement, lastPart])
+  }, [scrollToElement, messages.length, lastPart?.type])
 
   /** 处理操作按钮 */
   const handleConsentButtonClick = useCallback(
@@ -146,11 +157,16 @@ function App() {
         })
       }
     },
-    [messages, lastMessage, lastPart, sendMessage],
+    [messages, lastMessage, lastPart, sendMessage, setMessages],
   )
 
   return (
-    <ChatContextProvider value={context}>
+    <ChatContextProvider
+      value={{
+        ...context,
+        setMessages,
+      }}
+    >
       <div
         className={cn(
           'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
@@ -169,7 +185,7 @@ function App() {
         {/* 输入框容器 */}
         <div
           className={cn(
-            'my-4 grid w-full',
+            'my-4 w-full',
             messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
           )}
         >
@@ -184,7 +200,7 @@ function App() {
           <FormComponent
             className="mt-6"
             input={input}
-            placeholder="添加一个定时分析任务..."
+            placeholder="添加一个任务..."
             setInput={setInput}
             handleSubmit={() => {
               if (status === 'error') {
@@ -196,7 +212,101 @@ function App() {
             messages={messages}
             status={status}
             clearMessages={clearMessages}
-          />
+          >
+            {/* 建议输入 */}
+            {messages.length <= 0 && (
+              <div className="flex items-center gap-2">
+                {[['创建任务']].map(([prompt], index) => {
+                  return (
+                    <Button
+                      key={index}
+                      variant={'outline'}
+                      onClick={() =>
+                        sendMessage({
+                          text: prompt.trim(),
+                        })
+                      }
+                      className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                      title={prompt}
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span className="hidden sm:block">{prompt}</span>
+                    </Button>
+                  )
+                })}
+
+                <Button
+                  variant={'outline'}
+                  onClick={() => {
+                    setMessages([
+                      {
+                        id: generateId(),
+                        role: 'user',
+                        parts: [
+                          {
+                            type: 'text',
+                            text: '查看任务',
+                          },
+                        ],
+                      },
+                      {
+                        id: generateId(),
+                        role: 'assistant',
+                        parts: [
+                          {
+                            type: 'tool-ShowAllTaskUI',
+                            toolCallId: generateId(),
+                            state: 'input-available',
+                            input: {},
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                  className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                  title="查看任务"
+                >
+                  <List className="h-3 w-3" />
+                  <span className="hidden sm:block">查看任务</span>
+                </Button>
+
+                <Button
+                  variant={'outline'}
+                  onClick={() => {
+                    setMessages([
+                      {
+                        id: generateId(),
+                        role: 'user',
+                        parts: [
+                          {
+                            type: 'text',
+                            text: '最新报告',
+                          },
+                        ],
+                      },
+                      {
+                        id: generateId(),
+                        role: 'assistant',
+                        parts: [
+                          {
+                            type: 'tool-ShowLatestReportUI',
+                            toolCallId: generateId(),
+                            state: 'input-available',
+                            input: {},
+                          },
+                        ],
+                      },
+                    ])
+                  }}
+                  className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                  title="最新报告"
+                >
+                  <FileText className="h-3 w-3" />
+                  <span className="hidden sm:block">最新报告</span>
+                </Button>
+              </div>
+            )}
+          </FormComponent>
 
           {/* 请求用户同意 */}
           {lastMessage?.role === 'assistant' &&
@@ -222,91 +332,6 @@ function App() {
                 </Button>
               </div>
             )}
-
-          {/* 建议输入 */}
-          {messages.length <= 0 && (
-            <div className="mt-4 flex items-center gap-4">
-              {[['创建任务']].map(([prompt], index) => {
-                return (
-                  <Button
-                    key={index}
-                    variant={'outline'}
-                    onClick={() =>
-                      sendMessage({
-                        text: prompt.trim(),
-                      })
-                    }
-                  >
-                    {prompt}
-                  </Button>
-                )
-              })}
-
-              <Button
-                variant={'outline'}
-                onClick={() => {
-                  setMessages([
-                    {
-                      id: generateId(),
-                      role: 'user',
-                      parts: [
-                        {
-                          type: 'text',
-                          text: '查看任务',
-                        },
-                      ],
-                    },
-                    {
-                      id: generateId(),
-                      role: 'assistant',
-                      parts: [
-                        {
-                          type: 'tool-ShowAllTaskUI',
-                          toolCallId: generateId(),
-                          state: 'input-available',
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }}
-              >
-                查看任务
-              </Button>
-
-              <Button
-                variant={'outline'}
-                onClick={() => {
-                  setMessages([
-                    {
-                      id: generateId(),
-                      role: 'user',
-                      parts: [
-                        {
-                          type: 'text',
-                          text: '最新报告',
-                        },
-                      ],
-                    },
-                    {
-                      id: generateId(),
-                      role: 'assistant',
-                      parts: [
-                        {
-                          type: 'tool-ShowLatestReportUI',
-                          toolCallId: generateId(),
-                          state: 'input-available',
-                          input: {},
-                        },
-                      ],
-                    },
-                  ])
-                }}
-              >
-                最新报告
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </ChatContextProvider>
