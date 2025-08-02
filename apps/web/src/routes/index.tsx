@@ -214,7 +214,7 @@ function App() {
             clearMessages={clearMessages}
           >
             {/* 建议输入 */}
-            {messages.length <= 0 && (
+            {
               <div className="flex items-center gap-2">
                 {[['创建任务']].map(([prompt], index) => {
                   return (
@@ -239,6 +239,7 @@ function App() {
                   variant={'outline'}
                   onClick={() => {
                     setMessages([
+                      ...messages,
                       {
                         id: generateId(),
                         role: 'user',
@@ -274,6 +275,7 @@ function App() {
                   variant={'outline'}
                   onClick={() => {
                     setMessages([
+                      ...messages,
                       {
                         id: generateId(),
                         role: 'user',
@@ -305,7 +307,7 @@ function App() {
                   <span className="hidden sm:block">最新报告</span>
                 </Button>
               </div>
-            )}
+            }
           </FormComponent>
 
           {/* 请求用户同意 */}

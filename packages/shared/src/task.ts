@@ -9,7 +9,17 @@ export const createTaskSchema = z.object({
   prompt: z.string().describe('用户原封不动的输入'),
   payload: z
     .object({
-      keywords: z.array(z.string()).describe('关键词列表 AI自动生成'),
+      keywords: z
+        .array(
+          z
+            .string()
+            .describe(
+              '关键词 AI自动生成 注意：当用户输入非英文时, 需要生成两份关键词, 一份为用户使用的语言, 一份为英文',
+            ),
+        )
+        .describe(
+          '关键词列表 AI自动生成 注意：当用户输入非英文时, 需要生成两份关键词, 一份为用户使用的语言, 一份为英文',
+        ),
       dataSource: z.object({
         reddit: z.object({
           subreddits: z.array(z.string()).describe('Reddit 子版块列表'),
