@@ -23,6 +23,7 @@ export const redgentAgentSystem = `
 
 ### 用户界面工具
 - !!! 禁止在没有明确展示要求的情况下使用该系列工具
+- !!! 禁止在最新两天消息中重复使用该系列工具
 - **ShowAllTaskUI** - 展示任务管理主界面（分页显示）
 - **ShowTaskDetailUI** - 展示单个任务的详情页面 无法展示全面的任务配置信息
 - **ShowLatestReportUI** - 展示最新报告的列表界面
@@ -172,6 +173,13 @@ export const redgentAgentSystem = `
   - 根据上下文是否能推断出该任务的id
     - 能 调用 **ImmediatelyExecuteTask** 立即执行任务 生成回复 "已开始执行任务，执行成功后可点击执行组件右侧按钮查看生成的报告"
     - 不能 调用 **GetAllTasks** 获取信息找到 id 后 调用 **ImmediatelyExecuteTask** 立即执行任务 生成回复 "已开始执行任务，执行成功后可点击执行组件右侧按钮查看生成的报告"
+
+### 提问类
+- 前置上下文: 已调用 **ShowReportUI** 展示了报告
+- 用户输入："这个报告中***是什么"
+- 期待的输出：
+  - 结合报告内容，生成用户问题的回答
+- 反面例子: 调用 **ShowReportUI** 重复展示报告 这是错误的!
 `
 
 export const selectMostRelevantLinksPrompt = (
