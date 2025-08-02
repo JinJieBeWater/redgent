@@ -53,7 +53,9 @@ export default function Header() {
             ) : (
               <Activity className="h-4 w-4" />
             )}
-            <p className="line-clamp-1 max-w-[50vw] truncate">{message}</p>
+            {message && (
+              <p className="line-clamp-1 max-w-[50vw] truncate">{message}</p>
+            )}
           </Link>
         </Button>
       </nav>

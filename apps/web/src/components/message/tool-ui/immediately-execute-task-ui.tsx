@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
-import { trpc } from '@web/router'
+import { queryClient, trpc } from '@web/router'
 import { generateId } from 'ai'
 
 import { ErrorMessage, LoadingMessage } from './common'
@@ -70,7 +70,16 @@ export const ImmediatelyExecuteTaskUI = ({
     switch (data?.status) {
       case 'running':
         break
-      case 'success':
+      case 'success': {
+        queryClient.invalidateQueries(
+          trpc.report.paginateByTaskId.infiniteQueryFilter({
+            taskId: input.taskId,
+            limit: 4,
+          }),
+        )
+        queryClient.invalidateQueries(
+          trpc.report.paginate.infiniteQueryFilter(),
+        )
         addToolResult({
           tool: 'ImmediatelyExecuteTask',
           toolCallId: part.toolCallId,
@@ -82,6 +91,7 @@ export const ImmediatelyExecuteTaskUI = ({
           },
         })
         break
+      }
       case 'failure':
         addToolResult({
           tool: 'ImmediatelyExecuteTask',
@@ -97,7 +107,7 @@ export const ImmediatelyExecuteTaskUI = ({
       default:
         break
     }
-  }, [data, addToolResult, part.toolCallId, reportId, taskName])
+  }, [data, addToolResult, part.toolCallId, reportId, taskName, input.taskId])
 
   if (!data && isPending) {
     return <LoadingMessage message="正在查询任务执行状态..." />
