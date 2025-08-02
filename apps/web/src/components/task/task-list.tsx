@@ -1,8 +1,8 @@
 import type { ComponentProps } from 'react'
 import { memo } from 'react'
-import { Ban, Eye, Pause, Play, Zap } from 'lucide-react'
+import { Ban, Eye, Pause, Play } from 'lucide-react'
 
-import type { Task } from '@redgent/db'
+import type { Task, TaskStatus } from '@redgent/db'
 
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
@@ -12,7 +12,7 @@ type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
 
 // 根据任务状态确定状态信息
 export const getStatusInfo = (
-  status: string,
+  status: TaskStatus,
 ): {
   variant: 'default' | 'secondary' | 'outline' | 'destructive'
   icon: React.ComponentType<React.SVGAttributes<SVGElement>>
@@ -23,8 +23,6 @@ export const getStatusInfo = (
       return { variant: 'default', icon: Pause, label: '激活' }
     case 'paused':
       return { variant: 'secondary', icon: Play, label: '暂停' }
-    case 'running':
-      return { variant: 'outline', icon: Zap, label: '运行中' }
     default:
       return { variant: 'destructive', icon: Ban, label: '未知' }
   }
