@@ -244,11 +244,20 @@ export const TaskDetailUI = ({
                       onClick={() => {
                         handleReportClick(report)
                       }}
-                      title={report.title || '未命名报告'}
+                      disabled={report.errorMessage !== null}
+                      title={
+                        report.errorMessage !== null
+                          ? '任务运行失败'
+                          : report.title || '未命名报告'
+                      }
                     >
                       <div className="line-clamp-1 flex gap-1">
                         <span className="text-muted-foreground">#{index}</span>
-                        <span className="truncate">{report.title}</span>
+                        <span className="truncate">
+                          {report.errorMessage !== null
+                            ? '任务运行失败'
+                            : report.title || '未命名报告'}
+                        </span>
                       </div>
                       {/* 创建时间 */}
                       <div className="text-muted-foreground text-xs">

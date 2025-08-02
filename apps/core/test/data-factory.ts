@@ -317,9 +317,6 @@ export function createMockTaskConfig(overrides?: Partial<Task>): Task {
     updatedAt: new Date(),
     status: 'active',
     enableCache: true,
-    lastExecutedAt: null,
-    lastFailureAt: null,
-    lastErrorMessage: null,
     ...overrides,
   }
 }

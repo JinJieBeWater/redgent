@@ -19,6 +19,8 @@ export const ReportUI = ({
 }) => {
   if (part.type !== 'tool-ShowReportUI') return null
 
+  const { setMessages, messages } = useChatContext()
+
   const { input } = part
   if (!input?.id) return null
 
@@ -52,7 +54,14 @@ export const ReportUI = ({
   const { content } = data
   const findings = content?.findings || []
 
-  const { setMessages, messages } = useChatContext()
+  if (data.errorMessage !== null) {
+    return (
+      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+        <FileText className="h-4 w-4" />
+        <span>任务运行失败</span>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -106,12 +115,14 @@ export const ReportUI = ({
               <Calendar className="h-3 w-3" />
               <span>创建时间：{formatRelativeTime(data.createdAt)}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>
-                执行时间：{(data.executionDuration / 1000).toFixed(1)}s
-              </span>
-            </div>
+            {data.executionDuration && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>
+                  执行时间：{(data.executionDuration / 1000).toFixed(1)}s
+                </span>
+              </div>
+            )}
           </div>
 
           {/* 发现数量统计 */}

@@ -37,12 +37,6 @@ model Task {
 
   enableCache Boolean @default(true)
 
-  lastExecutedAt DateTime?
-
-  lastFailureAt DateTime?
-
-  lastErrorMessage String?
-
   reports TaskReport[]
 
   createdAt DateTime @default(now())
@@ -66,12 +60,14 @@ enum TaskStatus {
 model TaskReport {
   id String @id @default(uuid()) @db.Uuid
 
-  title String
+  title String?
 
   /// [ReportContent]
-  content Json
+  content Json?
 
-  executionDuration Int
+  executionDuration Int?
+
+  errorMessage String?
 
   createdAt DateTime @default(now())
 

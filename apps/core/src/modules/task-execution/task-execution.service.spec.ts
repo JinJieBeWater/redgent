@@ -67,6 +67,7 @@ describe(TaskExecutionService.name, () => {
             set: vi.fn().mockResolvedValue(undefined),
             mget: vi.fn().mockResolvedValue([]),
             mset: vi.fn().mockResolvedValue(undefined),
+            del: vi.fn().mockResolvedValue(undefined),
           },
         },
       ],

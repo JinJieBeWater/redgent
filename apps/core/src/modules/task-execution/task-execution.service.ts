@@ -31,7 +31,9 @@ type ExecuteContext = {
 
 @Injectable()
 export class TaskExecutionService {
-  private readonly CACHE_KEY_PREFIX_POST = 'redgent:link:'
+  private readonly CACHE_KEY_PREFIX = 'redgent:'
+  private readonly CACHE_KEY_PREFIX_LINK = `${this.CACHE_KEY_PREFIX}link:`
+  private readonly CACHE_KEY_PREFIX_TASK_REPORT_RUNNING = `${this.CACHE_KEY_PREFIX}task-report-running:`
   private readonly CACHE_TTL = 1000 * 60 * 60 * 36 // 36 hours
   private readonly MAX_LINKS_PER_TASK = 10
   readonly logger = new Logger(TaskExecutionService.name)
@@ -103,7 +105,7 @@ export class TaskExecutionService {
 
           subscriber.complete()
         } catch (error) {
-          await this._handleError(error, taskConfig, subscriber)
+          await this._handleError(error, taskConfig, context, subscriber)
         }
       }
 
@@ -139,6 +141,19 @@ export class TaskExecutionService {
     subscriber: Subscriber<TaskProgress>,
     context: ExecuteContext,
   ) {
+    await Promise.all([
+      await this.prismaService.taskReport.create({
+        data: {
+          id: context.reportId,
+          taskId: taskConfig.id,
+        },
+      }),
+      await this.cacheManager.set(
+        `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
+        true,
+        1000 * 60, // 1 minute
+      ),
+    ])
     subscriber.next({
       status: TaskProgressStatus.TASK_START,
       message: `任务 "${taskConfig.name}" 已开始`,
@@ -198,14 +213,14 @@ export class TaskExecutionService {
       message: '开始查询缓存，并进行过滤',
     })
 
-    const cacheKeys = links.map(l => `${this.CACHE_KEY_PREFIX_POST}${l.id}`)
+    const cacheKeys = links.map(l => `${this.CACHE_KEY_PREFIX_LINK}${l.id}`)
     const cachedValues = await this.cacheManager.mget(cacheKeys)
     const newLinks = links.filter(
       (_, index) => cachedValues[index] === undefined,
     )
     if (newLinks.length > 0) {
       const pairsToCache = newLinks.map(p => ({
-        key: `${this.CACHE_KEY_PREFIX_POST}${p.id}`,
+        key: `${this.CACHE_KEY_PREFIX_LINK}${p.id}`,
         value: 1,
         ttl: this.CACHE_TTL,
       }))
@@ -315,8 +330,8 @@ export class TaskExecutionService {
   private async _saveResults(
     taskConfig: Task,
     report: {
-      reportTitle: string
-      reportContent: PrismaJson.ReportContent
+      reportTitle: TaskReport['title']
+      reportContent: TaskReport['content']
     },
     subscriber: Subscriber<TaskProgress>,
     context: ExecuteContext,
@@ -324,24 +339,19 @@ export class TaskExecutionService {
   ) {
     const executionDuration = performance.now() - startTime
 
-    const [, taskReport] = await Promise.all([
-      this.prismaService.task.update({
-        where: { id: taskConfig.id },
-        data: {
-          lastExecutedAt: new Date(),
-          status: TaskStatusModel.active,
-        },
-      }),
-
-      this.prismaService.taskReport.create({
+    const [taskReport] = await Promise.all([
+      await this.prismaService.taskReport.create({
         data: {
           id: context.reportId,
           taskId: taskConfig.id,
           title: report.reportTitle,
-          content: report.reportContent,
+          content: report.reportContent || undefined,
           executionDuration,
         },
       }),
+      await this.cacheManager.del(
+        `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
+      ),
     ])
 
     subscriber.next({
@@ -354,18 +364,21 @@ export class TaskExecutionService {
   private async _handleError(
     error: unknown,
     taskConfig: Task,
+    context: ExecuteContext,
     subscriber: Subscriber<TaskProgress>,
   ) {
-    this.logger.error(error)
-    await this.prismaService.task.update({
-      where: { id: taskConfig.id },
-      data: {
-        lastFailureAt: new Date(),
-        lastErrorMessage: error instanceof Error ? error.message : '未知错误',
-        status: TaskStatusModel.active,
-      },
-    })
-
+    const message = error instanceof Error ? error.message : '未知错误'
+    await Promise.all([
+      await this.prismaService.taskReport.update({
+        where: { id: context.reportId },
+        data: {
+          errorMessage: message,
+        },
+      }),
+      await this.cacheManager.del(
+        `${this.CACHE_KEY_PREFIX_TASK_REPORT_RUNNING}${context.reportId}`,
+      ),
+    ])
     if (APICallError.isInstance(error)) {
       subscriber.error({
         status: TaskProgressStatus.TASK_ERROR,
@@ -374,7 +387,7 @@ export class TaskExecutionService {
     } else {
       subscriber.error({
         status: TaskProgressStatus.TASK_ERROR,
-        message: `任务 "${taskConfig.name}" 执行失败 ${error instanceof Error ? error.message : ''}`,
+        message: `任务 "${taskConfig.name}" 执行失败 ${message}`,
       })
     }
   }

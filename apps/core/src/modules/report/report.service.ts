@@ -29,6 +29,7 @@ export class ReportService {
         taskId: true,
         createdAt: true,
         executionDuration: true,
+        errorMessage: true,
       },
     })
     return report
@@ -57,6 +58,7 @@ export class ReportService {
           },
           createdAt: true,
           taskId: true,
+          errorMessage: true,
         },
       }),
       this.prisma.taskReport.count(),
@@ -94,6 +96,7 @@ export class ReportService {
           title: true,
           createdAt: true,
           taskId: true,
+          errorMessage: true,
         },
       }),
       this.prisma.taskReport.count({
