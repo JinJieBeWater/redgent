@@ -14,14 +14,7 @@ import { cn } from '@web/lib/utils'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import cronstrue from 'cronstrue'
-import {
-  AlertCircle,
-  ChevronDown,
-  Clock,
-  FileText,
-  Hash,
-  Play,
-} from 'lucide-react'
+import { ChevronDown, Clock, FileText, Hash, Play } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -128,10 +121,11 @@ export const TaskDetailUI = ({
 
   if (!task) {
     return (
-      <div className="flex items-center gap-2">
-        <AlertCircle className="text-destructive h-4 w-4" />
-        <p className="text-sm">任务不存在</p>
-      </div>
+      <ErrorMessage
+        error={{
+          message: '任务不存在',
+        }}
+      />
     )
   }
 

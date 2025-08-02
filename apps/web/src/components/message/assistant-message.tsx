@@ -21,6 +21,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
         const { type } = part
         switch (type) {
           case 'step-start':
+          case 'dynamic-tool':
             return null
           case 'text':
             return (
@@ -46,6 +47,8 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
           case 'tool-CreateTask':
           case 'tool-UpdateTask':
           case 'tool-DeleteTask':
+          case 'tool-GetLatestReport':
+          case 'tool-GetReportByTaskId':
             return null
           case 'tool-ImmediatelyExecuteTask': {
             const { state } = part
@@ -95,6 +98,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
             }
             return null
           }
+
           default:
             return (
               <MarkdownRenderer

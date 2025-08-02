@@ -5,7 +5,7 @@ import { ScheduleType, Task, TaskStatus } from '@redgent/db'
 import { TaskReportSchema } from './task-report'
 
 export const createTaskSchema = z.object({
-  name: z.string().describe('简短任务名称 AI自动生成'),
+  name: z.string().describe('简短任务名称 AI自动生成 应该尽可能的简短'),
   prompt: z.string().describe('用户原封不动的输入'),
   payload: z
     .object({

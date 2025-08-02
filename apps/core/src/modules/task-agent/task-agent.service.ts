@@ -81,7 +81,7 @@ export class TaskAgentService {
       服务端工具 获取最新的10个任务报告的粗略信息
       - 当需要获取最新的任务报告时，调用该工具
       `,
-      inputSchema: z.void(),
+      inputSchema: z.object({}),
       execute: async () => {
         this.logger.debug('getLatestReport 工具被调用')
         const reports = await this.prismaService.taskReport.findMany({

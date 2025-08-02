@@ -117,6 +117,7 @@ export class TaskExecutionService {
       void run()
     }).pipe(
       tap(progress => {
+        this.logger.debug('task execute progress:', progress)
         this.ee.emit(TASK_EXECUTE_EVENT, {
           taskId: taskConfig.id,
           reportId: context.reportId,

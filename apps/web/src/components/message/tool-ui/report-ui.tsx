@@ -7,7 +7,7 @@ import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
-import { Calendar, Clock, ExternalLink, FileText, List } from 'lucide-react'
+import { Calendar, Clock, ExternalLink, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
@@ -47,10 +47,11 @@ export const ReportUI = ({
 
   if (!data) {
     return (
-      <div className="text-muted-foreground flex items-center gap-2 text-sm">
-        <FileText className="h-4 w-4" />
-        <span>报告不存在</span>
-      </div>
+      <ErrorMessage
+        error={{
+          message: '报告不存在',
+        }}
+      />
     )
   }
 
