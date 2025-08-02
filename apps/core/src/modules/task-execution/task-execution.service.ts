@@ -25,6 +25,10 @@ import { PrismaService } from '../../processors/prisma/prisma.service'
 import { RedditService } from '../reddit/reddit.service'
 import { TASK_EXECUTE_EVENT } from '../task/task.constants'
 
+type ExecuteContext = {
+  reportId: string
+}
+
 @Injectable()
 export class TaskExecutionService {
   private readonly CACHE_KEY_PREFIX_POST = 'redgent:link:'
@@ -44,12 +48,21 @@ export class TaskExecutionService {
    * @param taskConfig 任务配置
    * @returns Observable<TaskProgress>
    */
-  execute(taskConfig: Task): Observable<TaskProgress> {
+  executeObservable(
+    taskConfig: Task,
+    context?: ExecuteContext,
+  ): Observable<TaskProgress> {
+    if (!context) {
+      context = {
+        reportId: crypto.randomUUID(),
+      }
+    }
     return new Observable((subscriber: Subscriber<TaskProgress>) => {
       const run = async () => {
-        const startTime = performance.now()
         try {
-          await this._startTask(taskConfig, subscriber)
+          const startTime = performance.now()
+
+          await this._startTask(taskConfig, subscriber, context)
 
           let links = await this._fetchLinks(taskConfig, subscriber)
           if (links.length === 0) {
@@ -79,10 +92,13 @@ export class TaskExecutionService {
             await this._analyze(taskConfig, completeLinkData, subscriber)
           await this._saveResults(
             taskConfig,
-            reportTitle,
-            reportContent,
-            startTime,
+            {
+              reportTitle,
+              reportContent,
+            },
             subscriber,
+            context,
+            startTime,
           )
 
           subscriber.complete()
@@ -96,6 +112,7 @@ export class TaskExecutionService {
       tap(progress => {
         this.ee.emit(TASK_EXECUTE_EVENT, {
           taskId: taskConfig.id,
+          reportId: context.reportId,
           name: taskConfig.name,
           progress,
         } satisfies z.infer<typeof ExecuteSubscribeOutputSchema>)
@@ -103,9 +120,24 @@ export class TaskExecutionService {
     )
   }
 
+  execute(taskConfig: Task): {
+    taskId: string
+    reportId: string
+  } {
+    const context: ExecuteContext = {
+      reportId: crypto.randomUUID(),
+    }
+    void this.executeObservable(taskConfig, context).subscribe()
+    return {
+      taskId: taskConfig.id,
+      reportId: context.reportId,
+    }
+  }
+
   private async _startTask(
     taskConfig: Task,
     subscriber: Subscriber<TaskProgress>,
+    context: ExecuteContext,
   ) {
     await this.prismaService.task.update({
       where: { id: taskConfig.id },
@@ -114,6 +146,9 @@ export class TaskExecutionService {
     subscriber.next({
       status: TaskProgressStatus.TASK_START,
       message: `任务 "${taskConfig.name}" 已开始`,
+      data: {
+        reportId: context.reportId,
+      },
     })
   }
 
@@ -139,11 +174,9 @@ export class TaskExecutionService {
       link => link.ups > 0 || link.num_comments > 0,
     )
 
-    // 由于 v5 版本的 openRouter provider 暂不兼容 只能使用deepseek的api
-    // chat 模型上下文不够大 暂时处理
-    // 帖子数量大于50时，按照ups排序，取前50个
-    if (filteredLinks.length > 50) {
-      filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 30)
+    // 由于 v5 版本的 openRouter provider 暂不兼容 只能使用deepseek的api 上下文不够用
+    if (filteredLinks.length > 20) {
+      filteredLinks = filteredLinks.sort((a, b) => b.ups - a.ups).slice(0, 20)
     }
 
     if (filteredLinks.length === 0) {
@@ -188,12 +221,12 @@ export class TaskExecutionService {
     if (newLinks.length === 0) {
       subscriber.next({
         status: TaskProgressStatus.TASK_CANCEL,
-        message: '所有帖子都已被处理过，没有新内容，任务结束。',
+        message: '任务取消: 无新内容',
       })
     } else {
       subscriber.next({
         status: TaskProgressStatus.FILTER_COMPLETE,
-        message: `缓存查询完成，发现 ${newLinks.length} 个新帖子`,
+        message: `发现${newLinks.length}个新帖子`,
       })
     }
     return newLinks
@@ -285,10 +318,13 @@ export class TaskExecutionService {
 
   private async _saveResults(
     taskConfig: Task,
-    reportTitle: string,
-    reportContent: PrismaJson.ReportContent,
-    startTime: number,
+    report: {
+      reportTitle: string
+      reportContent: PrismaJson.ReportContent
+    },
     subscriber: Subscriber<TaskProgress>,
+    context: ExecuteContext,
+    startTime: number,
   ) {
     const executionDuration = performance.now() - startTime
 
@@ -303,9 +339,10 @@ export class TaskExecutionService {
 
       this.prismaService.taskReport.create({
         data: {
+          id: context.reportId,
           taskId: taskConfig.id,
-          title: reportTitle,
-          content: reportContent,
+          title: report.reportTitle,
+          content: report.reportContent,
           executionDuration,
         },
       }),

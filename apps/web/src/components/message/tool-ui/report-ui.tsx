@@ -2,6 +2,7 @@ import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@web/components/ui/badge'
+import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
@@ -65,9 +66,9 @@ export const ReportUI = ({
           {/* 报告元信息 */}
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
             {data.task?.name && (
-              <Badge
+              <Button
                 variant="secondary"
-                className="cursor-pointer text-xs"
+                className="h-max cursor-pointer px-2 py-0.5 text-xs"
                 onClick={() => {
                   setMessages([
                     ...messages,
@@ -99,7 +100,7 @@ export const ReportUI = ({
                 }}
               >
                 {data.task.name}
-              </Badge>
+              </Button>
             )}
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />

@@ -36,7 +36,7 @@ export default function Header() {
     }
   }, [status, data])
   return (
-    <header className="flex max-w-screen items-center justify-between px-4 py-2">
+    <header className="max-w-screen flex items-center justify-between px-4 py-2">
       {/* 新对话 */}
       <nav>
         <Button variant="ghost" className="h-8 w-8" asChild>
@@ -48,13 +48,13 @@ export default function Header() {
       {/* 中间显示激活任务数量 */}
       <nav>
         <Button variant="ghost" asChild className="max-w-80 md:max-w-none">
-          <Link to="/" className="flex animate-pulse items-center gap-2">
+          <Link to="/" className="mx-4 flex animate-pulse items-center gap-2">
             {status === 'connecting' ? (
               <Spinner className="h-4 w-4" />
             ) : (
               <Activity className="h-4 w-4" />
             )}
-            {message}
+            <p className="line-clamp-1 truncate">{message}</p>
           </Link>
         </Button>
       </nav>

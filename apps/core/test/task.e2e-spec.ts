@@ -73,7 +73,7 @@ describe('analysis-task (e2e)', () => {
       })
 
       const progressObservable =
-        analysisTaskExecutionService.execute(mockTaskConfig)
+        analysisTaskExecutionService.executeObservable(mockTaskConfig)
 
       const progressEvents = await lastValueFrom<TaskProgress[]>(
         progressObservable.pipe(toArray()),

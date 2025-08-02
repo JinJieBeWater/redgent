@@ -98,7 +98,7 @@ describe(TaskExecutionService.name, () => {
     it('应该在不过滤的情况下成功执行任务', async () => {
       const taskConfig = { ...mockTaskConfig, enableCache: false }
 
-      const progressObservable = service.execute(taskConfig)
+      const progressObservable = service.executeObservable(taskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
       )
@@ -123,7 +123,7 @@ describe(TaskExecutionService.name, () => {
       // Mock mget to return one cached link and one new one
       cacheManager.mget.mockResolvedValue([1, undefined])
 
-      const progressObservable = service.execute(taskConfig)
+      const progressObservable = service.executeObservable(taskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
       )
@@ -158,7 +158,7 @@ describe(TaskExecutionService.name, () => {
       // Mock mget to return all links as cached
       cacheManager.mget.mockResolvedValue(mockRedditLinks.map(() => 1))
 
-      const progressObservable = service.execute(taskConfig)
+      const progressObservable = service.executeObservable(taskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
       )
@@ -176,7 +176,7 @@ describe(TaskExecutionService.name, () => {
     it('应该在从 Reddit 获取不到链接时取消任务', async () => {
       redditService.getHotLinksByQueriesAndSubreddits.mockResolvedValue([])
 
-      const progressObservable = service.execute(mockTaskConfig)
+      const progressObservable = service.executeObservable(mockTaskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
       )
@@ -195,7 +195,7 @@ describe(TaskExecutionService.name, () => {
         new Error(errorMessage),
       )
 
-      const progressObservable = service.execute(mockTaskConfig)
+      const progressObservable = service.executeObservable(mockTaskConfig)
 
       await expect(
         lastValueFrom(progressObservable.pipe(toArray())),
@@ -246,7 +246,7 @@ describe(TaskExecutionService.name, () => {
       )
       cacheManager.mget.mockResolvedValue(inputLinkData.map(() => undefined))
 
-      const progressObservable = service.execute(mockTaskConfig)
+      const progressObservable = service.executeObservable(mockTaskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
       )
@@ -281,7 +281,7 @@ describe(TaskExecutionService.name, () => {
       cacheManager.mget.mockResolvedValue([undefined, undefined])
       vi.spyOn(service, 'selectMostRelevantLinks')
 
-      const progressObservable = service.execute(mockTaskConfig)
+      const progressObservable = service.executeObservable(mockTaskConfig)
       const progressEvents = await lastValueFrom(
         progressObservable.pipe(toArray()),
       )
@@ -307,7 +307,7 @@ describe(TaskExecutionService.name, () => {
         new Error('测试预期的报错 Failed to fetch comments'),
       )
 
-      const progressObservable = service.execute(mockTaskConfig)
+      const progressObservable = service.executeObservable(mockTaskConfig)
 
       await expect(
         lastValueFrom(progressObservable.pipe(toArray())),

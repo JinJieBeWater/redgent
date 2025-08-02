@@ -238,7 +238,7 @@ export const TaskDetailUI = ({
                       variant={'outline'}
                       key={report.id}
                       size={'sm'}
-                      className="text-foreground px-2 text-xs"
+                      className="text-foreground flex justify-between px-2 text-xs"
                       onClick={() => {
                         handleReportClick(report)
                       }}
@@ -270,7 +270,7 @@ export const TaskDetailUI = ({
                       >
                         {isFetchingNextPage ? (
                           <>
-                            <Spinner />
+                            <Spinner className="h-3 w-3" />
                             加载中
                           </>
                         ) : (
@@ -292,7 +292,7 @@ export const TaskDetailUI = ({
             className="w-full text-xs"
             onClick={() => {
               sendMessage({
-                text: `立即执行任务 ${task.name}`,
+                text: `立即执行任务 "${task.name}"`,
               })
             }}
           >

@@ -45,7 +45,7 @@ async function evaluateTaskExecutionPrompt() {
 
   try {
     await lastValueFrom(
-      executionService.execute(taskConfig).pipe(
+      executionService.executeObservable(taskConfig).pipe(
         tap({
           next: progress => {
             console.log(`🔄 任务进度: ${JSON.stringify(progress, null, 2)}`)

@@ -85,7 +85,8 @@ describe(TaskExecutionService.name, () => {
 
     vi.spyOn(taskExecutionService, 'analyze')
 
-    const progressObservable = taskExecutionService.execute(mockTaskConfig)
+    const progressObservable =
+      taskExecutionService.executeObservable(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
         // tap((data) => console.log(data)),
@@ -127,7 +128,8 @@ describe(TaskExecutionService.name, () => {
 
     const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
-    const progressObservable = taskExecutionService.execute(mockTaskConfig)
+    const progressObservable =
+      taskExecutionService.executeObservable(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
         // tap((data) => console.log(data)),
@@ -169,7 +171,8 @@ describe(TaskExecutionService.name, () => {
 
     const cacheMsetSpy = vi.spyOn(cacheManager, 'mset')
 
-    const progressObservable = taskExecutionService.execute(mockTaskConfig)
+    const progressObservable =
+      taskExecutionService.executeObservable(mockTaskConfig)
     const progressEvents = await lastValueFrom(
       progressObservable.pipe(
         // tap((data) => console.log(data)),

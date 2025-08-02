@@ -160,11 +160,45 @@ export const LatestReportUI = ({
                 <span className="text-muted-foreground">#{index + 1}</span>
                 <span className="truncate">{report.title || '未命名报告'}</span>
               </div>
-              <div className="mt-1 flex w-full items-center gap-2 text-xs">
+              <div className="mt-1 flex w-full items-end gap-2 text-xs">
                 {report.task?.name && (
-                  <Badge variant="default" className="text-xs">
+                  <Button
+                    variant="default"
+                    size={'sm'}
+                    className="h-max px-2 py-1 text-xs"
+                    onClick={e => {
+                      e.stopPropagation()
+                      setMessages([
+                        ...messages,
+                        {
+                          id: generateId(),
+                          role: 'user',
+                          parts: [
+                            {
+                              type: 'text',
+                              text: `查看任务 "${report.task.name}"`,
+                            },
+                          ],
+                        },
+                        {
+                          id: generateId(),
+                          role: 'assistant',
+                          parts: [
+                            {
+                              type: 'tool-ShowTaskDetailUI',
+                              toolCallId: generateId(),
+                              state: 'input-available',
+                              input: {
+                                taskId: report.taskId,
+                              },
+                            },
+                          ],
+                        },
+                      ])
+                    }}
+                  >
                     {report.task.name}
-                  </Badge>
+                  </Button>
                 )}
                 <Badge variant="secondary" className="text-xs">
                   {formatRelativeTime(report.createdAt)}

@@ -7,6 +7,7 @@ import z from 'zod'
 import { TaskStatus } from '@redgent/db'
 import {
   createTaskSchema,
+  TaskProgressSchema,
   TaskProgressStatus,
   TaskReportMiniSchema,
   TaskReportSchema,
@@ -156,45 +157,30 @@ export class TaskAgentService {
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
       }),
+      outputSchema: z.object({
+        status: z
+          .enum(['running', 'success', 'cancel', 'failure'])
+          .describe('执行状态'),
+        message: z.string().describe('执行消息'),
+        taskId: z.uuid().describe('任务id'),
+        reportId: z.string().describe('报告id'),
+        progress: z.array(TaskProgressSchema).describe('任务进度历史'),
+      }),
       execute: async input => {
-        try {
-          this.logger.debug('immediatelyExecuteTask 工具被调用')
-          const task = await this.prismaService.task.findUnique({
-            where: { id: input.taskId },
-          })
-          if (!task) {
-            throw new Error('任务不存在')
-          }
-          const TaskProgresss = await lastValueFrom(
-            this.taskExecutionService.execute(task).pipe(
-              toArray(),
-              pipe(
-                tap(progress => {
-                  this.logger.log(
-                    `Task "${task.name}" (ID: ${task.id}) execution progress:`,
-                    JSON.stringify(progress, null, 2),
-                  )
-                }),
-              ),
-            ),
-          )
-          const lastProgress = TaskProgresss[TaskProgresss.length - 1]
-          if (lastProgress.status !== TaskProgressStatus.TASK_COMPLETE) {
-            return {
-              message: '任务未完成',
-              data: lastProgress.message,
-              status: lastProgress.status,
-            }
-          }
-          const report = lastProgress.data
-
-          return {
-            data: report,
-            message: '任务执行成功',
-            status: lastProgress.status,
-          }
-        } catch (error) {
-          this.logger.error(error)
+        this.logger.debug('immediatelyExecuteTask 工具被调用')
+        const task = await this.prismaService.task.findUnique({
+          where: { id: input.taskId },
+        })
+        if (!task) {
+          throw new Error('任务不存在')
+        }
+        const { reportId, taskId } = this.taskExecutionService.execute(task)
+        return {
+          message: '任务正在执行中',
+          status: 'running',
+          taskId,
+          reportId,
+          progress: [],
         }
       },
     }),

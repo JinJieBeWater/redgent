@@ -95,7 +95,7 @@ export const BaseTaskProgressSchema = z.object({
 })
 
 // 错误对象的联合类型（支持 Error 实例或普通错误对象）
-const ErrorSchema = z.union([
+export const ErrorSchema = z.union([
   z.instanceof(Error),
   z.object({
     message: z.string(),
@@ -105,20 +105,23 @@ const ErrorSchema = z.union([
 ])
 
 // 1. 任务生命周期状态
-const TaskStartProgressSchema = BaseTaskProgressSchema.extend({
+export const TaskStartProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.TASK_START),
+  data: z.object({
+    reportId: z.string().describe('任务报告 id，该阶段正在生成数据库中还没有'),
+  }),
 })
 
-const TaskCompleteProgressSchema = BaseTaskProgressSchema.extend({
+export const TaskCompleteProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.TASK_COMPLETE),
   data: TaskReportSchema,
 })
 
-const TaskCancelProgressSchema = BaseTaskProgressSchema.extend({
+export const TaskCancelProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.TASK_CANCEL),
 })
 
-const TaskErrorProgressSchema = BaseTaskProgressSchema.extend({
+export const TaskErrorProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.TASK_ERROR),
   data: z.object({
     error: ErrorSchema,
@@ -126,52 +129,54 @@ const TaskErrorProgressSchema = BaseTaskProgressSchema.extend({
 })
 
 // 2. 数据抓取阶段
-const FetchStartProgressSchema = BaseTaskProgressSchema.extend({
+export const FetchStartProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.FETCH_START),
 })
 
-const FetchCompleteProgressSchema = BaseTaskProgressSchema.extend({
+export const FetchCompleteProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.FETCH_COMPLETE),
 })
 
 // 3. 数据过滤阶段
-const FilterStartProgressSchema = BaseTaskProgressSchema.extend({
+export const FilterStartProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.FILTER_START),
 })
 
-const FilterCompleteProgressSchema = BaseTaskProgressSchema.extend({
+export const FilterCompleteProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.FILTER_COMPLETE),
 })
 
 // 4. 筛选阶段
-const SelectStartProgressSchema = BaseTaskProgressSchema.extend({
+export const SelectStartProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.SELECT_START),
 })
 
-const SelectCompleteProgressSchema = BaseTaskProgressSchema.extend({
+export const SelectCompleteProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.SELECT_COMPLETE),
 })
 
 // 5. 获取完整内容阶段
-const FetchContentStartProgressSchema = BaseTaskProgressSchema.extend({
+export const FetchContentStartProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.FETCH_CONTENT_START),
 })
 
-const FetchContentCompleteProgressSchema = BaseTaskProgressSchema.extend({
-  status: z.literal(TaskProgressStatus.FETCH_CONTENT_COMPLETE),
-})
+export const FetchContentCompleteProgressSchema = BaseTaskProgressSchema.extend(
+  {
+    status: z.literal(TaskProgressStatus.FETCH_CONTENT_COMPLETE),
+  },
+)
 
 // 6. AI 分析阶段
-const AnalyzeStartProgressSchema = BaseTaskProgressSchema.extend({
+export const AnalyzeStartProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.ANALYZE_START),
 })
 
-const AnalyzeCompleteProgressSchema = BaseTaskProgressSchema.extend({
+export const AnalyzeCompleteProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.ANALYZE_COMPLETE),
 })
 
 // 7. 通用信息
-const InfoProgressSchema = BaseTaskProgressSchema.extend({
+export const InfoProgressSchema = BaseTaskProgressSchema.extend({
   status: z.literal(TaskProgressStatus.INFO),
 })
 
@@ -199,12 +204,8 @@ export const TaskProgressSchema = z.discriminatedUnion('status', [
 export type TaskProgress = z.infer<typeof TaskProgressSchema>
 
 export const ExecuteSubscribeOutputSchema = z.object({
-  taskId: z.uuid(),
+  taskId: z.uuid().describe('任务id'),
+  reportId: z.string().describe('报告id'),
   name: z.string().describe('任务名称'),
-  progress: z.union([
-    BaseTaskProgressSchema,
-    BaseTaskProgressSchema.extend({
-      data: TaskReportSchema,
-    }),
-  ]),
+  progress: TaskProgressSchema,
 })
