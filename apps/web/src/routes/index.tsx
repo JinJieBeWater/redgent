@@ -30,7 +30,17 @@ function App() {
       return isSendAutomatically.current
     },
   })
-  const { messages, sendMessage, status, setMessages } = context
+  const { messages, sendMessage, status, setMessages: rawSetMessages } = context
+  const setMessages = useCallback(
+    (input: Parameters<typeof rawSetMessages>[0]) => {
+      if (status !== 'ready') {
+        toast.info('请等待当前对话完成')
+      } else {
+        rawSetMessages(input)
+      }
+    },
+    [status, rawSetMessages],
+  )
 
   /** 出现错误时重新提交 */
   const handleErrorSubmit = () => {
@@ -151,7 +161,12 @@ function App() {
   )
 
   return (
-    <ChatContextProvider value={context}>
+    <ChatContextProvider
+      value={{
+        ...context,
+        setMessages,
+      }}
+    >
       <div
         className={cn(
           'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
