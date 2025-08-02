@@ -31,6 +31,6 @@ export const ErrorMessage = ({
 }) => (
   <div className="mt-2.5 flex items-center gap-2" {...props}>
     <AlertCircle className="h-4 w-4 shrink-0" />
-    <p>加载失败: {error?.message}</p>
+    <p>{error?.message}</p>
   </div>
 )

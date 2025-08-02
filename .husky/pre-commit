@@ -1,3 +1,5 @@
+# This script runs before committing
+
 echo "📦 Building project..."
 pnpm build
 
