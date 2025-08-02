@@ -26,7 +26,7 @@ function App() {
     onError: err => {
       toast.error(`发生错误，请重试！${err.message ? err.message : ''}`)
     },
-    sendAutomaticallyWhen: ({}) => {
+    sendAutomaticallyWhen: () => {
       return isSendAutomatically.current
     },
   })
@@ -147,7 +147,7 @@ function App() {
         })
       }
     },
-    [messages, lastMessage, lastPart, sendMessage],
+    [messages, lastMessage, lastPart, sendMessage, setMessages],
   )
 
   return (

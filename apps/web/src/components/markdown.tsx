@@ -368,7 +368,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         <div className="bg-accent border-border flex items-center justify-between border-b px-4 py-2">
           <div className="flex items-center gap-2">
             {language && (
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+              <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                 {language}
               </span>
             )}
@@ -454,7 +454,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 
           {/* Fade overlay for collapsed long code blocks */}
           {shouldShowExpandButton && !isExpanded && (
-            <div className="from-muted pointer-events-none absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t to-transparent">
+            <div className="from-muted pointer-events-none absolute right-0 bottom-0 left-0 h-12 bg-gradient-to-t to-transparent">
               <div className="pointer-events-auto absolute bottom-2 left-1/2 -translate-x-1/2 transform">
                 <button
                   onClick={toggleExpand}
@@ -559,7 +559,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           <span className="truncate font-medium">{domain}</span>
         </div>
         {title && (
-          <div className="px-2 pb-2 pt-1">
+          <div className="px-2 pt-1 pb-2">
             <h3 className="text-foreground m-0 line-clamp-3 text-sm font-normal">
               {title}
             </h3>
@@ -586,7 +586,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             rel="noopener noreferrer"
             className={
               isCitation
-                ? 'text-primary bg-primary/10 hover:bg-primary/20 focus:ring-primary m-0! px-1.25 inline-flex -translate-y-[1px] cursor-pointer items-center rounded-sm py-0.5 align-baseline text-xs font-medium leading-none no-underline focus:outline-none focus:ring-1'
+                ? 'text-primary bg-primary/10 hover:bg-primary/20 focus:ring-primary m-0! inline-flex -translate-y-[1px] cursor-pointer items-center rounded-sm px-1.25 py-0.5 align-baseline text-xs leading-none font-medium no-underline focus:ring-1 focus:outline-none'
                 : 'text-primary bg-primary/10 font-medium no-underline hover:underline'
             }
           >
@@ -865,7 +865,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           key={generateKey()}
           className={cn(
             alignClass,
-            'border-border bg-muted/50 !m-1 !text-wrap border-r !p-2 font-semibold last:border-r-0',
+            'border-border bg-muted/50 !m-1 border-r !p-2 font-semibold !text-wrap last:border-r-0',
           )}
         >
           {children}
@@ -875,7 +875,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           key={generateKey()}
           className={cn(
             alignClass,
-            'border-border !m-1 !text-wrap border-r !p-2 last:border-r-0',
+            'border-border !m-1 border-r !p-2 !text-wrap last:border-r-0',
           )}
         >
           {children}

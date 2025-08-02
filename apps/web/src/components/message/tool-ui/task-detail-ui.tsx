@@ -33,12 +33,15 @@ export const TaskDetailUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    {
+      type: 'tool-ShowTaskDetailUI'
+      state: 'input-available' | 'output-available'
+    }
+  >
 }) => {
-  if (part.type !== 'tool-ShowTaskDetailUI') return null
-
   const { input } = part
-  if (!input?.taskId) return null
 
   const { sendMessage, addToolResult, setMessages, messages, status } =
     useChatContext()
@@ -113,7 +116,7 @@ export const TaskDetailUI = ({
         },
       },
     })
-  }, [allReports, totalCount, nextCursor, task])
+  }, [allReports, totalCount, nextCursor, task, addToolResult, part.toolCallId])
 
   if (taskPending || reportsPending) {
     return <LoadingMessage />

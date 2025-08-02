@@ -47,7 +47,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
           case 'tool-UpdateTask':
           case 'tool-DeleteTask':
             return null
-          case 'tool-ImmediatelyExecuteTask':
+          case 'tool-ImmediatelyExecuteTask': {
             const { state } = part
             if (state === 'output-available') {
               return (
@@ -59,6 +59,7 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
               )
             }
             return null
+          }
           case 'tool-ShowLatestReportUI': {
             const { state } = part
             if (state === 'input-available' || state === 'output-available') {

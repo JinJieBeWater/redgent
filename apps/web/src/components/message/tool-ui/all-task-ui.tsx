@@ -17,10 +17,11 @@ export const AllTaskUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    { type: 'tool-ShowAllTaskUI' }
+  >
 }) => {
-  if (part.type !== 'tool-ShowAllTaskUI') return null
-
   const { input } = part
   const {
     data,
@@ -74,7 +75,7 @@ export const AllTaskUI = ({
         total: totalCount,
       },
     })
-  }, [allTasks, totalCount, nextCursor])
+  }, [allTasks, totalCount, nextCursor, addToolResult, part.toolCallId])
 
   const isPending = taskListPending
   if (isPending) {

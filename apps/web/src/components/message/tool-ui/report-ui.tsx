@@ -15,14 +15,17 @@ export const ReportUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    {
+      type: 'tool-ShowReportUI'
+      state: 'input-available' | 'output-available'
+    }
+  >
 }) => {
-  if (part.type !== 'tool-ShowReportUI') return null
-
   const { setMessages, messages } = useChatContext()
 
   const { input } = part
-  if (!input?.id) return null
 
   const { data, isPending, isError, error } = useQuery(
     trpc.report.byId.queryOptions(
@@ -59,7 +62,7 @@ export const ReportUI = ({
       {/* 报告标题和基本信息 */}
       <div className="space-y-3">
         <div className="flex-1 space-y-2">
-          <h3 className="text-base font-medium leading-relaxed">
+          <h3 className="text-base leading-relaxed font-medium">
             {data.title || '未命名报告'}
           </h3>
 

@@ -6,9 +6,11 @@ import { AlertCircle } from 'lucide-react'
 export const RequestUserConsentUI = ({
   part,
 }: {
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    { type: 'tool-RequestUserConsent' }
+  >
 }) => {
-  if (part.type !== 'tool-RequestUserConsent') return null
   const { input } = part
   if (!input?.message) return null
 

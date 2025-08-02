@@ -19,10 +19,11 @@ import { ErrorMessage, LoadingMessage } from './common'
 export const LatestReportUI = ({
   part,
 }: {
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    { type: 'tool-ShowLatestReportUI' }
+  >
 }) => {
-  if (part.type !== 'tool-ShowLatestReportUI') return null
-
   const {
     data,
     fetchNextPage,
@@ -74,7 +75,7 @@ export const LatestReportUI = ({
         total: totalCount,
       },
     })
-  }, [allReports, totalCount, nextCursor])
+  }, [allReports, totalCount, nextCursor, addToolResult, part.toolCallId])
 
   const isPending = reportListPending
   if (isPending) {

@@ -1,14 +1,20 @@
-import type z from 'zod'
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useSubscription } from '@trpc/tanstack-react-query'
 import { trpc } from '@web/router'
 import { Activity, AlertCircle, Sparkle } from 'lucide-react'
+import z from 'zod'
 
 import type { ExecuteSubscribeOutputSchema } from '@redgent/shared'
 
 import { ModeToggle } from './mode-toggle'
 import { Button } from './ui/button'
+
+function hasDataProperty(
+  obj: unknown,
+): obj is { data: z.infer<typeof ExecuteSubscribeOutputSchema> } {
+  return typeof obj === 'object' && obj !== null && 'data' in obj
+}
 
 export default function Header() {
   const [message, setMessage] = useState('')
@@ -19,22 +25,17 @@ export default function Header() {
   useEffect(() => {
     if (status === 'error') {
       setMessage(`网络错误 ${error.message || error}`)
-    } else if (status === 'connecting') {
     } else if (status === 'idle') {
       setMessage('空闲')
     } else if (status === 'pending') {
-      if (data && (data as any).data) {
-        const res = (data as any)?.data as z.infer<
-          typeof ExecuteSubscribeOutputSchema
-        >
+      if (data && hasDataProperty(data)) {
+        const res = data.data
         setMessage(`${res.name} ${res.progress.message}`)
-      } else {
-        message !== '' && setMessage('')
       }
     }
-  }, [status, data])
+  }, [status, data, error])
   return (
-    <header className="max-w-screen flex items-center justify-between px-4 py-2">
+    <header className="flex max-w-screen items-center justify-between px-4 py-2">
       {/* 新对话 */}
       <nav className="shrink-0 grow-0">
         <Button variant="ghost" className="h-8 w-8" asChild>
@@ -44,7 +45,7 @@ export default function Header() {
         </Button>
       </nav>
       {/* 中间显示激活任务数量 */}
-      <nav className="grow-1 flex items-center justify-center">
+      <nav className="flex grow-1 items-center justify-center">
         <Button variant="ghost" asChild>
           <Link to="/" className="mx-4 flex animate-pulse items-center gap-2">
             {status === 'error' ? (

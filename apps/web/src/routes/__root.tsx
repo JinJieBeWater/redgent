@@ -8,7 +8,7 @@ import Header from '@web/components/app-header'
 import { Toaster } from '@web/components/ui/sonner'
 
 export interface RouterAppContext {
-  // @ts-ignore
+  // @ts-expect-error 由于 AppRouter 引用自后端 node_modules 中的 trpc 版本相同但是实例不同，会报错
   trpc: TRPCOptionsProxy<AppRouter>
   queryClient: QueryClient
 }

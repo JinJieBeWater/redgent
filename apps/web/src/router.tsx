@@ -18,7 +18,7 @@ import { routeTree } from './routeTree.gen'
 
 export const queryClient = new QueryClient()
 
-// @ts-ignore
+// @ts-expect-error 由于 AppRouter 引用自后端 node_modules 中的 trpc 版本相同但是实例不同，会报错
 export const trpc = createTRPCOptionsProxy<AppRouter>({
   client: createTRPCClient({
     links: [

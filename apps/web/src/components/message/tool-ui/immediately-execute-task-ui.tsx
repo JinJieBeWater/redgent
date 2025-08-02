@@ -13,11 +13,11 @@ export const ImmediatelyExecuteTaskUI = ({
   part,
 }: {
   message: AppMessage
-  part: UIMessagePart<AppUIDataTypes, AppToolUI>
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    { type: 'tool-ImmediatelyExecuteTask'; state: 'output-available' }
+  >
 }) => {
-  if (part.type !== 'tool-ImmediatelyExecuteTask') return null
-  if (part.state !== 'output-available') return
-
   const { input, output } = part
 
   const { addToolResult, setMessages, messages } = useChatContext()
@@ -95,7 +95,7 @@ export const ImmediatelyExecuteTaskUI = ({
       default:
         break
     }
-  }, [data])
+  }, [data, addToolResult, part.toolCallId, output])
 
   if (!data && isPending) {
     return <LoadingMessage message="正在查询任务执行状态..." />
