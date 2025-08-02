@@ -22,6 +22,7 @@ import {
   Hash,
   Play,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import type { TaskReportMiniSchema } from '@redgent/shared'
@@ -39,7 +40,8 @@ export const TaskDetailUI = ({
   const { input } = part
   if (!input?.taskId) return null
 
-  const { sendMessage, addToolResult, setMessages, messages } = useChatContext()
+  const { sendMessage, addToolResult, setMessages, messages, status } =
+    useChatContext()
 
   // 获取任务详情
   const {
@@ -291,9 +293,13 @@ export const TaskDetailUI = ({
             size={'sm'}
             className="w-full text-xs"
             onClick={() => {
-              sendMessage({
-                text: `立即执行任务 "${task.name}"`,
-              })
+              if (status === 'ready') {
+                sendMessage({
+                  text: `立即执行任务 "${task.name}"`,
+                })
+              } else {
+                toast.info('请等待当前任务完成')
+              }
             }}
           >
             <Play className="h-4 w-4" />

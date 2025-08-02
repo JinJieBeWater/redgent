@@ -36,9 +36,9 @@ export default function Header() {
     }
   }, [status, data])
   return (
-    <header className="max-w-screen flex items-center justify-between px-4 py-2">
+    <header className="flex max-w-screen items-center justify-between px-4 py-2">
       {/* 新对话 */}
-      <nav>
+      <nav className="shrink-0 grow-0">
         <Button variant="ghost" className="h-8 w-8" asChild>
           <Link to="/" aria-label="首页">
             <Sparkle className="h-4 w-4" />
@@ -46,19 +46,21 @@ export default function Header() {
         </Button>
       </nav>
       {/* 中间显示激活任务数量 */}
-      <nav>
-        <Button variant="ghost" asChild className="max-w-80 md:max-w-none">
+      <nav className="flex grow-1 items-center justify-center">
+        <Button variant="ghost" asChild>
           <Link to="/" className="mx-4 flex animate-pulse items-center gap-2">
             {status === 'connecting' ? (
               <Spinner className="h-4 w-4" />
             ) : (
               <Activity className="h-4 w-4" />
             )}
-            <p className="line-clamp-1 truncate">{message}</p>
+            <p className="line-clamp-1 max-w-[50vw] truncate">{message}</p>
           </Link>
         </Button>
       </nav>
-      <ModeToggle />
+      <nav className="shrink-0 grow-0">
+        <ModeToggle />
+      </nav>
     </header>
   )
 }
