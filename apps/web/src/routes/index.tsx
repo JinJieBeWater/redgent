@@ -1,4 +1,5 @@
-import type { AppMessage } from '@core/shared'
+import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { UIMessagePart } from 'ai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
@@ -7,9 +8,12 @@ import { PreviewMessages } from '@web/components/message/preview-messages'
 import { Button } from '@web/components/ui/button'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
+import { queryClient, trpc } from '@web/router'
 import { DefaultChatTransport, generateId } from 'ai'
 import { FileText, List, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+
+type AppUIMessagePart = UIMessagePart<AppUIDataTypes, AppToolUI>
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -34,6 +38,99 @@ function App() {
     },
     sendAutomaticallyWhen: () => {
       return isSendAutomatically.current
+    },
+    onFinish: async ({ message }) => {
+      const parts = message.parts
+      let createTaskPart: Extract<
+        AppUIMessagePart,
+        { type: 'tool-CreateTask'; state: 'output-available' }
+      > | null = null
+      let updateTaskPart: Extract<
+        AppUIMessagePart,
+        { type: 'tool-UpdateTask'; state: 'output-available' }
+      > | null = null
+      let deleteTaskPart: Extract<
+        AppUIMessagePart,
+        { type: 'tool-DeleteTask'; state: 'output-available' }
+      > | null = null
+      for (const part of parts) {
+        if (
+          part.type === 'tool-CreateTask' &&
+          part.state === 'output-available'
+        ) {
+          createTaskPart = part
+        }
+        if (
+          part.type === 'tool-UpdateTask' &&
+          part.state === 'output-available'
+        ) {
+          updateTaskPart = part
+        }
+        if (
+          part.type === 'tool-DeleteTask' &&
+          part.state === 'output-available'
+        ) {
+          deleteTaskPart = part
+        }
+      }
+      if (createTaskPart) {
+        queryClient.invalidateQueries(
+          trpc.task.paginate.infiniteQueryFilter(
+            {},
+            {
+              exact: false,
+            },
+          ),
+        )
+      }
+      if (updateTaskPart) {
+        queryClient.invalidateQueries(
+          trpc.task.paginate.infiniteQueryFilter(
+            {},
+            {
+              exact: false,
+            },
+          ),
+        )
+        queryClient.invalidateQueries(
+          trpc.task.detail.queryFilter(
+            {
+              id: updateTaskPart.input.taskId,
+            },
+            {
+              exact: false,
+            },
+          ),
+        )
+      }
+      if (deleteTaskPart) {
+        queryClient.invalidateQueries(
+          trpc.task.paginate.infiniteQueryFilter(
+            {},
+            {
+              exact: false,
+            },
+          ),
+        )
+        queryClient.invalidateQueries(
+          trpc.task.detail.queryFilter(
+            {
+              id: deleteTaskPart.input.taskId,
+            },
+            {
+              exact: false,
+            },
+          ),
+        )
+        queryClient.invalidateQueries(
+          trpc.report.paginate.infiniteQueryFilter(
+            {},
+            {
+              exact: false,
+            },
+          ),
+        )
+      }
     },
   })
 
