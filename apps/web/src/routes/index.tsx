@@ -20,7 +20,7 @@ function App() {
   const isSendAutomatically = useRef(false)
   const {
     messages,
-    sendMessage,
+    sendMessage: rawSendMessage,
     status,
     setMessages: rawSetMessages,
     regenerate,
@@ -36,15 +36,30 @@ function App() {
       return isSendAutomatically.current
     },
   })
+
+  const isPending = useMemo(() => {
+    return status === 'streaming' || status === 'submitted'
+  }, [status])
+  const sendMessage = useCallback<typeof rawSendMessage>(
+    async (input, options) => {
+      if (isPending) {
+        toast.info('请等待当前对话完成')
+      } else {
+        rawSendMessage(input, options)
+      }
+    },
+    [isPending, rawSendMessage],
+  )
+
   const setMessages = useCallback(
     (input: Parameters<typeof rawSetMessages>[0]) => {
-      if (status !== 'ready') {
+      if (isPending) {
         toast.info('请等待当前对话完成')
       } else {
         rawSetMessages(input)
       }
     },
-    [status, rawSetMessages],
+    [isPending, rawSetMessages],
   )
 
   /** 最后一条消息 */
