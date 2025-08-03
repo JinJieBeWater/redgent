@@ -1,42 +1,61 @@
+import type { UseChatHelpers } from '@ai-sdk/react'
 import type { AppMessage } from '@core/shared'
+import { memo } from 'react'
 import { cn } from '@web/lib/utils'
 import { AlertCircle, Loader2, Sparkles } from 'lucide-react'
 
 import { AssistantMessage } from './assistant-message'
 
 interface PreviewMessagesProps {
-  messages: AppMessage[]
   className?: string
-  status?: 'submitted' | 'streaming' | 'ready' | 'error'
+  messages: AppMessage[]
+  status?: UseChatHelpers<AppMessage>['status']
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  sendMessage: UseChatHelpers<AppMessage>['sendMessage']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }
 
-export function PreviewMessages({
+function ImplPreviewMessages({
+  className,
   messages,
   status,
-  className,
+  setMessages,
+  sendMessage,
+  addToolResult,
 }: PreviewMessagesProps) {
   return (
     <div className={cn('grid w-full grid-cols-1 gap-4', className)}>
       {messages.map((message, index) => (
         <PreviewMessage
           key={message.id}
-          message={message}
           isLoading={status === 'streaming' && messages.length - 1 === index}
           isError={status === 'error' && messages.length - 1 === index}
+          message={message}
+          setMessages={setMessages}
+          sendMessage={sendMessage}
+          addToolResult={addToolResult}
         />
       ))}
     </div>
   )
 }
 
-export const PreviewMessage = ({
+export const PreviewMessages = memo(ImplPreviewMessages)
+
+export const ImplPreviewMessage = ({
   message,
   isLoading,
   isError,
+  setMessages,
+  sendMessage,
+  addToolResult,
 }: {
   message: AppMessage
   isLoading: boolean
   isError: boolean
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  sendMessage: UseChatHelpers<AppMessage>['sendMessage']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
   return (
     <div
@@ -70,7 +89,12 @@ export const PreviewMessage = ({
 
       <div>
         {message.role === 'assistant' ? (
-          <AssistantMessage message={message} />
+          <AssistantMessage
+            message={message}
+            setMessages={setMessages}
+            sendMessage={sendMessage}
+            addToolResult={addToolResult}
+          />
         ) : (
           <p>{message.parts[0].type === 'text' ? message.parts[0].text : ''}</p>
         )}
@@ -78,3 +102,5 @@ export const PreviewMessage = ({
     </div>
   )
 }
+
+const PreviewMessage = memo(ImplPreviewMessage)

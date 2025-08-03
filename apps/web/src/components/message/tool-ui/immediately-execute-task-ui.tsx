@@ -1,31 +1,32 @@
+import type { UseChatHelpers } from '@ai-sdk/react'
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@web/components/ui/button'
-import { useChatContext } from '@web/contexts/chat-context'
 import { queryClient, trpc } from '@web/router'
 import { generateId } from 'ai'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const ImmediatelyExecuteTaskUI = ({
+export const ImplImmediatelyExecuteTaskUI = ({
   part,
+  setMessages,
+  addToolResult,
 }: {
-  message: AppMessage
   part: Extract<
     UIMessagePart<AppUIDataTypes, AppToolUI>,
     { type: 'tool-ImmediatelyExecuteTask'; state: 'output-available' }
   >
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
   const { input, output } = part
-
-  const { addToolResult, setMessages, messages } = useChatContext()
 
   // 查看报告函数
   const handleViewReport = () => {
     if (output.reportId) {
-      setMessages([
+      setMessages(messages => [
         ...messages,
         {
           id: generateId(),
@@ -180,3 +181,5 @@ export const ImmediatelyExecuteTaskUI = ({
     </div>
   )
 }
+
+export const ImmediatelyExecuteTaskUI = memo(ImplImmediatelyExecuteTaskUI)

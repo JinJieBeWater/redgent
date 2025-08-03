@@ -1,9 +1,10 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { memo } from 'react'
 import { Card, CardContent } from '@web/components/ui/card'
 import { AlertCircle } from 'lucide-react'
 
-export const RequestUserConsentUI = ({
+export const ImplRequestUserConsentUI = ({
   part,
 }: {
   part: Extract<
@@ -25,3 +26,5 @@ export const RequestUserConsentUI = ({
     </Card>
   )
 }
+
+export const RequestUserConsentUI = memo(ImplRequestUserConsentUI)

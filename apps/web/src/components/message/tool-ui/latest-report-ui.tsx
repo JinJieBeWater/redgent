@@ -1,12 +1,12 @@
-import type { AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { UseChatHelpers } from '@ai-sdk/react'
+import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import type z from 'zod'
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
-import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
@@ -16,13 +16,17 @@ import type { TaskReportMiniSchema } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const LatestReportUI = ({
+export const ImplLatestReportUI = ({
   part,
+  setMessages,
+  addToolResult,
 }: {
   part: Extract<
     UIMessagePart<AppUIDataTypes, AppToolUI>,
     { type: 'tool-ShowLatestReportUI' }
   >
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
   const {
     data,
@@ -61,8 +65,6 @@ export const LatestReportUI = ({
     return data?.pages[data.pages.length - 1]?.nextCursor
   }, [data?.pages])
 
-  const { addToolResult, setMessages, messages } = useChatContext()
-
   // 订阅最新的数据 维护对应 part 的 output
   useEffect(() => {
     if (allReports.length === 0) return
@@ -88,41 +90,43 @@ export const LatestReportUI = ({
 
   /** 处理报告点击事件 */
   const handleReportClick = (report: z.infer<typeof TaskReportMiniSchema>) => {
-    // 避免重复添加任务
-    const latestMessage = messages[messages.length - 1]
-    if (
-      latestMessage?.parts[0].type === 'tool-ShowReportUI' &&
-      latestMessage.parts[0].input?.id === report.id
-    ) {
-      return
-    }
-    setMessages([
-      ...messages,
-      {
-        id: generateId(),
-        role: 'user',
-        parts: [
-          {
-            type: 'text',
-            text: `查看 "${report.title}" 报告`,
-          },
-        ],
-      },
-      {
-        id: generateId(),
-        role: 'assistant',
-        parts: [
-          {
-            type: 'tool-ShowReportUI',
-            toolCallId: generateId(),
-            state: 'input-available',
-            input: {
-              id: report.id,
+    setMessages(messages => {
+      // 避免重复添加任务
+      const latestMessage = messages[messages.length - 1]
+      if (
+        latestMessage?.parts[0].type === 'tool-ShowReportUI' &&
+        latestMessage.parts[0].input?.id === report.id
+      ) {
+        return messages
+      }
+      return [
+        ...messages,
+        {
+          id: generateId(),
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: `查看 "${report.title}" 报告`,
             },
-          },
-        ],
-      },
-    ])
+          ],
+        },
+        {
+          id: generateId(),
+          role: 'assistant',
+          parts: [
+            {
+              type: 'tool-ShowReportUI',
+              toolCallId: generateId(),
+              state: 'input-available',
+              input: {
+                id: report.id,
+              },
+            },
+          ],
+        },
+      ]
+    })
   }
 
   return (
@@ -168,7 +172,7 @@ export const LatestReportUI = ({
                     className="text-xs"
                     onClick={e => {
                       e.stopPropagation()
-                      setMessages([
+                      setMessages(messages => [
                         ...messages,
                         {
                           id: generateId(),
@@ -240,3 +244,5 @@ export const LatestReportUI = ({
     </div>
   )
 }
+
+export const LatestReportUI = memo(ImplLatestReportUI)

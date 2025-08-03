@@ -118,7 +118,7 @@ const preprocessLaTeX = (content: string) => {
   return content
 }
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+const ImplMarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   const [processedContent, extractedCitations, latexBlocks] = useMemo(() => {
     const citations: CitationLink[] = []
 
@@ -927,5 +927,7 @@ export const CopyButton = ({ text }: { text: string }) => {
     </Button>
   )
 }
+
+const MarkdownRenderer = React.memo(ImplMarkdownRenderer)
 
 export { MarkdownRenderer, preprocessLaTeX }

@@ -1,9 +1,10 @@
+import type { UseChatHelpers } from '@ai-sdk/react'
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { memo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
-import { useChatContext } from '@web/contexts/chat-context'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
@@ -11,10 +12,10 @@ import { Calendar, Clock, ExternalLink, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const ReportUI = ({
+export const ImplReportUI = ({
   part,
+  setMessages,
 }: {
-  message: AppMessage
   part: Extract<
     UIMessagePart<AppUIDataTypes, AppToolUI>,
     {
@@ -22,9 +23,8 @@ export const ReportUI = ({
       state: 'input-available' | 'output-available'
     }
   >
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
 }) => {
-  const { setMessages, messages } = useChatContext()
-
   const { input } = part
 
   const { data, isPending, isError, error } = useQuery(
@@ -74,7 +74,7 @@ export const ReportUI = ({
                 variant="secondary"
                 className="h-max cursor-pointer px-2 py-0.5 text-xs"
                 onClick={() => {
-                  setMessages([
+                  setMessages(messages => [
                     ...messages,
                     {
                       id: generateId(),
@@ -183,3 +183,5 @@ export const ReportUI = ({
     </div>
   )
 }
+
+export const ReportUI = memo(ImplReportUI)

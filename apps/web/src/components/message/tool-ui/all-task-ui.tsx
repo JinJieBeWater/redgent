@@ -1,26 +1,29 @@
+import type { UseChatHelpers } from '@ai-sdk/react'
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { TaskMini } from '@web/components/task/task-list'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
-import { useChatContext } from '@web/contexts/chat-context'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import { ChevronDown, Hash, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const AllTaskUI = ({
+export const ImplAllTaskUI = ({
   part,
+  setMessages,
+  addToolResult,
 }: {
-  message: AppMessage
   part: Extract<
     UIMessagePart<AppUIDataTypes, AppToolUI>,
     { type: 'tool-ShowAllTaskUI' }
   >
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
   const { input } = part
   const {
@@ -49,8 +52,6 @@ export const AllTaskUI = ({
       },
     ),
   )
-
-  const { messages, setMessages, addToolResult } = useChatContext()
 
   // 合并所有页面的任务数据
   const allTasks = useMemo(() => {
@@ -88,41 +89,43 @@ export const AllTaskUI = ({
 
   /** 处理任务点击事件 */
   const handleTaskClick = (task: (typeof allTasks)[number]) => {
-    // 避免重复添加任务
-    const latestMessage = messages[messages.length - 1]
-    if (
-      latestMessage?.parts[0].type === 'tool-ShowTaskDetailUI' &&
-      latestMessage.parts[0].input?.taskId === task.id
-    ) {
-      return
-    }
-    setMessages([
-      ...messages,
-      {
-        id: generateId(),
-        role: 'user',
-        parts: [
-          {
-            type: 'text',
-            text: `查看 "${task.name}" 任务`,
-          },
-        ],
-      },
-      {
-        id: generateId(),
-        role: 'assistant',
-        parts: [
-          {
-            type: 'tool-ShowTaskDetailUI',
-            toolCallId: generateId(),
-            state: 'input-available',
-            input: {
-              taskId: task.id,
+    setMessages(messages => {
+      // 避免重复添加任务
+      const latestMessage = messages[messages.length - 1]
+      if (
+        latestMessage?.parts[0].type === 'tool-ShowTaskDetailUI' &&
+        latestMessage.parts[0].input?.taskId === task.id
+      ) {
+        return messages
+      }
+      return [
+        ...messages,
+        {
+          id: generateId(),
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: `查看 "${task.name}" 任务`,
             },
-          },
-        ],
-      },
-    ])
+          ],
+        },
+        {
+          id: generateId(),
+          role: 'assistant',
+          parts: [
+            {
+              type: 'tool-ShowTaskDetailUI',
+              toolCallId: generateId(),
+              state: 'input-available',
+              input: {
+                taskId: task.id,
+              },
+            },
+          ],
+        },
+      ]
+    })
   }
 
   return (
@@ -188,3 +191,5 @@ export const AllTaskUI = ({
     </div>
   )
 }
+
+export const AllTaskUI = memo(ImplAllTaskUI)
