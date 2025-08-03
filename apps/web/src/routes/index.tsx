@@ -52,7 +52,9 @@ function App() {
     return messages[messages.length - 1]
   }, [messages])
   /** 最后一Part */
-  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
+  const lastPart = useMemo(() => {
+    return lastMessage?.parts[lastMessage.parts.length - 1]
+  }, [lastMessage])
 
   /** 出现错误时重新提交 */
   const handleErrorSubmit = useCallback(() => {
@@ -140,40 +142,37 @@ function App() {
     }
   }, [scrollToElement, messages.length, lastPart?.type])
 
-  /** 处理操作按钮 */
+  /** 是否为用户同意请求状态 */
+  const isConsentRequest = useMemo(
+    () =>
+      lastMessage?.role === 'assistant' &&
+      lastPart?.type === 'tool-RequestUserConsent' &&
+      lastPart?.input?.message &&
+      lastPart?.state === 'input-available',
+    [lastMessage?.role, lastPart],
+  )
+
+  /** 处理用户同意/拒绝按钮点击 */
   const handleConsentButtonClick = useCallback(
     (consent: 'accept' | 'reject') => {
-      if (
-        lastMessage?.role === 'assistant' &&
-        lastPart?.type === 'tool-RequestUserConsent' &&
-        lastPart?.input?.message
-      ) {
-        setMessages([
-          ...messages.slice(0, -1),
-          {
-            ...lastMessage,
-            parts: [
-              ...lastMessage.parts,
-              {
-                type: 'tool-RequestUserConsent',
-                toolCallId: lastPart.toolCallId,
-                state: 'output-available',
-                input: {
-                  message: lastPart.input.message,
-                },
-                output: {
-                  consent,
-                },
-              },
-            ],
-          },
-        ])
-        sendMessage({
-          text: consent === 'accept' ? '接受' : '拒绝',
-        })
+      if (!isConsentRequest || lastPart.type !== 'tool-RequestUserConsent') {
+        toast.error('无效的同意请求状态')
+        return
       }
+
+      addToolResult({
+        tool: 'RequestUserConsent',
+        toolCallId: lastPart.toolCallId,
+        output: {
+          consent,
+        },
+      })
+      // 发送用户文本响应
+      sendMessage({
+        text: consent === 'accept' ? '接受' : '拒绝',
+      })
     },
-    [messages, lastMessage, lastPart, sendMessage, setMessages],
+    [isConsentRequest, lastPart, sendMessage, addToolResult],
   )
 
   return (

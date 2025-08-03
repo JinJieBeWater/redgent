@@ -1,7 +1,7 @@
 import type { UseChatHelpers } from '@ai-sdk/react'
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
@@ -15,6 +15,7 @@ import { ErrorMessage, LoadingMessage } from './common'
 export const ImplReportUI = ({
   part,
   setMessages,
+  addToolResult,
 }: {
   part: Extract<
     UIMessagePart<AppUIDataTypes, AppToolUI>,
@@ -24,6 +25,7 @@ export const ImplReportUI = ({
     }
   >
   setMessages: UseChatHelpers<AppMessage>['setMessages']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
   const { input } = part
 
@@ -36,6 +38,18 @@ export const ImplReportUI = ({
       },
     ),
   )
+
+  useEffect(() => {
+    if (data) {
+      addToolResult({
+        tool: 'ShowReportUI',
+        toolCallId: part.toolCallId,
+        output: {
+          report: data,
+        },
+      })
+    }
+  }, [data, addToolResult, part.toolCallId])
 
   if (isPending) {
     return <LoadingMessage />
