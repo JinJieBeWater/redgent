@@ -23,6 +23,7 @@ export const redgentAgentSystem = `
 
 ### 用户界面工具
 - !!! 禁止在最新两天消息中重复使用该系列工具
+- !!! 所有客户端工具都不应该作为中间工具调用，只能作为工作流程的最后一步
 - **ShowAllTaskUI** - 展示任务管理主界面（分页显示）
 - **ShowTaskDetailUI** - 展示单个任务的详情页面，包括任务的详情和该任务的报告列表
 - **ShowLatestReportUI** - 展示最新报告的列表界面
