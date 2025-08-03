@@ -1,4 +1,5 @@
 import type { AppMessage } from '@core/shared'
+import { memo } from 'react'
 
 import { MarkdownRenderer } from '../markdown'
 import { AllTaskUI } from './tool-ui/all-task-ui'
@@ -9,7 +10,7 @@ import { ReportUI } from './tool-ui/report-ui'
 import { RequestUserConsentUI } from './tool-ui/request-user-consent-ui'
 import { TaskDetailUI } from './tool-ui/task-detail-ui'
 
-export const AssistantMessage = ({ message }: { message: AppMessage }) => {
+export const ImplAssistantMessage = ({ message }: { message: AppMessage }) => {
   if (message.role !== 'assistant') {
     return null
   }
@@ -111,3 +112,5 @@ export const AssistantMessage = ({ message }: { message: AppMessage }) => {
     </div>
   )
 }
+
+export const AssistantMessage = memo(ImplAssistantMessage)

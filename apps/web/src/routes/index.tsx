@@ -1,5 +1,5 @@
 import type { AppMessage } from '@core/shared'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
@@ -48,9 +48,15 @@ function App() {
     [status, rawSetMessages],
   )
 
+  /** 最后一条消息 */
+  const lastMessage = useMemo(() => {
+    return messages[messages.length - 1]
+  }, [messages])
+  /** 最后一Part */
+  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
+
   /** 出现错误时重新提交 */
-  const handleErrorSubmit = () => {
-    const lastMessage = messages[messages.length - 1]
+  const handleErrorSubmit = useCallback(() => {
     if (
       lastMessage?.role === 'user' &&
       lastMessage?.parts[0]?.type === 'text'
@@ -70,28 +76,31 @@ function App() {
     } else {
       regenerate()
     }
-  }
+  }, [input, sendMessage, lastMessage, regenerate, messages, setMessages])
 
   /** 处理提交按钮点击事件 */
-  const handleSubmit = () => {
-    if (input.trim() && status == 'ready') {
+  const handleCommonSubmit = useCallback(() => {
+    if (input.trim()) {
       sendMessage({
         text: input.trim(),
       })
       setInput('')
     }
-  }
+  }, [input, sendMessage])
+
+  const handleSubmit = useCallback(() => {
+    if (status === 'error') {
+      handleErrorSubmit()
+    } else if (status == 'ready') {
+      handleCommonSubmit()
+    }
+  }, [handleCommonSubmit, handleErrorSubmit, status])
 
   /** 清空消息列表 */
   const clearMessages = () => {
     setMessages([])
     setInput('')
   }
-
-  /** 最后一条消息 */
-  const lastMessage = messages[messages.length - 1]
-  /** 最后一Part */
-  const lastPart = lastMessage?.parts[lastMessage.parts.length - 1]
 
   /** 处理消息列表滚动 */
   const bottomRef = useRef<HTMLDivElement>(null)

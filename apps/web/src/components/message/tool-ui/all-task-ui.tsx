@@ -1,6 +1,6 @@
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { TaskMini } from '@web/components/task/task-list'
@@ -13,7 +13,7 @@ import { ChevronDown, Hash, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const AllTaskUI = ({
+export const ImplAllTaskUI = ({
   part,
 }: {
   message: AppMessage
@@ -188,3 +188,5 @@ export const AllTaskUI = ({
     </div>
   )
 }
+
+export const AllTaskUI = memo(ImplAllTaskUI)

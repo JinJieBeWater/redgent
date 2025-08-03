@@ -1,5 +1,6 @@
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
+import { memo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
@@ -11,7 +12,7 @@ import { Calendar, Clock, ExternalLink, List } from 'lucide-react'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const ReportUI = ({
+export const ImplReportUI = ({
   part,
 }: {
   message: AppMessage
@@ -183,3 +184,5 @@ export const ReportUI = ({
     </div>
   )
 }
+
+export const ReportUI = memo(ImplReportUI)

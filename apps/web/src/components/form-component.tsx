@@ -1,6 +1,6 @@
 import type { UIMessage } from 'ai'
 import type { ComponentProps } from 'react'
-import { useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import { cn } from '@web/lib/utils'
 import { RotateCcw, Send, X } from 'lucide-react'
 
@@ -19,7 +19,7 @@ type FormComponentProps = {
   className?: string
 } & ComponentProps<'div'>
 
-export const FormComponent: React.FC<FormComponentProps> = ({
+export const ImplFormComponent: React.FC<FormComponentProps> = ({
   input,
   status,
   setInput,
@@ -128,3 +128,5 @@ export const FormComponent: React.FC<FormComponentProps> = ({
     </div>
   )
 }
+
+export const FormComponent = memo(ImplFormComponent)

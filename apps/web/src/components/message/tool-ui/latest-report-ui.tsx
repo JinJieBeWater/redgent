@@ -1,7 +1,7 @@
 import type { AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import type z from 'zod'
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { Badge } from '@web/components/ui/badge'
@@ -16,7 +16,7 @@ import type { TaskReportMiniSchema } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const LatestReportUI = ({
+export const ImplLatestReportUI = ({
   part,
 }: {
   part: Extract<
@@ -240,3 +240,5 @@ export const LatestReportUI = ({
     </div>
   )
 }
+
+export const LatestReportUI = memo(ImplLatestReportUI)

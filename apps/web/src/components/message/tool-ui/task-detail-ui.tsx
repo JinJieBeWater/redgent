@@ -1,6 +1,6 @@
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { getStatusInfo } from '@web/components/task/task-list'
@@ -22,7 +22,7 @@ import type { TaskReportMiniSchema } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const TaskDetailUI = ({
+export const ImplTaskDetailUI = ({
   part,
 }: {
   message: AppMessage
@@ -309,3 +309,5 @@ export const TaskDetailUI = ({
     </div>
   )
 }
+
+export const TaskDetailUI = memo(ImplTaskDetailUI)

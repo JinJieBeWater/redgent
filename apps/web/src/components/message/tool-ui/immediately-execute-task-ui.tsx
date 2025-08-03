@@ -1,6 +1,6 @@
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@web/components/ui/button'
 import { useChatContext } from '@web/contexts/chat-context'
@@ -9,7 +9,7 @@ import { generateId } from 'ai'
 
 import { ErrorMessage, LoadingMessage } from './common'
 
-export const ImmediatelyExecuteTaskUI = ({
+export const ImplImmediatelyExecuteTaskUI = ({
   part,
 }: {
   message: AppMessage
@@ -180,3 +180,5 @@ export const ImmediatelyExecuteTaskUI = ({
     </div>
   )
 }
+
+export const ImmediatelyExecuteTaskUI = memo(ImplImmediatelyExecuteTaskUI)

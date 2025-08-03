@@ -1,4 +1,5 @@
 import type { AppMessage } from '@core/shared'
+import { memo } from 'react'
 import { cn } from '@web/lib/utils'
 import { AlertCircle, Loader2, Sparkles } from 'lucide-react'
 
@@ -10,7 +11,7 @@ interface PreviewMessagesProps {
   status?: 'submitted' | 'streaming' | 'ready' | 'error'
 }
 
-export function PreviewMessages({
+function ImplPreviewMessages({
   messages,
   status,
   className,
@@ -29,7 +30,9 @@ export function PreviewMessages({
   )
 }
 
-export const PreviewMessage = ({
+export const PreviewMessages = memo(ImplPreviewMessages)
+
+export const ImplPreviewMessage = ({
   message,
   isLoading,
   isError,
@@ -78,3 +81,5 @@ export const PreviewMessage = ({
     </div>
   )
 }
+
+const PreviewMessage = memo(ImplPreviewMessage)
