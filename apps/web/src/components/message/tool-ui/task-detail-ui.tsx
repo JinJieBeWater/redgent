@@ -1,3 +1,4 @@
+import type { UseChatHelpers } from '@ai-sdk/react'
 import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
 import type { UIMessagePart } from 'ai'
 import { memo, useEffect, useMemo } from 'react'
@@ -7,7 +8,6 @@ import { getStatusInfo } from '@web/components/task/task-list'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
 import { Card, CardContent, CardTitle } from '@web/components/ui/card'
-import { useChatContext } from '@web/contexts/chat-context'
 import { formatIntervalTime } from '@web/lib/format-interval-time'
 import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { cn } from '@web/lib/utils'
@@ -24,8 +24,10 @@ import { ErrorMessage, LoadingMessage } from './common'
 
 export const ImplTaskDetailUI = ({
   part,
+  setMessages,
+  sendMessage,
+  addToolResult,
 }: {
-  message: AppMessage
   part: Extract<
     UIMessagePart<AppUIDataTypes, AppToolUI>,
     {
@@ -33,11 +35,11 @@ export const ImplTaskDetailUI = ({
       state: 'input-available' | 'output-available'
     }
   >
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  sendMessage: UseChatHelpers<AppMessage>['sendMessage']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
   const { input } = part
-
-  const { sendMessage, addToolResult, setMessages, messages, status } =
-    useChatContext()
 
   // 获取任务详情
   const {
@@ -134,41 +136,43 @@ export const ImplTaskDetailUI = ({
 
   /** 处理报告点击事件 */
   const handleReportClick = (report: z.infer<typeof TaskReportMiniSchema>) => {
-    // 避免重复添加任务
-    const latestMessage = messages[messages.length - 1]
-    if (
-      latestMessage?.parts[0].type === 'tool-ShowReportUI' &&
-      latestMessage.parts[0].input?.id === report.id
-    ) {
-      return
-    }
-    setMessages([
-      ...messages,
-      {
-        id: generateId(),
-        role: 'user',
-        parts: [
-          {
-            type: 'text',
-            text: `查看 "${report.title}" 报告`,
-          },
-        ],
-      },
-      {
-        id: generateId(),
-        role: 'assistant',
-        parts: [
-          {
-            type: 'tool-ShowReportUI',
-            toolCallId: generateId(),
-            state: 'input-available',
-            input: {
-              id: report.id,
+    setMessages(messages => {
+      // 避免重复添加任务
+      const latestMessage = messages[messages.length - 1]
+      if (
+        latestMessage?.parts[0].type === 'tool-ShowReportUI' &&
+        latestMessage.parts[0].input?.id === report.id
+      ) {
+        return messages
+      }
+      return [
+        ...messages,
+        {
+          id: generateId(),
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: `查看 "${report.title}" 报告`,
             },
-          },
-        ],
-      },
-    ])
+          ],
+        },
+        {
+          id: generateId(),
+          role: 'assistant',
+          parts: [
+            {
+              type: 'tool-ShowReportUI',
+              toolCallId: generateId(),
+              state: 'input-available',
+              input: {
+                id: report.id,
+              },
+            },
+          ],
+        },
+      ]
+    })
   }
 
   return (

@@ -5,7 +5,6 @@ import { useChat } from '@ai-sdk/react'
 import { FormComponent } from '@web/components/form-component'
 import { PreviewMessages } from '@web/components/message/preview-messages'
 import { Button } from '@web/components/ui/button'
-import { ChatContextProvider } from '@web/contexts/chat-context'
 import { useOptimizedScroll } from '@web/hooks/use-optimized-scroll'
 import { cn } from '@web/lib/utils'
 import { DefaultChatTransport, generateId } from 'ai'
@@ -19,7 +18,14 @@ export const Route = createFileRoute('/')({
 function App() {
   const [input, setInput] = useState('')
   const isSendAutomatically = useRef(false)
-  const context = useChat<AppMessage>({
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages: rawSetMessages,
+    regenerate,
+    addToolResult,
+  } = useChat<AppMessage>({
     transport: new DefaultChatTransport({
       api: '/api/task-agent',
     }),
@@ -30,13 +36,6 @@ function App() {
       return isSendAutomatically.current
     },
   })
-  const {
-    messages,
-    sendMessage,
-    status,
-    setMessages: rawSetMessages,
-    regenerate,
-  } = context
   const setMessages = useCallback(
     (input: Parameters<typeof rawSetMessages>[0]) => {
       if (status !== 'ready') {
@@ -97,10 +96,10 @@ function App() {
   }, [handleCommonSubmit, handleErrorSubmit, status])
 
   /** 清空消息列表 */
-  const clearMessages = () => {
+  const clearMessages = useCallback(() => {
     setMessages([])
     setInput('')
-  }
+  }, [setMessages, setInput])
 
   /** 处理消息列表滚动 */
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -178,181 +177,180 @@ function App() {
   )
 
   return (
-    <ChatContextProvider
-      value={{
-        ...context,
-        setMessages,
-      }}
+    <div
+      className={cn(
+        'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
+        messages.length > 0 && 'justify-start pt-4',
+      )}
     >
-      <div
-        className={cn(
-          'container mx-auto flex min-h-[calc(100vh-3rem)] max-w-2xl flex-col items-center justify-center px-4',
-          messages.length > 0 && 'justify-start pt-4',
-        )}
-      >
-        {/* 消息列表 */}
-        {messages.length > 0 && (
-          <>
-            <PreviewMessages messages={messages} status={status} />
-            {/* 滚动锚点 */}
-            <div ref={bottomRef} className="h-48"></div>
-          </>
-        )}
-
-        {/* 输入框容器 */}
-        <div
-          className={cn(
-            'my-4 w-full',
-            messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
-          )}
-        >
-          {/* Logo */}
-          {messages.length === 0 && (
-            <div className="text-center">
-              <h1 className="text-foreground text-4xl">Redgent</h1>
-            </div>
-          )}
-
-          {/* 输入框 */}
-          <FormComponent
-            className="mt-6"
-            input={input}
-            placeholder="添加一个任务..."
-            setInput={setInput}
-            handleSubmit={() => {
-              if (status === 'error') {
-                handleErrorSubmit()
-              } else {
-                handleSubmit()
-              }
-            }}
+      {/* 消息列表 */}
+      {messages.length > 0 && (
+        <>
+          <PreviewMessages
             messages={messages}
             status={status}
-            clearMessages={clearMessages}
-          >
-            {/* 建议输入 */}
-            {
-              <div className="flex items-center gap-2">
-                {[['创建任务']].map(([prompt], index) => {
-                  return (
-                    <Button
-                      key={index}
-                      variant={'outline'}
-                      onClick={() =>
-                        sendMessage({
-                          text: prompt.trim(),
-                        })
-                      }
-                      className="h-max gap-1 px-2 py-1 text-xs font-medium"
-                      title={prompt}
-                    >
-                      <Plus className="h-3 w-3" />
-                      <span className="hidden sm:block">{prompt}</span>
-                    </Button>
-                  )
-                })}
+            setMessages={setMessages}
+            sendMessage={sendMessage}
+            addToolResult={addToolResult}
+          />
+          {/* 滚动锚点 */}
+          <div ref={bottomRef} className="h-48"></div>
+        </>
+      )}
 
-                <Button
-                  variant={'outline'}
-                  onClick={() => {
-                    setMessages([
-                      ...messages,
-                      {
-                        id: generateId(),
-                        role: 'user',
-                        parts: [
-                          {
-                            type: 'text',
-                            text: '查看任务',
-                          },
-                        ],
-                      },
-                      {
-                        id: generateId(),
-                        role: 'assistant',
-                        parts: [
-                          {
-                            type: 'tool-ShowAllTaskUI',
-                            toolCallId: generateId(),
-                            state: 'input-available',
-                            input: {},
-                          },
-                        ],
-                      },
-                    ])
-                  }}
-                  className="h-max gap-1 px-2 py-1 text-xs font-medium"
-                  title="查看任务"
-                >
-                  <List className="h-3 w-3" />
-                  <span className="hidden sm:block">查看任务</span>
-                </Button>
+      {/* 输入框容器 */}
+      <div
+        className={cn(
+          'my-4 w-full',
+          messages.length > 0 && 'fixed bottom-2 z-50 max-w-2xl px-4',
+        )}
+      >
+        {/* Logo */}
+        {messages.length === 0 && (
+          <div className="text-center">
+            <h1 className="text-foreground text-4xl">Redgent</h1>
+          </div>
+        )}
 
-                <Button
-                  variant={'outline'}
-                  onClick={() => {
-                    setMessages([
-                      ...messages,
-                      {
-                        id: generateId(),
-                        role: 'user',
-                        parts: [
-                          {
-                            type: 'text',
-                            text: '最新报告',
-                          },
-                        ],
-                      },
-                      {
-                        id: generateId(),
-                        role: 'assistant',
-                        parts: [
-                          {
-                            type: 'tool-ShowLatestReportUI',
-                            toolCallId: generateId(),
-                            state: 'input-available',
-                            input: {},
-                          },
-                        ],
-                      },
-                    ])
-                  }}
-                  className="h-max gap-1 px-2 py-1 text-xs font-medium"
-                  title="最新报告"
-                >
-                  <FileText className="h-3 w-3" />
-                  <span className="hidden sm:block">最新报告</span>
-                </Button>
-              </div>
+        {/* 输入框 */}
+        <FormComponent
+          className="mt-6"
+          input={input}
+          placeholder="添加一个任务..."
+          setInput={setInput}
+          handleSubmit={() => {
+            if (status === 'error') {
+              handleErrorSubmit()
+            } else {
+              handleSubmit()
             }
-          </FormComponent>
+          }}
+          messages={messages}
+          status={status}
+          clearMessages={clearMessages}
+        >
+          {/* 建议输入 */}
+          {
+            <div className="flex items-center gap-2">
+              {[['创建任务']].map(([prompt], index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant={'outline'}
+                    onClick={() =>
+                      sendMessage({
+                        text: prompt.trim(),
+                      })
+                    }
+                    className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                    title={prompt}
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span className="hidden sm:block">{prompt}</span>
+                  </Button>
+                )
+              })}
 
-          {/* 请求用户同意 */}
-          {lastMessage?.role === 'assistant' &&
-            lastPart?.type === 'tool-RequestUserConsent' &&
-            lastPart.state === 'input-available' && (
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <Button
-                  size="lg"
-                  variant="destructive"
-                  onClick={() => {
-                    handleConsentButtonClick('accept')
-                  }}
-                >
-                  接受
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={() => {
-                    handleConsentButtonClick('reject')
-                  }}
-                >
-                  拒绝
-                </Button>
-              </div>
-            )}
-        </div>
+              <Button
+                variant={'outline'}
+                onClick={() => {
+                  setMessages([
+                    ...messages,
+                    {
+                      id: generateId(),
+                      role: 'user',
+                      parts: [
+                        {
+                          type: 'text',
+                          text: '查看任务',
+                        },
+                      ],
+                    },
+                    {
+                      id: generateId(),
+                      role: 'assistant',
+                      parts: [
+                        {
+                          type: 'tool-ShowAllTaskUI',
+                          toolCallId: generateId(),
+                          state: 'input-available',
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }}
+                className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                title="查看任务"
+              >
+                <List className="h-3 w-3" />
+                <span className="hidden sm:block">查看任务</span>
+              </Button>
+
+              <Button
+                variant={'outline'}
+                onClick={() => {
+                  setMessages([
+                    ...messages,
+                    {
+                      id: generateId(),
+                      role: 'user',
+                      parts: [
+                        {
+                          type: 'text',
+                          text: '最新报告',
+                        },
+                      ],
+                    },
+                    {
+                      id: generateId(),
+                      role: 'assistant',
+                      parts: [
+                        {
+                          type: 'tool-ShowLatestReportUI',
+                          toolCallId: generateId(),
+                          state: 'input-available',
+                          input: {},
+                        },
+                      ],
+                    },
+                  ])
+                }}
+                className="h-max gap-1 px-2 py-1 text-xs font-medium"
+                title="最新报告"
+              >
+                <FileText className="h-3 w-3" />
+                <span className="hidden sm:block">最新报告</span>
+              </Button>
+            </div>
+          }
+        </FormComponent>
+
+        {/* 请求用户同意 */}
+        {lastMessage?.role === 'assistant' &&
+          lastPart?.type === 'tool-RequestUserConsent' &&
+          lastPart.state === 'input-available' && (
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <Button
+                size="lg"
+                variant="destructive"
+                onClick={() => {
+                  handleConsentButtonClick('accept')
+                }}
+              >
+                接受
+              </Button>
+              <Button
+                size="lg"
+                onClick={() => {
+                  handleConsentButtonClick('reject')
+                }}
+              >
+                拒绝
+              </Button>
+            </div>
+          )}
       </div>
-    </ChatContextProvider>
+    </div>
   )
 }
