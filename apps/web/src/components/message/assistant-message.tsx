@@ -134,7 +134,7 @@ export const ImplAssistantMessage = ({
           }
           case 'tool-RequestUserConsent': {
             const { state } = part
-            if (state === 'input-available') {
+            if (state === 'input-available' || state === 'output-available') {
               return <RequestUserConsentUI key={index} part={part} />
             }
             return null

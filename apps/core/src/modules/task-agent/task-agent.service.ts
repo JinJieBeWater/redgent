@@ -175,6 +175,7 @@ export class TaskAgentService {
     UpdateTask: tool({
       description: `
       服务端工具 修改一个定时任务的配置
+      - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
       - 当用户要求修改一个定时任务的配置时，调用该工具
       - 可供修改项有 name, payload, scheduleType, scheduleExpression, enableCache, status
       `,
@@ -204,6 +205,7 @@ export class TaskAgentService {
     DeleteTask: tool({
       description: `
       服务端工具 删除一个定时任务
+      - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
       - 当用户要求删除一个定时任务时，调用该工具
       `,
       inputSchema: z.object({
