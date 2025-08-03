@@ -27,7 +27,7 @@ import { TrpcModule } from './processors/trpc/trpc.module'
           .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(8000),
-        PROXY: Joi.number().default(7890),
+        PROXY_URL: Joi.string().optional(),
         REDDIT_CLIENT_ID: Joi.string().required(),
         REDDIT_SECRET: Joi.string().required(),
         // OPENROUTER_API_KEY: Joi.string().required(),

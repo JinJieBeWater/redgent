@@ -40,6 +40,9 @@ function App() {
       return isSendAutomatically.current
     },
     onFinish: async ({ message }) => {
+      // 根据修改实时更新其他查询
+      // ! 由于当前版本的 @trpc/tanstack-react-query 查询过滤器的predicate函数类型不安全，使用重新查询的方式
+      // 后续类型安全后手动更新缓存即可避免额外请求
       const parts = message.parts
       let createTaskPart: Extract<
         AppUIMessagePart,

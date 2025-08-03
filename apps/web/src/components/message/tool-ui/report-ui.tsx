@@ -85,7 +85,6 @@ export const ImplReportUI = ({
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
             {data.task?.name && (
               <Button
-                variant="secondary"
                 className="h-max cursor-pointer px-2 py-0.5 text-xs"
                 onClick={() => {
                   setMessages(messages => [
