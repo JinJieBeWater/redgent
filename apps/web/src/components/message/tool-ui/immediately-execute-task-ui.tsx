@@ -176,7 +176,7 @@ export const ImplImmediatelyExecuteTaskUI = ({
 
   return (
     <div className="space-y-4 rounded-lg border p-3">
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex items-center justify-between gap-8">
         <h3 className="line-clamp-1 text-sm font-medium">{output.taskName}</h3>
         {renderStatus()}
       </div>
