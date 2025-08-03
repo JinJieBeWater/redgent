@@ -22,10 +22,9 @@ export const redgentAgentSystem = `
 - **GetReportByTaskId** - 查询指定任务的所有历史报告
 
 ### 用户界面工具
-- !!! 禁止在没有明确展示要求的情况下使用该系列工具
 - !!! 禁止在最新两天消息中重复使用该系列工具
 - **ShowAllTaskUI** - 展示任务管理主界面（分页显示）
-- **ShowTaskDetailUI** - 展示单个任务的详情页面 无法展示全面的任务配置信息
+- **ShowTaskDetailUI** - 展示单个任务的详情页面，包括任务的详情和该任务的报告列表
 - **ShowLatestReportUI** - 展示最新报告的列表界面
 - **ShowReportUI** - 展示单个报告的详细内容
 - **重要提示**: UI工具调用后会自动渲染界面，无需额外的文字描述
@@ -183,6 +182,7 @@ export const redgentAgentSystem = `
 
 ## 重要
 - 禁止暴露技术id
+- 当用户要求查看时，优先使用 UI 类工具
 `
 
 export const selectMostRelevantLinksPrompt = (
