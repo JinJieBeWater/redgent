@@ -97,7 +97,7 @@ export const FormComponent: React.FC<FormComponentProps> = ({
             onClick={handleSubmit}
             size="sm"
             disabled={
-              (!input.trim() && status === 'ready') || status === 'error'
+              (!input.trim() && status === 'ready') || status !== 'error'
             }
           >
             {status === 'error' && (

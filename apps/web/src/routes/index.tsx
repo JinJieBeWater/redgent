@@ -30,7 +30,13 @@ function App() {
       return isSendAutomatically.current
     },
   })
-  const { messages, sendMessage, status, setMessages: rawSetMessages } = context
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages: rawSetMessages,
+    regenerate,
+  } = context
   const setMessages = useCallback(
     (input: Parameters<typeof rawSetMessages>[0]) => {
       if (status !== 'ready') {
@@ -61,12 +67,14 @@ function App() {
           text: lastMessage?.parts[0]?.text.trim(),
         })
       }
+    } else {
+      regenerate()
     }
   }
 
   /** 处理提交按钮点击事件 */
   const handleSubmit = () => {
-    if (input.trim() && (status == 'ready' || status == 'error')) {
+    if (input.trim() && status == 'ready') {
       sendMessage({
         text: input.trim(),
       })
