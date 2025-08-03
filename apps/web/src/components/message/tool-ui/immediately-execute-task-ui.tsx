@@ -21,7 +21,9 @@ export const ImplImmediatelyExecuteTaskUI = ({
   setMessages: UseChatHelpers<AppMessage>['setMessages']
   addToolResult: UseChatHelpers<AppMessage>['addToolResult']
 }) => {
-  const { input, output } = part
+  const { input, output, toolCallId } = part
+  const { taskId } = input
+  const { reportId, taskName } = output
 
   // 查看报告函数
   const handleViewReport = () => {
@@ -59,14 +61,14 @@ export const ImplImmediatelyExecuteTaskUI = ({
   // 轮询
   const { data, isPending, isError, error } = useQuery(
     trpc.taskExecution.reportStatus.queryOptions(
-      { taskId: input.taskId, reportId: output.reportId },
+      { taskId: taskId, reportId: reportId },
       {
         enabled: output.status === 'running',
         refetchInterval: 3000,
       },
     ),
   )
-  const { reportId, taskName } = output
+
   useEffect(() => {
     switch (data?.status) {
       case 'running':
@@ -74,7 +76,7 @@ export const ImplImmediatelyExecuteTaskUI = ({
       case 'success': {
         queryClient.invalidateQueries(
           trpc.report.paginateByTaskId.infiniteQueryFilter({
-            taskId: input.taskId,
+            taskId: taskId,
             limit: 4,
           }),
         )
@@ -83,7 +85,7 @@ export const ImplImmediatelyExecuteTaskUI = ({
         )
         addToolResult({
           tool: 'ImmediatelyExecuteTask',
-          toolCallId: part.toolCallId,
+          toolCallId: toolCallId,
           output: {
             reportId: reportId,
             taskName: taskName,
@@ -96,19 +98,19 @@ export const ImplImmediatelyExecuteTaskUI = ({
       case 'failure':
         addToolResult({
           tool: 'ImmediatelyExecuteTask',
-          toolCallId: part.toolCallId,
+          toolCallId: toolCallId,
           output: {
             reportId: reportId,
             taskName: taskName,
             status: data.status,
-            message: '任务执行失败',
+            message: '执行频率过高',
           },
         })
         break
       default:
         break
     }
-  }, [data, addToolResult, part.toolCallId, reportId, taskName, input.taskId])
+  }, [data, addToolResult, toolCallId, reportId, taskName, taskId, isPending])
 
   if (!data && isPending) {
     return <LoadingMessage message="正在查询任务执行状态..." />

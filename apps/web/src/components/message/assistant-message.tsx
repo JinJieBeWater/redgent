@@ -93,7 +93,12 @@ export const ImplAssistantMessage = ({
             const { state } = part
             if (state === 'input-available' || state === 'output-available') {
               return (
-                <ReportUI key={index} part={part} setMessages={setMessages} />
+                <ReportUI
+                  key={index}
+                  part={part}
+                  setMessages={setMessages}
+                  addToolResult={addToolResult}
+                />
               )
             }
             return null

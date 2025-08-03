@@ -15,7 +15,6 @@ import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import cronstrue from 'cronstrue'
 import { ChevronDown, Clock, FileText, Hash, Play } from 'lucide-react'
-import { toast } from 'sonner'
 import { z } from 'zod'
 
 import type { TaskReportMiniSchema } from '@redgent/shared'
@@ -248,7 +247,9 @@ export const ImplTaskDetailUI = ({
                       title={report.title || '未命名报告'}
                     >
                       <div className="line-clamp-1 flex gap-1">
-                        <span className="text-muted-foreground">#{index}</span>
+                        <span className="text-muted-foreground">
+                          #{index + 1}
+                        </span>
                         <span className="truncate">
                           {report.title || '未命名报告'}
                         </span>
@@ -296,13 +297,9 @@ export const ImplTaskDetailUI = ({
             size={'sm'}
             className="w-full text-xs"
             onClick={() => {
-              if (status === 'ready') {
-                sendMessage({
-                  text: `立即执行任务 "${task.name}"`,
-                })
-              } else {
-                toast.info('请等待当前任务完成')
-              }
+              sendMessage({
+                text: `立即执行任务 "${task.name}"`,
+              })
             }}
           >
             <Play className="h-4 w-4" />
