@@ -67,7 +67,6 @@ export const ImplLatestReportUI = ({
 
   // 订阅最新的数据 维护对应 part 的 output
   useEffect(() => {
-    if (allReports.length === 0) return
     addToolResult({
       tool: 'ShowLatestReportUI',
       toolCallId: part.toolCallId,

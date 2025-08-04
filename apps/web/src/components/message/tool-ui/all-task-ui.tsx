@@ -66,7 +66,6 @@ export const ImplAllTaskUI = ({
 
   // 订阅最新的数据 维护对应 part 的 output
   useEffect(() => {
-    if (allTasks.length === 0) return
     addToolResult({
       tool: 'ShowAllTaskUI',
       toolCallId: part.toolCallId,
