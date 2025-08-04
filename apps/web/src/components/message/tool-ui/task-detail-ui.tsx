@@ -97,19 +97,20 @@ export const ImplTaskDetailUI = ({
 
   // 订阅最新的数据 维护对应 part 的 output
   useEffect(() => {
-    if (allReports.length === 0 || !task) return
-    addToolResult({
-      tool: 'ShowTaskDetailUI',
-      toolCallId: part.toolCallId,
-      output: {
-        task,
-        page: {
-          reports: allReports,
-          total: totalCount,
-          nextCursor: nextCursor,
+    if (task) {
+      addToolResult({
+        tool: 'ShowTaskDetailUI',
+        toolCallId: part.toolCallId,
+        output: {
+          task,
+          page: {
+            reports: allReports,
+            total: totalCount,
+            nextCursor: nextCursor,
+          },
         },
-      },
-    })
+      })
+    }
   }, [allReports, totalCount, nextCursor, task, addToolResult, part.toolCallId])
 
   if (taskPending || reportsPending) {
