@@ -2,3 +2,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'tooling/*'
+
+syncInjectedDepsAfterScripts:
+  - build
+injectWorkspacePackages: true
