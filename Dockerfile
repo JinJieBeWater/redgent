@@ -16,8 +16,8 @@ RUN pnpm deploy --filter=core --prod /prod/core
 RUN pnpm deploy --filter=web --prod /prod/web
 # 将 generated 复制到 core 下
 RUN cp -r /usr/src/app/packages/database/generated /prod/core
-# 检查
-RUN ls -la /prod/core/generated/prisma/
+# 将nginx.conf文件复制到 web 下
+RUN cp /usr/src/app/apps/web/nginx.conf /prod/web
 
 FROM base AS core
 COPY --from=build /prod/core /prod/core
@@ -25,8 +25,10 @@ WORKDIR /prod/core
 EXPOSE 3001
 CMD [ "node", "./dist/src/main.js" ]
 
-FROM base AS web
-COPY --from=build /prod/web /prod/web
-WORKDIR /prod/web
+# production stage
+FROM nginx:stable AS web
+COPY --from=build /prod/web/dist /usr/share/nginx/html
+COPY --from=build /prod/web/nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 3000
-CMD [ "pnpm", "start" ]
+CMD ["nginx", "-g", "daemon off;"]
