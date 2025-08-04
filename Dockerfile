@@ -10,7 +10,7 @@ COPY . /usr/src/app
 WORKDIR /usr/src/app
 
 # 安装系统依赖
-RUN apk add --no-cache openssl3 curl
+# RUN apk add --no-cache openssl3 curl
 
 # 安装项目依赖
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
