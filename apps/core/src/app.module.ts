@@ -26,7 +26,7 @@ import { TrpcModule } from './processors/trpc/trpc.module'
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
-        PORT: Joi.number().default(8000),
+        PORT: Joi.number(),
         PROXY_URL: Joi.string().optional(),
         REDDIT_CLIENT_ID: Joi.string().required(),
         REDDIT_SECRET: Joi.string().required(),
