@@ -11,7 +11,6 @@ services:
     ports:
       - '3001:3001'
     environment:
-      NODE_ENV: production
       PORT: 3001
       DATABASE_URL: ${DATABASE_URL}
       REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID}
