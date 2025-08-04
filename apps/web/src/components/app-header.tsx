@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useSubscription } from '@trpc/tanstack-react-query'
-import { trpc } from '@web/router'
+import { queryClient, trpc } from '@web/router'
 import { Activity, AlertCircle, Sparkle } from 'lucide-react'
 import z from 'zod'
 
@@ -31,6 +31,18 @@ export default function Header() {
       if (data && hasDataProperty(data)) {
         const res = data.data
         setMessage(`${res.name} ${res.progress.message}`)
+        if (res.progress.status === 'TASK_COMPLETE') {
+          const { taskId } = res
+          queryClient.invalidateQueries(
+            trpc.report.paginateByTaskId.infiniteQueryFilter({
+              taskId: taskId,
+              limit: 4,
+            }),
+          )
+          queryClient.invalidateQueries(
+            trpc.report.paginate.infiniteQueryFilter(),
+          )
+        }
       }
     }
   }, [status, data, error])

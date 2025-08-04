@@ -4,7 +4,7 @@ import type { UIMessagePart } from 'ai'
 import { memo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@web/components/ui/button'
-import { queryClient, trpc } from '@web/router'
+import { trpc } from '@web/router'
 import { generateId } from 'ai'
 
 import { ErrorMessage, LoadingMessage } from './common'
@@ -74,15 +74,6 @@ export const ImplImmediatelyExecuteTaskUI = ({
       case 'running':
         break
       case 'success': {
-        queryClient.invalidateQueries(
-          trpc.report.paginateByTaskId.infiniteQueryFilter({
-            taskId: taskId,
-            limit: 4,
-          }),
-        )
-        queryClient.invalidateQueries(
-          trpc.report.paginate.infiniteQueryFilter(),
-        )
         addToolResult({
           tool: 'ImmediatelyExecuteTask',
           toolCallId: toolCallId,
