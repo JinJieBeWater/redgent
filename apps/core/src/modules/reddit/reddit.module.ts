@@ -16,7 +16,7 @@ import { RedditService } from './reddit.service'
           headers: {
             'User-Agent': 'Redgent/1.0 (by u/Equivalent_Emu_9077)',
           },
-          httpsAgent: proxyUrl && new HttpsProxyAgent(proxyUrl),
+          httpsAgent: proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined,
         }
       },
       inject: [ConfigService],
