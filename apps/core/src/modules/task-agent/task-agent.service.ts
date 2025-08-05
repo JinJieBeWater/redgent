@@ -5,7 +5,7 @@ import z from 'zod'
 
 import { TaskStatus } from '@redgent/db'
 import {
-  createTaskSchema,
+  CreateTaskSchema,
   TaskReportMiniSchema,
   TaskReportSchema,
   TaskSchema,
@@ -153,7 +153,7 @@ export class TaskAgentService {
       - subreddit 生成逻辑
         - 确保 subreddit 为真实的 subreddit
       `,
-      inputSchema: createTaskSchema,
+      inputSchema: CreateTaskSchema,
       execute: async input => {
         try {
           this.logger.debug('createTask 工具被调用')
@@ -172,6 +172,60 @@ export class TaskAgentService {
       },
     }),
 
+    switchTaskStatus: tool({
+      description: `
+      服务端工具 切换一个或多个定时任务的状态
+      - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
+      - 当用户要求切换定时任务的状态时，调用该工具
+      `,
+      inputSchema: z.union([
+        TaskSchema.pick({
+          id: true,
+          status: true,
+        }),
+        z.array(
+          TaskSchema.pick({
+            id: true,
+            status: true,
+          }),
+        ),
+      ]),
+      execute: async input => {
+        try {
+          this.logger.debug('switchTaskStatus 工具被调用')
+          const targets = Array.isArray(input) ? input : [input]
+          const result = await Promise.all(
+            targets.map(async item => {
+              const { id, status } = item
+              const task = await this.prismaService.task.update({
+                where: { id },
+                data: { status },
+              })
+              if (task.status === TaskStatus.active) {
+                this.taskScheduleService.registerTask(task)
+                return {
+                  id: task.id,
+                  status: task.status,
+                  message: '任务已启动',
+                }
+              } else {
+                this.taskScheduleService.removeTask(task.id)
+                return {
+                  id: task.id,
+                  status: task.status,
+                  message: '任务已停止',
+                }
+              }
+            }),
+          )
+          return result
+        } catch (error) {
+          this.logger.error(error instanceof Error ? error.message : error)
+          throw error
+        }
+      },
+    }),
+
     UpdateTask: tool({
       description: `
       服务端工具 修改一个定时任务的配置
@@ -181,7 +235,15 @@ export class TaskAgentService {
       `,
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
-        data: createTaskSchema.partial().describe('输入需要修改的配置'),
+        data: CreateTaskSchema.partial()
+          .pick({
+            name: true,
+            payload: true,
+            scheduleType: true,
+            scheduleExpression: true,
+            enableCache: true,
+          })
+          .describe('输入需要修改的配置'),
       }),
       execute: async input => {
         try {

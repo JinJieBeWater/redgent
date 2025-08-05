@@ -4,7 +4,7 @@ import { ScheduleType, Task, TaskStatus } from '@redgent/db'
 
 import { TaskReportSchema } from './task-report'
 
-export const createTaskSchema = z.object({
+export const CreateTaskSchema = z.object({
   name: z.string().describe('简短任务名称 AI自动生成 应该尽可能的简短'),
   prompt: z.string().describe('用户原封不动的输入'),
   payload: z
@@ -39,16 +39,14 @@ export const createTaskSchema = z.object({
   enableCache: z.boolean().default(true).describe('3天缓存'),
 })
 
-export const updateTaskSchema = createTaskSchema.partial()
-
-export const TaskSchema: z.ZodType<Task> = createTaskSchema.extend({
+export const TaskSchema = CreateTaskSchema.extend({
   id: z.uuid(),
   lastExecutedAt: z.date().nullable(),
   lastErrorMessage: z.string().nullable(),
   lastFailureAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-})
+}) satisfies z.ZodType<Task>
 
 /**
  * 定义所有可能的任务进度状态

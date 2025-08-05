@@ -81,21 +81,17 @@ export class TaskScheduleService implements OnModuleInit {
 
   /**
    * 注册 CRON 任务
-   * @param taskName - 任务名称
+   * @param id - 任务名称
    * @param cronExpression - CRON 表达式
    * @param task - 任务对象
    */
-  private registerCronTask(
-    taskName: string,
-    cronExpression: string,
-    task: Task,
-  ) {
+  private registerCronTask(id: string, cronExpression: string, task: Task) {
     try {
       const job = new CronJob(cronExpression, () => {
         this.executeTask(task)
       })
 
-      this.schedulerRegistry.addCronJob(taskName, job)
+      this.schedulerRegistry.addCronJob(id, job)
       job.start()
     } catch (error) {
       this.logger.error(
@@ -107,12 +103,12 @@ export class TaskScheduleService implements OnModuleInit {
 
   /**
    * 注册 INTERVAL 任务
-   * @param taskName - 任务名称
+   * @param id - 任务名称
    * @param intervalExpression - INTERVAL 表达式 例如 "5000" 表示每 5 秒执行一次
    * @param task - 任务对象
    */
   private registerIntervalTask(
-    taskName: string,
+    id: string,
     intervalExpression: string,
     task: Task,
   ) {
@@ -128,7 +124,7 @@ export class TaskScheduleService implements OnModuleInit {
       this.executeTask(task)
     }, interval)
 
-    this.schedulerRegistry.addInterval(taskName, intervalId)
+    this.schedulerRegistry.addInterval(id, intervalId)
   }
 
   /**
@@ -137,41 +133,23 @@ export class TaskScheduleService implements OnModuleInit {
    */
   private executeTask(task: Task) {
     this.logger.log(`Executing task: "${task.name}" (ID: ${task.id})`)
-    this.taskExecutionService.executeObservable(task).subscribe({
-      next: progress => {
-        this.logger.log(
-          `Task "${task.name}" (ID: ${task.id}) execution progress:`,
-          JSON.stringify(progress, null, 2),
-        )
-      },
-      error: error => {
-        this.logger.error(
-          `Task "${task.name}" (ID: ${task.id}) execution failed:`,
-          error,
-        )
-      },
-      complete: () => {
-        this.logger.log(
-          `Task "${task.name}" (ID: ${task.id}) execution completed`,
-        )
-      },
-    })
+    this.taskExecutionService.executeObservable(task).subscribe()
   }
 
   /**
    * 从调度器中移除任务（用于更新或删除）
-   * @param taskName - The unique name of the task in the registry.
+   * @param id - The unique name of the task in the registry.
    */
-  removeTask(taskName: string) {
+  removeTask(id: string) {
     try {
-      if (this.schedulerRegistry.doesExist('cron', taskName)) {
-        this.schedulerRegistry.deleteCronJob(taskName)
+      if (this.schedulerRegistry.doesExist('cron', id)) {
+        this.schedulerRegistry.deleteCronJob(id)
       }
-      if (this.schedulerRegistry.doesExist('interval', taskName)) {
-        this.schedulerRegistry.deleteInterval(taskName)
+      if (this.schedulerRegistry.doesExist('interval', id)) {
+        this.schedulerRegistry.deleteInterval(id)
       }
     } catch (e) {
-      this.logger.warn(`无法移除任务 ${taskName}，可能不存在或已被删除`, e)
+      this.logger.warn(`无法移除任务 ${id}，可能不存在或已被删除`, e)
     }
   }
 }
