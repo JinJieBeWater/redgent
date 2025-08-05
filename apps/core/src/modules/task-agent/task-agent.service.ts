@@ -25,6 +25,19 @@ export class TaskAgentService {
     private readonly trpcRouter: TrpcRouter,
   ) {}
   readonly tools = () => ({
+    GetCurrentTime: tool({
+      description: `
+      服务端工具 获取当前时间
+      - 当需要获得当前时间时，调用该工具
+      `,
+      inputSchema: z.object({}),
+      execute: async () => {
+        return {
+          data: new Date(),
+        }
+      },
+    }),
+
     GetAllTasks: tool({
       description: `
       服务端工具 获取所有任务的粗略信息
