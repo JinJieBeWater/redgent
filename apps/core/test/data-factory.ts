@@ -13,7 +13,7 @@ import type {
   RedditLinkWrapper,
   RedditListingResponse,
 } from '@redgent/shared'
-import { Task } from '@redgent/db'
+import { Task, TaskReport } from '@redgent/db'
 
 // ============================================================================
 // Reddit 数据工厂
@@ -317,6 +317,32 @@ export function createMockTaskConfig(overrides?: Partial<Task>): Task {
     updatedAt: new Date(),
     status: 'active',
     enableCache: true,
+    ...overrides,
+  }
+}
+
+/**
+ * 创建模拟的任务报告数据
+ * @param overrides 可选的覆盖属性
+ * @returns 任务报告数据
+ */
+export function createMockTaskReport(
+  overrides?: Partial<TaskReport>,
+): TaskReport {
+  return {
+    id: randomUUID(),
+    title: 'Test Report',
+    content: {
+      findings: [
+        {
+          elaboration: 'Test elaboration',
+          supportingLinkIds: ['t3_test', 't3_test2'],
+        },
+      ],
+    },
+    executionDuration: 1000,
+    taskId: randomUUID(),
+    createdAt: new Date(),
     ...overrides,
   }
 }

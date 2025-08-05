@@ -28,8 +28,7 @@ export const TaskReportMiniSchema = z.object({
   taskId: z.uuid(),
 })
 
-export const TaskReportSchema: z.ZodType<TaskReport> =
-  TaskReportMiniSchema.extend({
-    content: TaskReportContentSchema,
-    executionDuration: z.number(),
-  })
+export const TaskReportSchema = TaskReportMiniSchema.extend({
+  content: TaskReportContentSchema,
+  executionDuration: z.number(),
+}) satisfies z.ZodType<TaskReport>
