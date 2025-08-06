@@ -10,13 +10,11 @@ services:
     container_name: redgent-core
     ports:
       - '3001:3001'
+    env_file:
+      - .env.production.local
     environment:
+      DOCKER: 'true'
       PORT: 3001
-      DATABASE_URL: ${DATABASE_URL}
-      REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID}
-      REDDIT_SECRET: ${REDDIT_SECRET}
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
-      PROXY_URL: ${PROXY_URL:-}
     networks:
       - redgent-network
     restart: unless-stopped

@@ -24,7 +24,7 @@ export default function Header() {
 
   useEffect(() => {
     if (status === 'error') {
-      setMessage(`网络错误 ${error.message || error}`)
+      setMessage(`网络波动，请尝试刷新页面`)
     } else if (status === 'idle') {
       setMessage('空闲')
     } else if (status === 'pending') {

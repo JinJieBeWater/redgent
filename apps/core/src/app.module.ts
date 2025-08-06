@@ -21,7 +21,14 @@ import { TrpcModule } from './processors/trpc/trpc.module'
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      envFilePath: process.env.DOCKER
+        ? undefined
+        : [
+            `../../.env.${process.env.NODE_ENV}.local`,
+            `../../.env.${process.env.NODE_ENV}`,
+            '../../.env.local',
+            '../../.env',
+          ],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
