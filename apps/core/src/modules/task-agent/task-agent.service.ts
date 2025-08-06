@@ -333,6 +333,7 @@ export class TaskAgentService {
       - 工具的输出会随着任务执行的进度而变化
       - 当用户要求立即执行一次任务时，调用该工具
       - 执行完成后可以点击 ImmediatelyExecuteTask 的 UI 组件右侧的按钮查看生成的报告
+      - 如果报错, 应该根据错误信息提示用户
       `,
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
@@ -352,7 +353,7 @@ export class TaskAgentService {
         }
         const res = await this.taskExecutionService.execute(task)
         if (res.status === 'cancel') {
-          throw new Error('当前任务已经在执行中')
+          throw new Error('任务已经在执行, 不可重复执行')
         }
         return {
           taskName: task.name,

@@ -66,6 +66,8 @@ export class TaskExecutionService {
     }
     return new Observable((subscriber: Subscriber<TaskProgress>) => {
       const run = async () => {
+        // 任务失败时清除做的缓存 供下次重试使用
+        const filterLinks: RedditLinkInfoUntrusted[] = []
         try {
           const startTime = performance.now()
 
@@ -79,6 +81,7 @@ export class TaskExecutionService {
 
           if (taskConfig.enableCache) {
             links = await this._filterLinks(taskConfig, links, subscriber)
+            filterLinks.push(...links)
             if (links.length === 0) {
               subscriber.complete()
               return
@@ -110,7 +113,13 @@ export class TaskExecutionService {
 
           subscriber.complete()
         } catch (error) {
-          await this._handleError(error, taskConfig, context, subscriber)
+          await this._handleError(
+            error,
+            taskConfig,
+            context,
+            subscriber,
+            filterLinks,
+          )
         }
       }
 
@@ -370,11 +379,17 @@ export class TaskExecutionService {
     taskConfig: Task,
     context: ExecuteContext,
     subscriber: Subscriber<TaskProgress>,
+    filterLinks: RedditLinkInfoUntrusted[],
   ) {
     this.logger.error(error)
     const message = error instanceof Error ? error.message : '未知错误'
     await this.cacheManager.del(
       `${CACHE_KEY_PREFIX_TASK_RUNNING}${taskConfig.id}`,
+    )
+    await Promise.allSettled(
+      filterLinks.map(link =>
+        this.cacheManager.del(`${CACHE_KEY_PREFIX_LINK}${link.id}`),
+      ),
     )
     if (APICallError.isInstance(error)) {
       subscriber.error({
