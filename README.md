@@ -1,11 +1,28 @@
-# 🔥 Redgent
+<a href="https://github.com/JinJieBeWater/redgent">
+  <h1 align="center">✨ Redgent</h1>
+</a>
+
+<p align="center">
+    Redgent 是一款基于 Generative UI 的定时任务管理工具，通过对话界面管理定时任务，支持 Reddit 数据抓取和 AI 分析
+</p>
+
+<p align="center">
+  <a href="#-核心功能特性"><strong>核心功能</strong></a> ·
+  <a href="#️-技术栈"><strong>技术栈</strong></a> ·
+  <a href="#️-系统架构"><strong>系统架构</strong></a> ·
+  <a href="#-快速开始"><strong>快速开始</strong></a> ·
+  <a href="#-docker-部署"><strong>Docker 部署</strong></a>
+</p>
 
 <div align="center">
-  <p><strong>基于 Generative UI 的定时任务管理工具</strong></p>
-  <p>通过对话界面管理后台定时任务，支持 Reddit 数据抓取和 AI 分析</p>
-  
-  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com/) [![AI SDK](https://img.shields.io/badge/AI%20SDK-000000?style=flat-square&logo=vercel&logoColor=white)](https://sdk.vercel.ai/) [![tRPC](https://img.shields.io/badge/tRPC-2596BE?style=flat-square&logo=trpc&logoColor=white)](https://trpc.io/) [![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com/)
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com/) [![AI SDK](https://img.shields.io/badge/AI%20SDK-000000?style=flat-square&logo=vercel&logoColor=white)](https://sdk.vercel.ai/) [![tRPC](https://img.shields.io/badge/tRPC-2596BE?style=flat-square&logo=trpc&logoColor=white)](https://trpc.io/) [![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com/)
+
 </div>
+
+<br/>
+
+# ✨ Redgent
 
 ## ✨ 核心功能特性
 
@@ -339,6 +356,6 @@ pnpm build      # 构建所有包
 ## ⚠️ 注意事项
 
 - **数据库**: 确保 PostgreSQL 服务可访问且已创建对应数据库
-- **API 限制**: Reddit API 和 DeepSeek API 都有频率限制，请合理设置任务间隔
+- **任务频率限制**: Reddit API 有频率限制，且任务会对数据做缓存防止重复分析，过滤频繁的任务会导致数据全部命中缓存取消任务，请合理设置任务间隔
 - **代理配置**: 如果在网络受限环境，需要正确配置 `PROXY_URL`
 - **端口冲突**: 确保 3000 和 3001 端口未被占用

@@ -1,9 +1,11 @@
+import { AiSdkModule } from '@core/modules/ai-sdk/ai-sdk.module'
 import { RedditService } from '@core/modules/reddit/reddit.service'
 import { ReportService } from '@core/modules/report/report.service'
 import { TaskExecutionService } from '@core/modules/task-execution/task-execution.service'
 import { EeModule } from '@core/processors/ee/ee.module'
 import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager'
 import { INestApplication } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Cache } from 'cache-manager'
 import { lastValueFrom, toArray } from 'rxjs'
@@ -52,6 +54,10 @@ describe(TaskExecutionService.name, () => {
           isGlobal: true,
           ttl: 60 * 60 * 1000, // 1 hour
         }),
+        ConfigModule.forRoot({
+          isGlobal: true,
+        }),
+        AiSdkModule,
         EeModule,
       ],
       providers: [
