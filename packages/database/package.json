@@ -4,9 +4,9 @@
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly",
     "db:generate": "prisma generate",
-    "db:migrate": "dotenv -e ../../.env.local -- prisma migrate dev --skip-generate",
-    "db:deploy": "dotenv -e ../../.env.local -- prisma migrate deploy",
-    "db:studio": "dotenv -e ../../.env.local -- prisma studio",
+    "db:migrate": "dotenv -e ../../.env -- prisma migrate dev --skip-generate",
+    "db:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:studio": "dotenv -e ../../.env -- prisma studio",
     "db:deploy:prod": "dotenv -e ../../.env.production.local -- prisma migrate deploy",
     "db:studio:prod": "dotenv -e ../../.env.production.local -- prisma studio"
   },

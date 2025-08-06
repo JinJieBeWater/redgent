@@ -203,24 +203,50 @@ sequenceDiagram
 
 ### 💻 本地开发
 
-1. **克隆项目**
+1. **数据库准备**
+
+   **方式一：使用本地 Docker 数据库**
+
+   使用脚本快速启动本地 PostgreSQL 数据库：
+
+   ```bash
+   # 启动本地 PostgreSQL 容器
+   ./start-database.sh
+   ```
+
+   该脚本会：
+   - 自动从 `.env` 文件读取数据库配置
+   - 检查 Docker/Podman 是否安装和运行
+   - 创建并启动 PostgreSQL 容器
+   - 如果使用默认密码，会提示生成随机密码
+
+   **Windows 用户请注意**：
+   1. 需要先安装 WSL (Windows Subsystem for Linux)
+   2. 安装 Docker Desktop
+   3. 在 WSL 环境中运行脚本
+
+   **方式二：使用云数据库或自建数据库**
+
+   直接在 `.env` 文件中配置你的 PostgreSQL 连接字符串。
+
+2. **克隆项目**
 
    ```bash
    git clone https://github.com/JinJieBeWater/redgent.git
    cd redgent
    ```
 
-2. **安装依赖**
+3. **安装依赖**
 
    ```bash
    pnpm install
    ```
 
-3. **环境配置**
+4. **环境配置**
 
    ```bash
    # 复制环境变量模板
-   cp .env.example .env.local
+   cp .env.example .env
 
    # 编辑 .env 文件，填入必要的配置：
    # - REDDIT_CLIENT_ID: Reddit API 客户端 ID
@@ -231,7 +257,7 @@ sequenceDiagram
    # - PROXY_URL: (可选) 代理配置
    ```
 
-4. **数据库准备**
+5. **完成数据库设置**
 
    ```bash
    # 运行数据库迁移
@@ -239,10 +265,9 @@ sequenceDiagram
 
    # 生成 Prisma 客户端
    pnpm turbo run db:generate
-
    ```
 
-5. **启动开发服务**
+6. **启动开发服务**
 
    ```bash
    # 同时启动前后端开发服务器
