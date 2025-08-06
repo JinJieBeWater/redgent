@@ -1,6 +1,5 @@
 import type { Response } from 'express'
-import { redgentAgentSystem } from '@core/ai-sdk/prompts'
-import { myProvider } from '@core/ai-sdk/provider'
+import { redgentAgentSystem } from '@core/modules/ai-sdk/prompts'
 import { AppMessage } from '@core/shared'
 import {
   Body,
@@ -19,6 +18,7 @@ import {
   streamText,
 } from 'ai'
 
+import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { ChatDto } from './dto/chat.dto'
 import { TaskAgentService } from './task-agent.service'
 
@@ -26,7 +26,10 @@ import { TaskAgentService } from './task-agent.service'
 export class TaskAgentController {
   private readonly logger = new Logger(TaskAgentController.name)
 
-  constructor(private readonly taskAgentService: TaskAgentService) {}
+  constructor(
+    private readonly taskAgentService: TaskAgentService,
+    private readonly aiSdkService: AiSdkService,
+  ) {}
 
   /**
    * 任务代理接口
@@ -37,6 +40,7 @@ export class TaskAgentController {
   async chat(@Body() chat: ChatDto, @Res() res: Response) {
     try {
       const self = this
+      const myProvider = this.aiSdkService.myProvider
 
       const stream = createUIMessageStream<AppMessage>({
         execute({ writer }) {

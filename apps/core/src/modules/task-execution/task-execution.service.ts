@@ -1,13 +1,12 @@
 import type { Cache } from 'cache-manager'
 import {
-  analyzeRedditContentPrompt,
-  selectMostRelevantLinksPrompt,
-} from '@core/ai-sdk/prompts'
-import { myProvider } from '@core/ai-sdk/provider'
-import {
   CACHE_KEY_PREFIX_LINK,
   CACHE_KEY_PREFIX_TASK_RUNNING,
 } from '@core/common/constants/cache'
+import {
+  analyzeRedditContentPrompt,
+  selectMostRelevantLinksPrompt,
+} from '@core/modules/ai-sdk/prompts'
 import { EeService } from '@core/processors/ee/ee.service'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, Logger } from '@nestjs/common'
@@ -26,6 +25,7 @@ import {
 } from '@redgent/shared'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
+import { AiSdkService } from '../ai-sdk/ai-sdk.service'
 import { RedditService } from '../reddit/reddit.service'
 import { TASK_EXECUTE_EVENT } from '../task/task.constants'
 import {
@@ -48,6 +48,7 @@ export class TaskExecutionService {
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly ee: EeService,
+    private readonly aiSdkService: AiSdkService,
   ) {}
 
   /**
@@ -423,6 +424,7 @@ export class TaskExecutionService {
     links: { id: string; title: string; selftext: string }[],
   ) {
     try {
+      const myProvider = this.aiSdkService.myProvider
       const { object } = await generateObject({
         model: myProvider.languageModel('structure-model'),
         schema: z.object({
@@ -442,7 +444,7 @@ export class TaskExecutionService {
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         // Handle the API call error
-        this.logger.error(error.message)
+        this.logger.error(error)
         throw new Error(error.message)
       } else {
         this.logger.error(error)
@@ -465,6 +467,8 @@ export class TaskExecutionService {
     }[],
   ): Promise<Pick<TaskReport, 'title' | 'content'>> {
     try {
+      const myProvider = this.aiSdkService.myProvider
+
       const { object: analysisResult } = await generateObject({
         model: myProvider.languageModel('analysis-model'),
         schema: z.object({

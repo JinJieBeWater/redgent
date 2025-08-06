@@ -1,5 +1,6 @@
 import { EeModule } from '@core/processors/ee/ee.module'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
+import { ConfigModule } from '@nestjs/config'
 import { Test, TestingModule } from '@nestjs/testing'
 import { ModelMessage } from 'ai'
 import { Cache } from 'cache-manager'
@@ -15,13 +16,14 @@ import {
   createTooManyLinks,
   TEST_DATA_PRESETS,
 } from '../../../test/data-factory'
-import { selectMostRelevantLinksPrompt } from '../../ai-sdk/prompts'
+import { PrismaService } from '../../processors/prisma/prisma.service'
+import { AiSdkModule } from '../ai-sdk/ai-sdk.module'
+import { selectMostRelevantLinksPrompt } from '../ai-sdk/prompts'
 import {
   addCustomResponseHandler,
   clearCustomHandlers,
   compareMessages,
-} from '../../ai-sdk/utils'
-import { PrismaService } from '../../processors/prisma/prisma.service'
+} from '../ai-sdk/utils'
 import { RedditService } from '../reddit/reddit.service'
 import { TaskExecutionService } from './task-execution.service'
 
@@ -42,7 +44,13 @@ describe(TaskExecutionService.name, () => {
     clearCustomHandlers()
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [EeModule],
+      imports: [
+        EeModule,
+        AiSdkModule,
+        ConfigModule.forRoot({
+          isGlobal: true,
+        }),
+      ],
       providers: [
         TaskExecutionService,
         {
