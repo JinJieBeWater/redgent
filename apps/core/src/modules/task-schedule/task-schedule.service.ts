@@ -3,6 +3,7 @@ import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
 
 import { ScheduleType, Task, TaskStatus } from '@redgent/db'
+import { formatIntervalTime } from '@redgent/shared'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'
 import { TaskExecutionService } from '../task-execution/task-execution.service'
@@ -42,6 +43,20 @@ export class TaskScheduleService implements OnModuleInit {
    */
   async onModuleInit() {
     await this.registerTasksFromDb()
+    // 查询cron 和 interval 任务的概览
+    const cronTasks = this.schedulerRegistry.getCronJobs()
+    const intervalTasks = this.schedulerRegistry.getIntervals()
+    this.logger.log(`CRON 任务概览: ${cronTasks.size} 个`)
+    this.logger.log(`INTERVAL 任务概览: ${intervalTasks.length} 个`)
+    // 打印 IntervalTaskState
+    this.intervalTaskStates.forEach((value, key) => {
+      this.logger.log(`INTERVAL 任务: ${key}`)
+      this.logger.log(`执行频率: ${formatIntervalTime(value.normalInterval)}`)
+      this.logger.log(`是否正在校准: ${value.isCalibrating}`)
+      this.logger.log(
+        `下次执行时间: ${value.nextExecutionTime?.toLocaleString()}`,
+      )
+    })
   }
 
   /**
@@ -52,9 +67,7 @@ export class TaskScheduleService implements OnModuleInit {
       where: { status: TaskStatus.active },
     })
 
-    for (const task of tasks) {
-      this.registerTask(task)
-    }
+    await Promise.all(tasks.map(task => this.registerTask(task)))
   }
 
   /**
@@ -62,7 +75,7 @@ export class TaskScheduleService implements OnModuleInit {
    * 这是功能的核心，处理不同的调度类型。
    * @param task - The task object from the database.
    */
-  registerTask(task: Task) {
+  async registerTask(task: Task) {
     const { id, name, scheduleType, scheduleExpression } = task
 
     // 确保同一个任务不被重复注册
@@ -74,7 +87,7 @@ export class TaskScheduleService implements OnModuleInit {
         break
 
       case ScheduleType.interval:
-        void this.registerIntervalTask(id, scheduleExpression, task)
+        await this.registerIntervalTask(id, scheduleExpression, task)
         break
 
       default:
@@ -249,10 +262,10 @@ export class TaskScheduleService implements OnModuleInit {
    * @param id - 任务ID
    * @returns 任务下次执行时间
    */
-  getNextExecutionTime(id: string): Date | undefined {
+  getNextExecutionTime(id: string) {
     if (this.schedulerRegistry.doesExist('cron', id)) {
       const job = this.schedulerRegistry.getCronJob(id)
-      return job?.nextDates()[0].toJSDate()
+      return job?.nextDate().toJSDate()
     } else if (this.schedulerRegistry.doesExist('interval', id)) {
       const taskState = this.intervalTaskStates.get(id)
       if (taskState) {

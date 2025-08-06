@@ -43,39 +43,35 @@ function App() {
       // 根据修改实时更新其他查询
       // ! 由于当前版本的 @trpc/tanstack-react-query 查询过滤器的predicate函数类型不安全，使用重新查询的方式
       // 后续类型安全后手动更新缓存即可避免额外请求
-      const parts = message.parts
-      let createTaskPart: Extract<
+
+      type ToolPart<T extends AppUIMessagePart['type']> = Extract<
         AppUIMessagePart,
-        { type: 'tool-CreateTask'; state: 'output-available' }
-      > | null = null
-      let updateTaskPart: Extract<
-        AppUIMessagePart,
-        { type: 'tool-UpdateTask'; state: 'output-available' }
-      > | null = null
-      let deleteTaskPart: Extract<
-        AppUIMessagePart,
-        { type: 'tool-DeleteTask'; state: 'output-available' }
-      > | null = null
-      for (const part of parts) {
-        if (
-          part.type === 'tool-CreateTask' &&
-          part.state === 'output-available'
-        ) {
-          createTaskPart = part
-        }
-        if (
-          part.type === 'tool-UpdateTask' &&
-          part.state === 'output-available'
-        ) {
-          updateTaskPart = part
-        }
-        if (
-          part.type === 'tool-DeleteTask' &&
-          part.state === 'output-available'
-        ) {
-          deleteTaskPart = part
-        }
+        { type: T; state: 'output-available' }
+      >
+
+      const findOutputPart = <T extends AppUIMessagePart['type']>(
+        type: T,
+      ): ToolPart<T> | null => {
+        const part = message.parts.find(
+          (part): part is ToolPart<T> =>
+            part.type === type &&
+            'state' in part &&
+            part.state === 'output-available',
+        )
+        return part ?? null
       }
+
+      const [
+        createTaskPart,
+        updateTaskPart,
+        switchTaskStatusPart,
+        deleteTaskPart,
+      ] = [
+        findOutputPart('tool-CreateTask'),
+        findOutputPart('tool-UpdateTask'),
+        findOutputPart('tool-switchTaskStatus'),
+        findOutputPart('tool-DeleteTask'),
+      ]
       if (createTaskPart) {
         queryClient.invalidateQueries(
           trpc.task.paginate.infiniteQueryFilter(
@@ -105,6 +101,25 @@ function App() {
             },
           ),
         )
+      }
+      if (switchTaskStatusPart) {
+        queryClient.invalidateQueries(
+          trpc.task.paginate.infiniteQueryFilter(
+            {},
+            {
+              exact: false,
+            },
+          ),
+        )
+        const input = switchTaskStatusPart.input.tasks
+        const tasks = Array.isArray(input) ? input : [input]
+        tasks.forEach(task => {
+          queryClient.invalidateQueries(
+            trpc.task.detail.queryFilter({
+              id: task.id,
+            }),
+          )
+        })
       }
       if (deleteTaskPart) {
         queryClient.invalidateQueries(
@@ -332,13 +347,7 @@ function App() {
           input={input}
           placeholder="添加一个任务..."
           setInput={setInput}
-          handleSubmit={() => {
-            if (status === 'error') {
-              handleErrorSubmit()
-            } else {
-              handleSubmit()
-            }
-          }}
+          handleSubmit={handleSubmit}
           messages={messages}
           status={status}
           clearMessages={clearMessages}

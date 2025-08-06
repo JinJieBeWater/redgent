@@ -33,7 +33,7 @@ export class TaskAgentService {
       inputSchema: z.object({}),
       execute: async () => {
         return {
-          data: new Date(),
+          data: new Date().toLocaleString(),
         }
       },
     }),
@@ -157,6 +157,24 @@ export class TaskAgentService {
       },
     }),
 
+    GetNextExecutionTime: tool({
+      description: `
+      服务端工具 获取一个任务的下一次执行时间
+      - 当需要获取一个任务的下一次执行时间时，调用该工具
+      `,
+      inputSchema: z.object({
+        taskId: z.uuid().describe('任务id'),
+      }),
+      execute: async ({ taskId }) => {
+        const nextExecutionTime = this.taskScheduleService
+          .getNextExecutionTime(taskId)
+          ?.toLocaleString()
+        return {
+          data: nextExecutionTime,
+        }
+      },
+    }),
+
     CreateTask: tool({
       description: `
       服务端工具 创建一个定时任务
@@ -173,7 +191,7 @@ export class TaskAgentService {
           const task = await this.prismaService.task.create({
             data: input,
           })
-          this.taskScheduleService.registerTask(task)
+          await this.taskScheduleService.registerTask(task)
           return {
             data: task,
             message: '任务创建成功',
@@ -191,22 +209,24 @@ export class TaskAgentService {
       - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
       - 当用户要求切换定时任务的状态时，调用该工具
       `,
-      inputSchema: z.union([
-        TaskSchema.pick({
-          id: true,
-          status: true,
-        }),
-        z.array(
+      inputSchema: z.object({
+        tasks: z.union([
+          z.array(
+            TaskSchema.pick({
+              id: true,
+              status: true,
+            }),
+          ),
           TaskSchema.pick({
             id: true,
             status: true,
           }),
-        ),
-      ]),
-      execute: async input => {
+        ]),
+      }),
+      execute: async ({ tasks }) => {
         try {
           this.logger.debug('switchTaskStatus 工具被调用')
-          const targets = Array.isArray(input) ? input : [input]
+          const targets = Array.isArray(tasks) ? tasks : [tasks]
           const result = await Promise.all(
             targets.map(async item => {
               const { id, status } = item
@@ -215,7 +235,7 @@ export class TaskAgentService {
                 data: { status },
               })
               if (task.status === TaskStatus.active) {
-                this.taskScheduleService.registerTask(task)
+                await this.taskScheduleService.registerTask(task)
                 return {
                   id: task.id,
                   status: task.status,
@@ -244,7 +264,7 @@ export class TaskAgentService {
       服务端工具 修改一个定时任务的配置
       - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
       - 当用户要求修改一个定时任务的配置时，调用该工具
-      - 可供修改项有 name, payload, scheduleType, scheduleExpression, enableCache, status
+      - 可供修改项有 name, payload, scheduleType, scheduleExpression, enableCache
       `,
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
@@ -265,7 +285,11 @@ export class TaskAgentService {
             where: { id: input.taskId },
             data: input.data,
           })
-          this.taskScheduleService.registerTask(task)
+          if (task.status === TaskStatus.active) {
+            await this.taskScheduleService.registerTask(task)
+          } else {
+            this.taskScheduleService.removeTask(task.id)
+          }
           return {
             data: task,
             message: '任务更新成功',

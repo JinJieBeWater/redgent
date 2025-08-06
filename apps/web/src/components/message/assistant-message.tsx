@@ -60,6 +60,9 @@ export const ImplAssistantMessage = ({
           case 'tool-DeleteTask':
           case 'tool-GetLatestReport':
           case 'tool-GetReportByTaskId':
+          case 'tool-GetCurrentTime':
+          case 'tool-switchTaskStatus':
+          case 'tool-GetNextExecutionTime':
             return null
           case 'tool-ImmediatelyExecuteTask': {
             const { state } = part

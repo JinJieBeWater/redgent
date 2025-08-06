@@ -20,9 +20,9 @@ export const getStatusInfo = (
 } => {
   switch (status) {
     case 'active':
-      return { variant: 'default', icon: Pause, label: '激活' }
+      return { variant: 'default', icon: Pause, label: '激活中' }
     case 'paused':
-      return { variant: 'secondary', icon: Play, label: '暂停' }
+      return { variant: 'secondary', icon: Play, label: '暂停中' }
     default:
       return { variant: 'destructive', icon: Ban, label: '未知' }
   }
