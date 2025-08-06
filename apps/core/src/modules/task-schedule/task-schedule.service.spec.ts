@@ -106,10 +106,10 @@ describe(TaskScheduleService.name, () => {
   })
 
   describe('registerTask', () => {
-    it('应该注册cron任务', () => {
+    it('应该注册cron任务', async () => {
       const removeTaskSpy = vi.spyOn(service, 'removeTask')
 
-      service.registerTask(mockCronTask)
+      await service.registerTask(mockCronTask)
 
       expect(removeTaskSpy).toHaveBeenCalledWith(mockCronTask.id)
       expect(schedulerRegistry.addCronJob).toHaveBeenCalledWith(
@@ -124,7 +124,7 @@ describe(TaskScheduleService.name, () => {
       // 模拟没有历史报告的情况
       prismaService.taskReport.findFirst.mockResolvedValue(null)
 
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       // 等待异步操作完成
       await vi.waitFor(() => {
@@ -149,7 +149,7 @@ describe(TaskScheduleService.name, () => {
 
       const loggerSpy = vi.spyOn(service['logger'], 'error')
 
-      service.registerTask(invalidTask)
+      await service.registerTask(invalidTask)
 
       await vi.waitFor(() => {
         expect(loggerSpy).toHaveBeenCalledWith(
@@ -173,7 +173,7 @@ describe(TaskScheduleService.name, () => {
       prismaService.taskReport.findFirst.mockResolvedValue(null)
       const executeTaskSpy = vi.spyOn(service as any, 'executeTask')
 
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       const nextExecutionTime =
         Date.now() + Number(mockIntervalTask.scheduleExpression)
@@ -207,7 +207,7 @@ describe(TaskScheduleService.name, () => {
 
       vi.spyOn(globalThis, 'setInterval') // 监视 setInterval
 
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       await vi.waitFor(() => {
         const intervalTaskStates = service['intervalTaskStates']
@@ -216,7 +216,7 @@ describe(TaskScheduleService.name, () => {
         expect(taskState).toBeDefined()
         expect(taskState?.normalInterval).toBe(5000)
         expect(taskState?.isCalibrating).toBe(true)
-        expect(setInterval).toHaveBeenCalledWith(expect.any(Function), 2950)
+        expect(setInterval).toHaveBeenCalledWith(expect.any(Function), 3000)
       })
     })
 
@@ -233,7 +233,7 @@ describe(TaskScheduleService.name, () => {
 
       const executeTaskSpy = vi.spyOn(service as any, 'executeTask')
 
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       await vi.waitFor(() => {
         expect(executeTaskSpy).toHaveBeenCalledWith(mockIntervalTask)
@@ -255,7 +255,7 @@ describe(TaskScheduleService.name, () => {
       const deleteIntervalSpy = vi.spyOn(schedulerRegistry, 'deleteInterval')
       const addIntervalSpy = vi.spyOn(schedulerRegistry, 'addInterval')
 
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       // 等待初始注册完成
       await vi.waitFor(() => {
@@ -310,7 +310,7 @@ describe(TaskScheduleService.name, () => {
     it('应该移除interval任务状态', async () => {
       // 先注册一个任务以创建状态
       prismaService.taskReport.findFirst.mockResolvedValue(null)
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       // 等待状态创建完成
       await vi.waitFor(() => {
@@ -348,7 +348,7 @@ describe(TaskScheduleService.name, () => {
 
       const loggerSpy = vi.spyOn(service['logger'], 'error')
 
-      service.registerTask(zeroIntervalTask)
+      await service.registerTask(zeroIntervalTask)
 
       await vi.waitFor(() => {
         expect(loggerSpy).toHaveBeenCalled()
@@ -363,7 +363,7 @@ describe(TaskScheduleService.name, () => {
 
       const loggerSpy = vi.spyOn(service['logger'], 'error')
 
-      service.registerTask(negativeIntervalTask)
+      await service.registerTask(negativeIntervalTask)
 
       await vi.waitFor(() => {
         expect(loggerSpy).toHaveBeenCalled()
@@ -389,7 +389,7 @@ describe(TaskScheduleService.name, () => {
       prismaService.taskReport.findFirst.mockResolvedValue(null)
 
       // 第一次注册
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       await vi.waitFor(() => {
         const intervalTaskStates = service['intervalTaskStates']
@@ -399,7 +399,7 @@ describe(TaskScheduleService.name, () => {
       const removeTaskSpy = vi.spyOn(service, 'removeTask')
 
       // 第二次注册同一任务
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       expect(removeTaskSpy).toHaveBeenCalledWith(mockIntervalTask.id)
     })
@@ -417,7 +417,7 @@ describe(TaskScheduleService.name, () => {
     it('应该返回cron任务的下次执行时间', async () => {
       const mockNextDate = new Date('2024-01-01T12:00:00Z')
       const mockCronJob = {
-        nextDates: vi.fn().mockReturnValue([{ toJSDate: () => mockNextDate }]),
+        nextDate: vi.fn().mockReturnValue({ toJSDate: () => mockNextDate }),
       }
 
       schedulerRegistry.doesExist.mockImplementation((type, id) => {
@@ -466,7 +466,7 @@ describe(TaskScheduleService.name, () => {
       )
 
       // 注册任务（应该进入校准阶段）
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       // 等待任务注册完成
       await vi.waitFor(() => {
@@ -505,7 +505,7 @@ describe(TaskScheduleService.name, () => {
       )
 
       // 注册任务（应该进入校准阶段）
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       // 等待任务注册完成
       await vi.waitFor(() => {
@@ -546,7 +546,7 @@ describe(TaskScheduleService.name, () => {
       prismaService.taskReport.findFirst.mockResolvedValue(null)
 
       // 注册任务
-      service.registerTask(mockIntervalTask)
+      await service.registerTask(mockIntervalTask)
 
       // 等待任务注册完成
       await vi.waitFor(() => {

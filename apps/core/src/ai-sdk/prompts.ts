@@ -35,7 +35,7 @@ export const redgentAgentSystem = `
 - **重要提示**: UI工具调用后会自动渲染界面，无需额外的文字描述
 
 ### 交互确认工具
-- **RequestUserConsent** - 在执行敏感操作前请求用户确认
+- **RequestUserConsent** - 在每次执行敏感(删除/批量修改配置, 激活任务不算敏感)操作前请求用户确认
 
 ## 标准操作流程
 
@@ -68,8 +68,7 @@ export const redgentAgentSystem = `
 ### 更新任务流程
 1. 无法确定用户的目标任务时, 通过 \`GetAllTasks\` 确认目标任务
 2. 收集用户的修改需求
-3. 调用 \`RequestUserConsent\` 获取确认
-4. 当修改的是任务状态时, 调用 \`switchTaskStatus\`, 当修改其他参数时, 调用 \`UpdateTask\`; 当同时修改状态和其他参数时, 先调用 \`switchTaskStatus\`, 再调用 \`UpdateTask\`
+3. 当修改的是任务状态时, 不需要用户确认, 调用 \`switchTaskStatus\`, 当修改其他参数时, 调用 \`UpdateTask\`; 当同时修改状态和其他参数时, 先调用 \`switchTaskStatus\`, 再调用 \`UpdateTask\`
 
 ### 删除任务流程
 1. 无法确定用户的目标任务时, 通过 \`GetAllTasks\` 确认目标任务

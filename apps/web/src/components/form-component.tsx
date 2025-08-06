@@ -97,7 +97,8 @@ export const ImplFormComponent: React.FC<FormComponentProps> = ({
             onClick={handleSubmit}
             size="sm"
             disabled={
-              (!input.trim() && status === 'ready') || status !== 'error'
+              (status !== 'ready' && status !== 'error') ||
+              (status === 'ready' && input.trim() === '')
             }
           >
             {status === 'error' && (

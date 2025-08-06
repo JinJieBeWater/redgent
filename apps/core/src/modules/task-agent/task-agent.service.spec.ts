@@ -95,10 +95,13 @@ describe(TaskAgentService.name, () => {
       })
 
       const inputData = {
-        id: mockTask.id,
-        status: TaskStatus.active,
+        tasks: [
+          {
+            id: updatedTask.id,
+            status: TaskStatus.active,
+          },
+        ],
       }
-
       prismaService.task.update.mockResolvedValue(updatedTask)
 
       const result = await switchTaskStatusTool.execute!(inputData, {
@@ -122,10 +125,13 @@ describe(TaskAgentService.name, () => {
 
     it('应该成功切换单个任务状态为paused并移除调度', async () => {
       const inputData = {
-        id: mockTask.id,
-        status: TaskStatus.paused,
+        tasks: [
+          {
+            id: mockTask.id,
+            status: TaskStatus.paused,
+          },
+        ],
       }
-
       const updatedTask = createMockTaskConfig({
         ...mockTask,
         status: TaskStatus.paused,
@@ -159,10 +165,12 @@ describe(TaskAgentService.name, () => {
         name: '测试任务2',
       })
 
-      const inputData = [
-        { id: mockTask.id, status: TaskStatus.active },
-        { id: mockTask2.id, status: TaskStatus.paused },
-      ]
+      const inputData = {
+        tasks: [
+          { id: mockTask.id, status: TaskStatus.active },
+          { id: mockTask2.id, status: TaskStatus.paused },
+        ],
+      }
 
       const updatedTask1 = createMockTaskConfig({
         ...mockTask,
@@ -213,8 +221,12 @@ describe(TaskAgentService.name, () => {
 
     it('应该在数据库更新失败时抛出错误', async () => {
       const inputData = {
-        id: mockTask.id,
-        status: TaskStatus.active,
+        tasks: [
+          {
+            id: mockTask.id,
+            status: TaskStatus.active,
+          },
+        ],
       }
 
       const dbError = new Error('数据库连接失败')
