@@ -1,38 +1,66 @@
-# Redgent
+# 🔥 Redgent
 
-一个基于 Nest.js/React 构建的全栈应用。Redgent 通过定时抓取 Reddit 的实时热点内容，并利用大型语言模型（LLM）进行自动化信息处理，帮助用户高效获取和分析来自社交媒体的关键信息。
+<div align="center">
+  <p><strong>基于 Generative UI 的定时任务管理工具</strong></p>
+  <p>通过对话界面管理后台定时任务，支持 Reddit 数据抓取和 AI 分析</p>
+  
+  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com/) [![AI SDK](https://img.shields.io/badge/AI%20SDK-000000?style=flat-square&logo=vercel&logoColor=white)](https://sdk.vercel.ai/) [![tRPC](https://img.shields.io/badge/tRPC-2596BE?style=flat-square&logo=trpc&logoColor=white)](https://trpc.io/) [![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com/)
+</div>
 
-## ✨ 主要特性
+## ✨ 核心功能特性
 
-- **Reddit 趋势追踪**: 创建定时任务，自动监控热门帖子和讨论。
-- **LLM 智能分析**: 利用大语言模型，自动提炼 Reddit 帖子的核心观点、情感倾向和关键信息。
-- **自动化报告生成**: 将分析结果整理成简洁的报告，方便用户快速回顾和查阅。
-- **灵活的任务管理**: 通过 Agent 对话，可以实现任务的自动化和管理。
+### 🤖 Agent 交互
+
+- **自然语言交互**: 通过对话式 AI Agent 创建和管理任务
+- **Generative UI**: 充分使用生成式用户界面，动态生成交互组件
+- **所见即AI所见**: 通过数据同步机制确保用户界面与 AI 认知一致
+
+### ⏰ 灵活的调度系统
+
+- **多种调度模式**: 支持 Cron 表达式和 Interval 两种调度方式
+- **校准功能**: 智能校准 Interval 任务执行间隔
+
+### 📊 数据源与分析
+
+- **数据源支持**: 当前支持 Reddit 数据源
+- **Reddit 趋势追踪**: 自动监控热门帖子和讨论内容
+- **AI 简洁分析**: 使用大语言模型对抓取数据进行简短而高效的分析
+- **自动化报告**: 将分析结果整理成清晰的报告，便于快速查阅
+
+### 🎨 现代化 UI/UX
+
+- **响应式设计**: 支持桌面端和移动端自适应布局
+- **实时状态显示**: 通过 SSE 推送任务实时执行进度
 
 ## 🛠️ 技术栈
 
-- **后端**: [Nest.js](https://nestjs.com/), TypeScript
-- **前端**: [React](https://react.dev/), TypeScript
-- **数据库**: PostgreSQL (Prisma)
-- **Monorepo 工具**: [Turborepo](https://turbo.build/repo), [pnpm](https://pnpm.io/)
+### 后端架构
 
-## 📂 项目结构
+- **[NestJS](https://nestjs.com/)** - 企业级 Node.js 框架
+- **[tRPC](https://trpc.io/)** - 端到端类型安全的 API
+- **[AI SDK](https://sdk.vercel.ai/)** - 统一的 AI 模型接口
+- **[Prisma](https://prisma.io/)** - 现代化 ORM 和数据库工具
+- **[PostgreSQL](https://postgresql.org/)** - 可靠的关系型数据库
+- **[cache-manager](https://github.com/node-cache-manager/node-cache-manager)** - 统一缓存管理
 
-本项目是一个基于 pnpm 工作区的 Monorepo 项目，并使用 [Turborepo](https://turbo.build/repo) 进行任务编排。最终将包含以下核心部分：
+### 前端架构
 
-```
-/
-├── apps/
-│   ├── nestjs/       # 后端服务 (NestJS)
-│   └── web/          # 前端应用 (React)
-├── packages/
-│   ├── eslint-config/      # 共享的 ESLint 配置
-│   ├── typescript-config/  # 共享的 TypeScript 配置
-│   └── ui/                 # 共享的 React UI 组件库
-└── package.json
-```
+- **[React 19](https://react.dev/)** - 现代化前端框架
+- **[TanStack Router](https://tanstack.com/router)** - 类型安全的路由管理
+- **[TanStack Query](https://tanstack.com/query)** - 强大的数据获取和缓存
+- **[shadcn/ui](https://ui.shadcn.com/)** - 高质量 React 组件库
+- **[Tailwind CSS v4](https://tailwindcss.com/)** - 原子化 CSS 框架
 
-## 🤖 核心交互逻辑
+### 工程化工具
+
+- **[Turborepo](https://turbo.build/repo)** - 高性能构建系统
+- **[pnpm](https://pnpm.io/)** - 快速、节省磁盘空间的包管理器
+- **[Vitest](https://vitest.dev/)** - 快速的单元测试框架
+- **[Docker](https://docker.com/)** - 容器化部署
+
+## 🏛️ 系统架构
+
+### 核心交互流程
 
 下面的序列图展示了典型的用户工作流：
 
@@ -41,123 +69,251 @@
 sequenceDiagram
     participant U as 用户
     participant AI as Agent
-    participant PG as PostgreSQL
+    participant DB as 数据库
     participant SCH as 定时任务
     participant WF as 分析工作流
 
     %% 1. 创建任务
-    U->>AI: 「生成一个每天6点获取LLM相关信息的定时任务，提取出LLM相关的前沿驱势」
-    AI->>PG: 保存 TaskConfig
-    PG-->>U: ✅ 任务已创建
+    U->>AI: 「生成一个每天6点获取LLM相关信息的定时任务，提取出LLM相关的前沿趋势」
+    AI->>DB: 保存 TaskConfig
+    AI-->>U: ✅ 任务已创建
 
     %% 2. 定时执行
     loop 每天6点
-        SCH->>PG: 读取 TaskConfig
+        SCH->>DB: 读取 TaskConfig
         SCH->>WF: 抓取信息+分析
-        WF->>PG: 保存分析结果
+        WF->>DB: 保存分析结果
     end
 
     %% 3. 查看结果
-    U->>PG: 查询任务结果
-    PG-->>U: 返回分析报告
+    U->>DB: 查询任务结果
+    DB-->>U: 返回分析报告
 
     %% 4. 修改任务
     U->>AI: 「把执行频率改成每天一次」
-    AI->>PG: 更新调度表达式
-    PG-->>U: ✅ 任务已更新
+    AI->>DB: 更新调度配置
+    AI-->>U: ✅ 任务已更新
 ```
 
-## 🤖 任务生成逻辑
+### 任务生成逻辑
 
-此阶段的核心是将用户的自然语言指令转化为一个精确、可执行的任务配置。
-
-当用户输入指令（例如：“帮我创建一个任务，每天抓取关于前端开发的最新讨论”）时，系统会：
-
-1.  **提取核心关键字**: 从指令中识别出核心主题，如“前端开发”。
-2.  **LLM 智能扩展**: 将核心主题交由大语言模型（LLM）进行分析，生成一组相关的英文搜索关键词（`keywords`）。
-3.  **发现相关社区**: 使用 `keywords` 在 Reddit 上搜索相关的子版块（`subreddits`）。
-4.  **LLM 智能筛选**: 将搜索到的 `subreddits` 列表交由 LLM 进行筛选，选出最相关的一部分。
-5.  **创建任务配置**: 最后，将定时规则、关键词和筛选后的社区列表存入数据库，形成一个具体的 `TaskConfig`。
+将用户的自然语言指令转化为可执行的任务配置：
 
 ```mermaid
 sequenceDiagram
-    participant U as 用户 (User)
-    participant Agent as 对话Agent
-    participant LLM as 大语言模型
-    participant Reddit as Reddit
-    participant DB as 数据库 (PostgreSQL)
+    participant U as 用户
+    participant Agent as Agent
+    participant DB as 数据库
 
     U->>Agent: 「帮我监控关于前端开发的 Reddit 帖子，每三个小时一次」
-    Agent->>LLM: 基于「前端开发」生成关键词
-    LLM-->>Agent: 返回 keywords
-    Agent->>Reddit: 根据 keywords 搜索 subreddits
-    Reddit-->>Agent: 返回 subreddits 列表
-    Agent->>LLM: 筛选 subreddits 列表
-    LLM-->>Agent: 返回最终 subreddits
+    Agent->>Agent: 解析用户指令，生成任务配置 (计划添加数据源架构)
     Agent->>DB: 保存 TaskConfig
-    DB-->>U: ✅ 任务已创建
+    Agent-->>U: ✅ 任务已创建
 ```
 
-## 🤖 Reddit 抓取逻辑
-
-抓取逻辑根据 `TaskConfig` 的配置来执行：
-
-1.  **数据源**: 根据任务中指定的 `subreddits` 和 `keywords`，从 Reddit API 并行抓取相关的热门帖子，汇集成原始内容池。
-2.  **过滤与去重**: 如果 `TaskConfig` 中的 `enableCache` 选项为 `true`，系统会启用缓存机制。它会将当前抓取到的内容与历史缓存进行对比，过滤掉那些在近期（如过去36小时内）已经处理过的帖子，从而有效避免重复分析。
-3.  **生成结果集**: 最终，将排序后的帖子列表作为可分析的数据集，交由下游的分析模块进行处理。
-
-下面的序列图展示了这个过程：
+### 数据抓取与分析流程
 
 ```mermaid
 sequenceDiagram
-    participant TC as TaskConfig
+    participant SCH as 调度系统
+    participant DB as 数据库
+    participant DS as 数据源适配器(计划中/未实现)
     participant Reddit as Reddit API
-    participant Cache as 历史缓存
-    participant P as 处理流程
-    participant LLM as LLM
+    participant AI as AI分析引擎
 
-
-    P->>TC: 读取 keywords, subreddits, enableCache
-    P->>Reddit: 根据 keywords/subreddits 抓取内容
-    Reddit-->>P: 返回原始帖子列表
-    alt 如果 enableCache is true
-        P->>Cache: 对比帖子列表进行去重
-        Cache-->>P: 返回过滤后的列表
-    end
-    P->>LLM: 列表太多，让 LLM 帮我精选
-    LLM-->>P: 返回精选后的列表
-    P->>Reddit: 根据列表抓取相关评论
-    Reddit-->>P: 返回相关评论
-    P-->>下游分析模块: 输出最终数据集
+    SCH->>DB: 读取 Task 配置
+    DB-->>SCH: 返回 payload 数据源配置
+    SCH->>DS: 根据 payload.dataSource 选择适配器
+    DS->>Reddit: 基于 keywords/subreddits 抓取内容
+    Reddit-->>DS: 返回原始数据
+    DS->>DS: 内容过滤与去重
+    DS->>AI: 发送处理后的数据
+    AI-->>DS: 返回分析结果
+    DS->>DB: 保存 TaskReport
 ```
 
-## 🤖 任务执行逻辑
+### Generative UI 所见即AI所见
 
-任务创建后，调度器会根据其调度表达式定时触发执行。
-
-执行流程如下：
-
-1.  调度器从数据库中读取到期的任务配置。
-2.  根据配置触发分析工作流，工作流会根据 `keywords` 和 `subreddits` 从 Reddit 抓取相关帖子。
-3.  将抓取到的内容交由 LLM 进行分析、总结，生成报告。
-4.  最终的分析报告被存回数据库，等待用户查询。
+通过数据同步机制，确保用户界面与 AI 状态一致。当 AI 生成 Tool UI 组件时，用户看到的数据始终与 AI 的认知保持一致
 
 ```mermaid
 sequenceDiagram
-    participant SCH as 定时任务 (Scheduler)
-    participant DB as 数据库 (PostgreSQL)
-    participant WF as 分析工作流
-    participant LLM as 大语言模型
-    participant U as 用户
+    participant User as 用户
+    participant ToolUI as Tool UI组件
+    participant AI as AI Agent
 
-    loop 按 调度表达式定时触发
-        SCH->>DB: 读取到期的 TaskConfig
-        SCH->>WF: 触发分析工作流
-        WF->>LLM: 根据配置抓取 Reddit 内容并请求分析
-        LLM-->>WF: 返回分析报告
-        WF->>DB: 将分析报告存入数据库
-    end
+    %% AI 生成 Tool UI
+    AI->>ToolUI: 生成并渲染 Tool UI 组件
+    ToolUI->>ToolUI: 获取并显示数据
 
-    U->>DB: 查询任务结果
-    DB-->>U: 返回分析报告
+    %% 关键：实时同步机制，维护 part 的 output
+    Note over ToolUI,AI: 🔄 核心同步机制
+    ToolUI->>AI: addToolResult 同步最新数据到 part.output
+
+    %% 用户交互触发更新
+    User->>ToolUI: 用户操作（点击、翻页、更新等）
+    ToolUI->>ToolUI: 数据状态更新
+    ToolUI->>AI: addToolResult 再次同步新数据
+
+    Note over User,AI: ✅ 所见即 AI 所见：界面数据 = AI 认知数据
 ```
+
+## 🏗️ 工程化优势
+
+### 🔗 端到端类型安全
+
+- **tRPC 类型安全**: 从后端 API 到前端调用的端到端类型安全
+- **AI 工具类型化**: 16+ AI 工具函数（CreateTask、UpdateTask、GetAllTasks 等）全部类型检查
+- **共享类型系统**: 通过独立包管理实现跨应用的类型定义复用
+
+### 📦 monorepo 架构
+
+- **数据库层抽离**: 独立的 `@redgent/db` 包统一管理 Prisma 客户端
+- **业务逻辑共享**: `@redgent/shared` 提供跨应用的工具函数和类型
+
+## 📂 项目结构
+
+本项目是一个基于 pnpm 工作区的 Monorepo 项目，并使用 [Turborepo](https://turbo.build/repo) 进行任务编排。最终将包含以下核心部分：
+
+```
+/
+├── apps/
+│   ├── core/          # NestJS 后端服务
+│   └── web/           # React 前端应用
+├── packages/
+│   ├── database/      # Prisma 数据库客户端和模型
+│   └── shared/        # 共享的类型定义和工具函数
+├── tooling/           # 工程化配置
+│   ├── eslint-config/     # ESLint 共享配置
+│   ├── prettier-config/   # Prettier 共享配置
+│   ├── typescript-config/ # TypeScript 共享配置
+│   └── tsup-config/       # tsup 构建配置
+└── package.json
+```
+
+## 🚀 快速开始
+
+### 📋 环境要求
+
+- **Node.js** >= 18
+- **pnpm** >= 9.0.0
+- **PostgreSQL** 数据库
+- **DeepSeek API Key** （用于 AI 功能）
+- **Reddit API** 凭证
+
+### 💻 本地开发
+
+1. **克隆项目**
+
+   ```bash
+   git clone https://github.com/JinJieBeWater/redgent.git
+   cd redgent
+   ```
+
+2. **安装依赖**
+
+   ```bash
+   pnpm install
+   ```
+
+3. **环境配置**
+
+   ```bash
+   # 复制环境变量模板
+   cp .env.example .env.local
+
+   # 编辑 .env 文件，填入必要的配置：
+   # - REDDIT_CLIENT_ID: Reddit API 客户端 ID
+   # - REDDIT_SECRET: Reddit API 密钥
+   # - DEEPSEEK_API_KEY: DeepSeek AI API 密钥
+   # - DATABASE_URL: PostgreSQL 连接字符串
+   # - DIRECT_URL: PostgreSQL 连接字符串
+   # - PROXY_URL: (可选) 代理配置
+   ```
+
+4. **数据库准备**
+
+   ```bash
+   # 运行数据库迁移
+   pnpm turbo run db:migrate
+
+   # 生成 Prisma 客户端
+   pnpm turbo run db:generate
+
+   ```
+
+5. **启动开发服务**
+
+   ```bash
+   # 同时启动前后端开发服务器
+   pnpm dev
+   ```
+
+   访问地址：
+   - 前端：http://localhost:3000
+   - 后端 API：http://localhost:3001
+
+### 🧪 运行测试
+
+```bash
+# 运行所有测试
+pnpm test
+
+# 运行集成测试
+pnpm test:integration
+
+# 运行 E2E 测试
+pnpm test:e2e
+
+# 测试覆盖率
+pnpm test:cov
+```
+
+### 🔧 开发工具命令
+
+```bash
+# 代码检查和格式化
+pnpm lint       # ESLint 检查
+pnpm format     # Prettier 格式化
+pnpm typecheck  # TypeScript 类型检查
+
+# 构建项目
+pnpm build      # 构建所有包
+```
+
+## 🐳 Docker 部署
+
+### 🚀 快速部署
+
+1. **准备环境文件**
+
+   ```bash
+   # 复制并配置环境变量
+   cp .env.example .env.production.local
+   # 编辑 .env.production.local 填入生产环境配置
+   ```
+
+2. **启动服务**
+
+   ```bash
+   # 构建并启动所有服务
+   docker-compose up -d --build
+   ```
+
+   服务访问地址：
+   - 前端：http://localhost:3000
+   - 后端 API：http://localhost:3001
+
+3. **查看服务状态**
+
+   ```bash
+   # 查看运行状态
+   docker-compose ps
+   ```
+
+## ⚠️ 注意事项
+
+- **数据库**: 确保 PostgreSQL 服务可访问且已创建对应数据库
+- **API 限制**: Reddit API 和 DeepSeek API 都有频率限制，请合理设置任务间隔
+- **代理配置**: 如果在网络受限环境，需要正确配置 `PROXY_URL`
+- **端口冲突**: 确保 3000 和 3001 端口未被占用

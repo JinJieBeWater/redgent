@@ -442,9 +442,8 @@ export class TaskExecutionService {
     } catch (error) {
       if (APICallError.isInstance(error) && error.responseBody) {
         // Handle the API call error
-        const err = error.responseBody
-        this.logger.error(err)
-        throw new Error(err)
+        this.logger.error(error.message)
+        throw new Error(error.message)
       } else {
         this.logger.error(error)
         throw new Error('无法进行 AI 筛选，请稍后重试')
