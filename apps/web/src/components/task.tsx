@@ -4,8 +4,8 @@ import { Ban, Eye, Pause, Play } from 'lucide-react'
 
 import type { Task, TaskStatus } from '@redgent/db'
 
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
+import { Badge } from './ui/badge'
+import { Button } from './ui/button'
 
 // Mini 组件只需要的字段
 type TaskMini = Pick<Task, 'id' | 'name' | 'status'>

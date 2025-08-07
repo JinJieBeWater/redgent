@@ -173,19 +173,6 @@ sequenceDiagram
     Note over User,AI: ✅ 所见即 AI 所见：界面数据 = AI 认知数据
 ```
 
-## 🏗️ 工程化优势
-
-### 🔗 端到端类型安全
-
-- **tRPC 类型安全**: 从后端 API 到前端调用的端到端类型安全
-- **AI 工具类型化**: 16+ AI 工具函数（CreateTask、UpdateTask、GetAllTasks 等）全部类型检查
-- **共享类型系统**: 通过独立包管理实现跨应用的类型定义复用
-
-### 📦 monorepo 架构
-
-- **数据库层抽离**: 独立的 `@redgent/db` 包统一管理 Prisma 客户端
-- **业务逻辑共享**: `@redgent/shared` 提供跨应用的工具函数和类型
-
 ## 📂 项目结构
 
 本项目是一个基于 pnpm 工作区的 Monorepo 项目，并使用 [Turborepo](https://turbo.build/repo) 进行任务编排。最终将包含以下核心部分：
