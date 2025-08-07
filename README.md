@@ -315,6 +315,8 @@ pnpm test:cov
 # 代码检查和格式化
 pnpm lint       # ESLint 检查
 pnpm format     # Prettier 格式化
+
+# 由于 web 依赖 core 的类型构建，所以必须确保 core 的 dist 存在
 pnpm typecheck  # TypeScript 类型检查
 
 # 构建项目

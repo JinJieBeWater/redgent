@@ -6,6 +6,7 @@ import z from 'zod'
 import { TaskStatus } from '@redgent/db'
 import {
   CreateTaskSchema,
+  TaskPayloadSchema,
   TaskReportMiniSchema,
   TaskReportSchema,
   TaskSchema,
@@ -203,7 +204,7 @@ export class TaskAgentService {
       },
     }),
 
-    switchTaskStatus: tool({
+    SwitchTaskStatus: tool({
       description: `
       服务端工具 切换一个或多个定时任务的状态
       - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
@@ -225,7 +226,7 @@ export class TaskAgentService {
       }),
       execute: async ({ tasks }) => {
         try {
-          this.logger.debug('switchTaskStatus 工具被调用')
+          this.logger.debug('SwitchTaskStatus 工具被调用')
           const targets = Array.isArray(tasks) ? tasks : [tasks]
           const result = await Promise.all(
             targets.map(async item => {
@@ -254,6 +255,38 @@ export class TaskAgentService {
           return result
         } catch (error) {
           this.logger.error(error instanceof Error ? error.message : error)
+          throw error
+        }
+      },
+    }),
+
+    UpdateTaskPayload: tool({
+      description: `
+      服务端工具 修改一个定时任务 Payload 配置
+      - 当用户要求修改一个定时任务的抓取关键字/子版块时，调用该工具
+      `,
+      inputSchema: z.object({
+        taskId: z.uuid().describe('任务id'),
+        payload: TaskPayloadSchema,
+      }),
+      execute: async ({ taskId, payload }) => {
+        try {
+          this.logger.debug('updateTaskPayload 工具被调用')
+          const task = await this.prismaService.task.update({
+            where: { id: taskId },
+            data: { payload },
+          })
+          if (task.status === TaskStatus.active) {
+            await this.taskScheduleService.registerTask(task)
+          } else {
+            this.taskScheduleService.removeTask(task.id)
+          }
+          return {
+            data: task,
+            message: '任务更新成功',
+          }
+        } catch (error) {
+          this.logger.error(error)
           throw error
         }
       },

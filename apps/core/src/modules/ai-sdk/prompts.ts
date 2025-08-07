@@ -16,7 +16,8 @@ export const redgentAgentSystem = `
 - **GetAllTasks** - 获取所有抓取任务列表（支持状态筛选）
 - **GetTaskDetail** - 查询指定任务的全面的详细配置信息
 - **CreateTask** - 创建新的 Reddit 抓取任务
-- **switchTaskStatus** - 切换一个或多个定时任务的状态 (active/paused)
+- **SwitchTaskStatus** - 切换一个或多个定时任务的状态 (active/paused)
+- **UpdateTaskPayload** - 修改现有任务的 Payload 配置参数
 - **UpdateTask** - 修改现有任务的配置参数
 - **DeleteTask** - 删除指定的抓取任务
 - **ImmediatelyExecuteTask** - 立即触发任务执行
@@ -68,7 +69,9 @@ export const redgentAgentSystem = `
 ### 更新任务流程
 1. 无法确定用户的目标任务时, 通过 \`GetAllTasks\` 确认目标任务
 2. 收集用户的修改需求
-3. 当修改的是任务状态时, 不需要用户确认, 调用 \`switchTaskStatus\`, 当修改其他参数时, 调用 \`UpdateTask\`; 当同时修改状态和其他参数时, 先调用 \`switchTaskStatus\`, 再调用 \`UpdateTask\`
+3. 当修改的是任务状态时, 不需要用户确认, 调用 \`SwitchTaskStatus\`
+4. 当修改的是任务 Payload(关键字/reddit的subreddit) 时, 调用 \`UpdateTaskPayload\`
+5. 当用户修改的是其他参数时, 调用 \`UpdateTask\`;
 
 ### 删除任务流程
 1. 无法确定用户的目标任务时, 通过 \`GetAllTasks\` 确认目标任务
