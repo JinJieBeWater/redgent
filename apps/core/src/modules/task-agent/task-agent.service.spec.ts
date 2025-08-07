@@ -79,13 +79,13 @@ describe(TaskAgentService.name, () => {
     expect(service).toBeDefined()
   })
 
-  describe('switchTaskStatus 工具', () => {
-    let switchTaskStatusTool: ReturnType<
+  describe('SwitchTaskStatus 工具', () => {
+    let SwitchTaskStatusTool: ReturnType<
       typeof service.tools
-    >['switchTaskStatus']
+    >['SwitchTaskStatus']
 
     beforeEach(() => {
-      switchTaskStatusTool = service.tools().switchTaskStatus
+      SwitchTaskStatusTool = service.tools().SwitchTaskStatus
     })
 
     it('应该成功切换单个任务状态为active并注册调度', async () => {
@@ -104,7 +104,7 @@ describe(TaskAgentService.name, () => {
       }
       prismaService.task.update.mockResolvedValue(updatedTask)
 
-      const result = await switchTaskStatusTool.execute!(inputData, {
+      const result = await SwitchTaskStatusTool.execute!(inputData, {
         toolCallId: generateId(),
         messages: [],
       })
@@ -139,7 +139,7 @@ describe(TaskAgentService.name, () => {
 
       prismaService.task.update.mockResolvedValue(updatedTask)
 
-      const result = await switchTaskStatusTool.execute!(inputData, {
+      const result = await SwitchTaskStatusTool.execute!(inputData, {
         toolCallId: generateId(),
         messages: [],
       })
@@ -185,7 +185,7 @@ describe(TaskAgentService.name, () => {
         .mockResolvedValueOnce(updatedTask1)
         .mockResolvedValueOnce(updatedTask2)
 
-      const result = await switchTaskStatusTool.execute!(inputData, {
+      const result = await SwitchTaskStatusTool.execute!(inputData, {
         toolCallId: generateId(),
         messages: [],
       })
@@ -234,7 +234,7 @@ describe(TaskAgentService.name, () => {
       prismaService.task.update.mockRejectedValue(dbError)
 
       await expect(
-        switchTaskStatusTool.execute!(inputData, {
+        SwitchTaskStatusTool.execute!(inputData, {
           toolCallId: generateId(),
           messages: [],
         }),

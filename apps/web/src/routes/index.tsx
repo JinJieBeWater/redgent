@@ -64,12 +64,12 @@ function App() {
       const [
         createTaskPart,
         updateTaskPart,
-        switchTaskStatusPart,
+        SwitchTaskStatusPart,
         deleteTaskPart,
       ] = [
         findOutputPart('tool-CreateTask'),
         findOutputPart('tool-UpdateTask'),
-        findOutputPart('tool-switchTaskStatus'),
+        findOutputPart('tool-SwitchTaskStatus'),
         findOutputPart('tool-DeleteTask'),
       ]
       if (createTaskPart) {
@@ -102,7 +102,7 @@ function App() {
           ),
         )
       }
-      if (switchTaskStatusPart) {
+      if (SwitchTaskStatusPart) {
         queryClient.invalidateQueries(
           trpc.task.paginate.infiniteQueryFilter(
             {},
@@ -111,7 +111,7 @@ function App() {
             },
           ),
         )
-        const input = switchTaskStatusPart.input.tasks
+        const input = SwitchTaskStatusPart.input.tasks
         const tasks = Array.isArray(input) ? input : [input]
         tasks.forEach(task => {
           queryClient.invalidateQueries(

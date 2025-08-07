@@ -61,7 +61,8 @@ export const ImplAssistantMessage = ({
           case 'tool-GetLatestReport':
           case 'tool-GetReportByTaskId':
           case 'tool-GetCurrentTime':
-          case 'tool-switchTaskStatus':
+          case 'tool-SwitchTaskStatus':
+          case 'tool-UpdateTaskPayload':
           case 'tool-GetNextExecutionTime':
             return null
           case 'tool-ImmediatelyExecuteTask': {
