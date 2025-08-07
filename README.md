@@ -22,15 +22,13 @@
 
 <br/>
 
-# ✨ Redgent
-
 ## ✨ 核心功能特性
 
 ### 🤖 Agent 交互
 
 - **自然语言交互**: 通过对话式 AI Agent 创建和管理任务
 - **Generative UI**: 充分使用生成式用户界面，动态生成交互组件
-- **所见即AI所见**: 通过数据同步机制确保用户界面与 AI 认知一致
+- **UI-AI认知 同步**: 通过数据同步机制确保用户界面与 AI 认知一致
 
 ### ⏰ 灵活的调度系统
 
@@ -149,7 +147,7 @@ sequenceDiagram
     DS->>DB: 保存 TaskReport
 ```
 
-### Generative UI 所见即AI所见
+### Generative UI UI-AI认知 同步
 
 通过数据同步机制，确保用户界面与 AI 状态一致。当 AI 生成 Tool UI 组件时，用户看到的数据始终与 AI 的认知保持一致
 
@@ -335,7 +333,20 @@ pnpm build      # 构建所有包
    # 编辑 .env.production.local 填入生产环境配置
    ```
 
-2. **启动服务**
+2. **时区设置**
+
+   默认时区为 `Asia/Shanghai`，如果需要更改，请修改 `docker-compose.yml` 中的 `TZ` 变量
+
+   ```yaml
+   services:
+     core:
+     # ...
+     environment:
+       TZ: 'Asia/Shanghai'
+       # ...
+   ```
+
+3. **启动服务**
 
    ```bash
    # 构建并启动所有服务
@@ -346,7 +357,7 @@ pnpm build      # 构建所有包
    - 前端：http://localhost:3000
    - 后端 API：http://localhost:3001
 
-3. **查看服务状态**
+4. **查看服务状态**
 
    ```bash
    # 查看运行状态
@@ -359,3 +370,4 @@ pnpm build      # 构建所有包
 - **任务频率限制**: Reddit API 有频率限制，且任务会对数据做缓存防止重复分析，过滤频繁的任务会导致数据全部命中缓存取消任务，请合理设置任务间隔
 - **代理配置**: 如果在网络受限环境，需要正确配置 `PROXY_URL`
 - **端口冲突**: 确保 3000 和 3001 端口未被占用
+- **时区问题**: 在 Docker 环境下，确保正确设置时区 `TZ` 环境变量

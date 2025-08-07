@@ -1,9 +1,11 @@
 # 基础镜像
 FROM node:24-alpine3.21 AS base
-ENV TZ Asia/Shanghai
-RUN apk add tzdata && cp /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && echo ${TZ} > /etc/timezone \
-    && apk del tzdata
+
+# 时区设置
+ARG TZ=Asia/Shanghai
+ENV TZ=${TZ}
+RUN apk add --no-cache tzdata && cp /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
