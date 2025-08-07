@@ -13,6 +13,7 @@ services:
     env_file:
       - .env.production.local
     environment:
+      TZ: 'Asia/Shanghai'
       DOCKER: 'true'
       PORT: 3001
     networks:
