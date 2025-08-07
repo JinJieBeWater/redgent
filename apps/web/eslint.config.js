@@ -1,4 +1,8 @@
-import { nextJsConfig } from "@repo/eslint-config/next-js";
+import { reactJsConfig } from '@redgent/eslint-config/react-js'
 
-/** @type {import("eslint").Linter.Config} */
-export default nextJsConfig;
+export default [
+  ...reactJsConfig,
+  {
+    ignores: ['dist', 'node_modules', 'routeTree.gen.ts'],
+  },
+]

@@ -1,0 +1,21 @@
+{
+  "extends": "@redgent/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "incremental": true,
+    "paths": {
+      "@core/*": ["./src/*"]
+    },
+    "types": ["vitest/globals"]
+  },
+  "references": [
+    {
+      "path": "../../packages/shared/tsconfig.json"
+    },
+    {
+      "path": "../../packages/database/tsconfig.json"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(gh pr:*)",
+      "WebFetch(domain:ai-sdk.dev)",
+      "Bash(find /d/JinJieBeWater/ImmortalDragons/exam/redgent -name \"*.d.ts\" -type f)"
+    ],
+    "deny": []
+  }
+}

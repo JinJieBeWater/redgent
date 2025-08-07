@@ -1,20 +1,24 @@
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@redgent/typescript-config/react.json",
+  "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "types": ["vite/client", "@testing-library/jest-dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@web/*": ["./src/*"],
+      "@core/*": ["../core/src/*"]
+    }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "next-env.d.ts",
-    "next.config.js",
-    ".next/types/**/*.ts"
+  "references": [
+    {
+      "path": "../core/tsconfig.json"
+    },
+    {
+      "path": "../../packages/shared/tsconfig.json"
+    },
+    {
+      "path": "../../packages/database/tsconfig.json"
+    }
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

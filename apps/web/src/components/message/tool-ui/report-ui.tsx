@@ -1,0 +1,200 @@
+import type { UseChatHelpers } from '@ai-sdk/react'
+import type { AppMessage, AppToolUI, AppUIDataTypes } from '@core/shared'
+import type { UIMessagePart } from 'ai'
+import { memo, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Badge } from '@web/components/ui/badge'
+import { Button } from '@web/components/ui/button'
+import { formatRelativeTime } from '@web/lib/format-relative-time'
+import { trpc } from '@web/router'
+import { generateId } from 'ai'
+import { Calendar, Clock, ExternalLink, List } from 'lucide-react'
+
+import { ErrorMessage, LoadingMessage } from './common'
+
+export const ImplReportUI = ({
+  part,
+  setMessages,
+  addToolResult,
+}: {
+  part: Extract<
+    UIMessagePart<AppUIDataTypes, AppToolUI>,
+    {
+      type: 'tool-ShowReportUI'
+      state: 'input-available' | 'output-available'
+    }
+  >
+  setMessages: UseChatHelpers<AppMessage>['setMessages']
+  addToolResult: UseChatHelpers<AppMessage>['addToolResult']
+}) => {
+  const { input } = part
+
+  const { data, isPending, isError, error } = useQuery(
+    trpc.report.byId.queryOptions(
+      { id: input.id },
+      {
+        staleTime: 1000,
+        initialData: part.output?.report,
+      },
+    ),
+  )
+
+  useEffect(() => {
+    if (data) {
+      addToolResult({
+        tool: 'ShowReportUI',
+        toolCallId: part.toolCallId,
+        output: {
+          report: data,
+        },
+      })
+    }
+  }, [data, addToolResult, part.toolCallId])
+
+  if (isPending) {
+    return <LoadingMessage />
+  }
+
+  if (isError) {
+    return <ErrorMessage error={error} />
+  }
+
+  if (!data) {
+    return (
+      <ErrorMessage
+        error={{
+          message: '报告不存在',
+        }}
+      />
+    )
+  }
+
+  const { content } = data
+  const findings = content?.findings || []
+
+  return (
+    <div className="space-y-4">
+      {/* 报告标题和基本信息 */}
+      <div className="space-y-3">
+        <div className="flex-1 space-y-2">
+          <h3 className="text-base leading-relaxed font-medium">
+            {data.title || '未命名报告'}
+          </h3>
+
+          {/* 报告元信息 */}
+          <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
+            {data.task?.name && (
+              <Button
+                className="h-max cursor-pointer px-2 py-0.5 text-xs"
+                onClick={() => {
+                  setMessages(messages => [
+                    ...messages,
+                    {
+                      id: generateId(),
+                      role: 'user',
+                      parts: [
+                        {
+                          type: 'text',
+                          text: `查看任务 "${data.task.name}"`,
+                        },
+                      ],
+                    },
+                    {
+                      id: generateId(),
+                      role: 'assistant',
+                      parts: [
+                        {
+                          type: 'tool-ShowTaskDetailUI',
+                          toolCallId: generateId(),
+                          state: 'input-available',
+                          input: {
+                            taskId: data.taskId,
+                          },
+                        },
+                      ],
+                    },
+                  ])
+                }}
+              >
+                {data.task.name}
+              </Button>
+            )}
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>创建时间：{formatRelativeTime(data.createdAt)}</span>
+            </div>
+            {data.executionDuration && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>
+                  执行时间：{(data.executionDuration / 1000).toFixed(1)}s
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* 发现数量统计 */}
+          <div className="flex items-center gap-2">
+            <List className="text-muted-foreground h-3 w-3" />
+            <span className="text-sm font-medium">分析发现</span>
+            <Badge variant="outline" className="text-xs">
+              {findings.length} 项
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {/* 分析发现列表 */}
+      {findings.length > 0 ? (
+        <div className="-ml-8 space-y-3">
+          {findings.map((finding, index) => (
+            <div key={index} className="space-y-2">
+              <div className="flex items-start gap-3">
+                <Badge
+                  variant="secondary"
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full p-0 text-xs font-medium"
+                >
+                  {index + 1}
+                </Badge>
+                <div className="flex-1">
+                  <p className="text-foreground text-sm leading-relaxed">
+                    {finding.elaboration}
+                  </p>
+                  {/* 相关链接 */}
+                  {finding.supportingLinkIds &&
+                    finding.supportingLinkIds.length > 0 && (
+                      <div className="mt-1">
+                        <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
+                          <span className="shrink-0">相关链接</span>
+                          {finding.supportingLinkIds.map((id, index) => (
+                            <Badge variant="outline" key={index}>
+                              <a
+                                href={`https://www.reddit.com/comments/${id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-1 text-xs hover:underline"
+                              >
+                                {`${id}`}
+                                <ExternalLink className="h-3 w-3" />
+                                <span className="sr-only">打开链接</span>
+                              </a>
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-muted-foreground flex flex-col items-center gap-2 text-center">
+          <p className="text-sm">此报告无任何发现</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export const ReportUI = memo(ImplReportUI)

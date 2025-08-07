@@ -1,36 +1,59 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
+  "$schema": "https://turborepo.com/schema.v2.json",
   "ui": "tui",
+  "globalEnv": ["NODE_ENV", "PORT", "DEEPSEEK_API_KEY", "DOCKER"],
+  "globalDependencies": [".env*", ".env.*"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env*"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["DATABASE_URL"]
+    },
+    "web#build": {
+      "dependsOn": ["core#build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**"]
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".eslintrc.*", "eslint.config.*"]
     },
-    "check-types": {
-      "dependsOn": [
-        "^check-types"
-      ]
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"]
+    },
+    "format": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc.*", "prettier.config.*"]
+    },
+    "format:check": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc.*", "prettier.config.*"]
+    },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*"]
+    },
+    "test:integration": {
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.*", "vitest.config.*"]
+    },
+    "test:e2e": {
+      "inputs": ["$TURBO_DEFAULT$", "playwright.config.*", "cypress.config.*"]
     },
     "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true,
+      "outputs": []
+    },
+    "db:generate": {
+      "cache": false,
+      "outputs": ["generated/**"]
+    },
+    "db:migrate": {
       "cache": false,
       "persistent": true
+    },
+    "db:deploy": {
+      "cache": false
     }
-  },
-  "globalEnv": [
-    "PORT"
-  ]
+  }
 }

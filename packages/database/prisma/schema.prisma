@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native"]
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Task {
+  id String @id @default(uuid()) @db.Uuid
+
+  name String
+
+  prompt String
+
+  status TaskStatus @default(active)
+
+  /// [TaskPayload]
+  payload Json
+
+  scheduleType ScheduleType
+
+  scheduleExpression String
+
+  enableCache Boolean @default(true)
+
+  reports TaskReport[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+enum ScheduleType {
+  cron
+
+  interval
+}
+
+enum TaskStatus {
+  active
+
+  paused
+}
+
+/// 分析报告模型 - 存储AI分析Reddit内容后生成的结果
+model TaskReport {
+  id String @id @default(uuid()) @db.Uuid
+
+  title String
+
+  /// [ReportContent]
+  content Json
+
+  executionDuration Int
+
+  createdAt DateTime @default(now())
+
+  taskId String @db.Uuid
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}

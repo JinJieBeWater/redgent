@@ -1,0 +1,33 @@
+{
+  "name": "@redgent/shared",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@redgent/db": "workspace:*",
+    "ai": "5.0.0-beta.25",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@redgent/eslint-config": "workspace:*",
+    "@redgent/typescript-config": "workspace:*",
+    "@redgent/tsup-config": "workspace:*",
+    "eslint": "^9.31.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}

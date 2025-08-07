@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # NestJS 后端服务
+  core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: core
+    container_name: redgent-core
+    ports:
+      - '3001:3001'
+    env_file:
+      - .env.production.local
+    environment:
+      TZ: 'Asia/Shanghai'
+      DOCKER: 'true'
+      PORT: 3001
+    networks:
+      - redgent-network
+    restart: unless-stopped
+
+  # React 前端服务
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    container_name: redgent-web
+    ports:
+      - '3000:3000'
+    depends_on:
+      - core
+    networks:
+      - redgent-network
+    restart: unless-stopped
+
+networks:
+  redgent-network:
+    driver: bridge

@@ -1,0 +1,16 @@
+{
+  "name": "@redgent/tsup-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    "./base": "./base.js"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0"
+  }
+}

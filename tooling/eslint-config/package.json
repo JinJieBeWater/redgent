@@ -1,5 +1,5 @@
 {
-  "name": "@repo/eslint-config",
+  "name": "@redgent/eslint-config",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -7,6 +7,7 @@
     "./base": "./base.js",
     "./next-js": "./next.js",
     "./nest-js": "./nest.js",
+    "./react-js": "./react.js",
     "./react-internal": "./react-internal.js"
   },
   "devDependencies": {
@@ -14,12 +15,13 @@
     "@next/eslint-plugin-next": "^15.3.0",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-turbo": "^2.5.0",
     "globals": "^16.3.0",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.36.0"
   }
 }

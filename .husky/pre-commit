@@ -1,0 +1,15 @@
+# This script runs before committing
+
+echo "📦 Building project..."
+pnpm build
+
+echo "🚀 Running lint-staged..."
+pnpm dlx lint-staged
+
+echo "📝 Type checking..."
+pnpm typecheck
+
+echo "🧪 Running unit tests..."
+pnpm test
+
+echo "✅ All pre-commit checks passed!"
