@@ -297,14 +297,13 @@ export class TaskAgentService {
       服务端工具 修改一个定时任务的配置
       - 在调用前必须调用 \`RequestUserConsent\` 获得用户的同意
       - 当用户要求修改一个定时任务的配置时，调用该工具
-      - 可供修改项有 name, payload, scheduleType, scheduleExpression, enableCache
+      - 可供修改项有 name, scheduleType, scheduleExpression, enableCache
       `,
       inputSchema: z.object({
         taskId: z.uuid().describe('任务id'),
         data: CreateTaskSchema.partial()
           .pick({
             name: true,
-            payload: true,
             scheduleType: true,
             scheduleExpression: true,
             enableCache: true,
