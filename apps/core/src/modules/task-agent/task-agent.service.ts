@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { tool } from 'ai'
 import z from 'zod'
 
-import { TaskStatus } from '@redgent/db'
+import { TaskStatus } from '@redgent/db/client'
 import {
   CreateTaskSchema,
   TaskPayloadSchema,

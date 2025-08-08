@@ -2,13 +2,13 @@ import type { ComponentProps } from 'react'
 import { memo } from 'react'
 import { Ban, Eye, Pause, Play } from 'lucide-react'
 
-import type { Task, TaskStatus } from '@redgent/db'
+import type { TaskModel, TaskStatus } from '@redgent/db'
 
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 
 // Mini 组件只需要的字段
-type TaskMini = Pick<Task, 'id' | 'name' | 'status'>
+type TaskMini = Pick<TaskModel, 'id' | 'name' | 'status'>
 
 // 根据任务状态确定状态信息
 export const getStatusInfo = (

@@ -11,7 +11,10 @@ export default defineConfig({
     include: ['**/*.spec.ts'],
     alias: {
       '@core': path.resolve(__dirname, './src'),
-      '@redgent/db': path.resolve(__dirname, '../../packages/database/src'),
+      '@redgent/db/client': path.resolve(
+        __dirname,
+        '../../packages/database/src',
+      ),
       '@redgent/shared': path.resolve(__dirname, '../../packages/shared/src'),
       test: path.resolve(__dirname, './test'),
     },

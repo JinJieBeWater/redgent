@@ -1,4 +1,9 @@
-import { PrismaClient, ScheduleType, Task, TaskStatus } from '@redgent/db'
+import {
+  PrismaClient,
+  ScheduleType,
+  Task,
+  TaskStatus,
+} from '@redgent/db/client'
 
 const prisma = new PrismaClient()
 
@@ -130,7 +135,7 @@ async function seedTestTasks() {
 
 // 如果直接运行此脚本
 if (require.main === module) {
-  seedTestTasks()
+  void seedTestTasks()
 }
 
 export { seedTestTasks }

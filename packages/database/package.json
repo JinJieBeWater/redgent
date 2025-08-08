@@ -15,10 +15,15 @@
     "generated"
   ],
   "exports": {
-    ".": {
+    "./client": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
-      "import": "./src/index.ts"
+      "import": "./dist/index.mjs"
+    },
+    ".": {
+      "types": "./dist/common.d.ts",
+      "require": "./dist/common.js",
+      "import": "./dist/common.mjs"
     }
   },
   "dependencies": {

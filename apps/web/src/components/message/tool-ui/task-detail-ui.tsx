@@ -8,8 +8,6 @@ import { getStatusInfo } from '@web/components/task'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
 import { Card, CardContent, CardTitle } from '@web/components/ui/card'
-import { formatIntervalTime } from '@web/lib/format-interval-time'
-import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { cn } from '@web/lib/utils'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
@@ -18,6 +16,7 @@ import { ChevronDown, Clock, FileText, Hash, Play } from 'lucide-react'
 import { z } from 'zod'
 
 import type { TaskReportMiniSchema } from '@redgent/shared'
+import { formatIntervalTime, formatRelativeTime } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 

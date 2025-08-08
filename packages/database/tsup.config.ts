@@ -6,4 +6,6 @@ import { config } from '@redgent/tsup-config/base'
 export default defineConfig({
   ...config,
   dts: false,
+  entry: ['src/index.ts', 'src/common.ts'],
+  format: ['cjs', 'esm'],
 })

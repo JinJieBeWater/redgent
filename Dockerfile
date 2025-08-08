@@ -33,7 +33,7 @@ RUN pnpm deploy --filter=core --prod /prod/core
 RUN pnpm deploy --filter=web --prod /prod/web
 
 # 复制必要文件到对应服务
-RUN cp -r /usr/src/app/packages/database/generated /prod/core
+RUN cp -r /usr/src/app/packages/database/src/generated/prisma/*.node /prod/core/node_modules/@redgent/db/dist
 RUN cp /usr/src/app/apps/web/nginx.conf /prod/web
 
 # Core 服务 (NestJS 后端)
