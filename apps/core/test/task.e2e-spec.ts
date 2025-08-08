@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { lastValueFrom, toArray } from 'rxjs'
 import { App } from 'supertest/types'
 
-import { PrismaClient } from '@redgent/db'
+import { PrismaClient } from '@redgent/db/client'
 import { TaskProgress, TaskProgressStatus } from '@redgent/shared'
 
 import { AppModule } from '../src/app.module'

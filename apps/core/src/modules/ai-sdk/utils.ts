@@ -10,7 +10,7 @@ import {
 } from '@ai-sdk/provider'
 import { generateId } from 'ai'
 
-import { TaskReport } from '@redgent/db'
+import { TaskReport } from '@redgent/db/client'
 
 import { TEST_PROMPTS } from './basic'
 

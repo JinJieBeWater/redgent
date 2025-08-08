@@ -13,7 +13,7 @@ import type {
   RedditLinkWrapper,
   RedditListingResponse,
 } from '@redgent/shared'
-import { Task, TaskReport } from '@redgent/db'
+import { Task, TaskReport } from '@redgent/db/client'
 
 // ============================================================================
 // Reddit 数据工厂

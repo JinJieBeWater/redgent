@@ -14,7 +14,7 @@ import { APICallError, generateObject } from 'ai'
 import { Observable, Subscriber, tap } from 'rxjs'
 import z from 'zod'
 
-import { Task, TaskReport } from '@redgent/db'
+import { Task, TaskReport } from '@redgent/db/client'
 import {
   CommentNode,
   ExecuteSubscribeOutputSchema,

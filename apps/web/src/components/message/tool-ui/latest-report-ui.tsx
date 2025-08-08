@@ -7,12 +7,12 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { Spinner } from '@web/components/spinner'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
-import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import { ChevronDown, FileText, Hash } from 'lucide-react'
 
 import type { TaskReportMiniSchema } from '@redgent/shared'
+import { formatRelativeTime } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 

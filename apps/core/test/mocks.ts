@@ -1,6 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended'
 
-import { PrismaClient } from '@redgent/db'
+import { PrismaClient } from '@redgent/db/client'
 
 export const createMockContext = () => {
   return {

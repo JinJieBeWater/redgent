@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { TaskReport } from '@redgent/db'
+import { TaskReportModel } from '@redgent/db'
 
 export const TaskReportContentSchema = z.object({
   findings: z
@@ -31,4 +31,4 @@ export const TaskReportMiniSchema = z.object({
 export const TaskReportSchema = TaskReportMiniSchema.extend({
   content: TaskReportContentSchema,
   executionDuration: z.number(),
-}) satisfies z.ZodType<TaskReport>
+}) satisfies z.ZodType<TaskReportModel>

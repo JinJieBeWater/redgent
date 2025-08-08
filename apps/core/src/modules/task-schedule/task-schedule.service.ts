@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { CronJob } from 'cron'
 
-import { ScheduleType, Task, TaskStatus } from '@redgent/db'
+import { ScheduleType, Task, TaskStatus } from '@redgent/db/client'
 import { formatIntervalTime } from '@redgent/shared'
 
 import { PrismaService } from '../../processors/prisma/prisma.service'

@@ -1,7 +1,7 @@
 import { zAsyncIterable } from '@core/common/dto/z-async-iterable.dto'
 import z from 'zod'
 
-import { TaskStatus } from '@redgent/db'
+import { TaskStatus } from '@redgent/db/client'
 import { ExecuteSubscribeOutputSchema } from '@redgent/shared'
 
 export const PaginateSchema = z.object({

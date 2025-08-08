@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { lastValueFrom, tap } from 'rxjs'
 
-import { Task } from '@redgent/db'
+import { Task } from '@redgent/db/client'
 
 import { AppModule } from '../src/app.module'
 import { TaskExecutionService } from '../src/modules/task-execution/task-execution.service'
