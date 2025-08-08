@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { CronJob } from 'cron'
 import { Mocked } from 'vitest'
 
-import { ScheduleType, TaskStatus } from '@redgent/db'
+import { ScheduleType, TaskStatus } from '@redgent/db/client'
 
 import {
   createMockTaskConfig,

@@ -5,10 +5,11 @@ import { memo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@web/components/ui/badge'
 import { Button } from '@web/components/ui/button'
-import { formatRelativeTime } from '@web/lib/format-relative-time'
 import { trpc } from '@web/router'
 import { generateId } from 'ai'
 import { Calendar, Clock, ExternalLink, List } from 'lucide-react'
+
+import { formatRelativeTime } from '@redgent/shared'
 
 import { ErrorMessage, LoadingMessage } from './common'
 

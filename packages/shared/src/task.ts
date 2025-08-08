@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { ScheduleType, Task, TaskStatus } from '@redgent/db'
+import { ScheduleType, TaskModel, TaskStatus } from '@redgent/db'
 
 import { TaskReportSchema } from './task-report'
 
@@ -48,7 +48,7 @@ export const TaskSchema = CreateTaskSchema.extend({
   lastFailureAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-}) satisfies z.ZodType<Task>
+}) satisfies z.ZodType<TaskModel>
 
 /**
  * 定义所有可能的任务进度状态

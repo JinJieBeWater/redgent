@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { generateId } from 'ai'
 import { Mocked } from 'vitest'
 
-import { TaskStatus } from '@redgent/db'
+import { TaskStatus } from '@redgent/db/client'
 
 import { createMockTaskConfig } from '../../../test/data-factory'
 import { createMockContext, MockedContext } from '../../../test/mocks'
